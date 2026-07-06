@@ -13,8 +13,8 @@
 
         common:
             odom_frame_id: "odom"
-            sensor_frame_id: "imu_link"
-            base_frame_id: "base_link"
+            sensor_frame_id: "livox_frame"
+            base_frame_id: "livox_frame"
             send_odom_base_tf: false
             lid_topic: "/front_lidar"
             imu_topic: "/front_lidar/imu"
@@ -25,7 +25,7 @@
             lidar_type: 5
             scan_line: 4
             blind: 0.5
-            timestamp_unit: 0
+            timestamp_unit: 3
             scan_rate: 10
 
         mapping:
@@ -36,7 +36,7 @@
             fov_degree: 360.0
             det_range: 100.0
             extrinsic_est_en: false
-            extrinsic_T: [-0.011, -0.02329, 0.04412]
+            extrinsic_T: [0.0, 0.0, 0.0]
             extrinsic_R: [1.0, 0.0, 0.0,
                           0.0, 1.0, 0.0,
                           0.0, 0.0, 1.0]
