@@ -492,3 +492,71 @@ ros2 topic hz /state_estimation
 ros2 topic echo /state_estimation --once
 ros2 run tf2_ros tf2_echo map odom
 ```
+
+## 13. Repository Scripts Added For Deployment
+
+This repository now includes helper scripts:
+
+```text
+scripts/sync_orin_sysroot.sh        # copy /lib, /usr, /opt/ros and Livox install from Orin into a local sysroot
+scripts/build_orin_cross.sh         # cross-compile with toolchains/orin-aarch64.cmake
+scripts/package_orin_runtime.sh     # package a cross-compiled install tree into a runtime tarball
+scripts/build_native_orin.sh        # build natively on the Orin board
+scripts/package_orin_source.sh      # create a source+map package for the Orin board
+```
+
+Current local status: `/home/user/sysroots/orin` exists, but it is not a complete target sysroot yet. It is missing:
+
+```text
+/opt/ros/humble
+/usr/include/pcl-1.12
+Livox driver install
+```
+
+So `scripts/build_orin_cross.sh` is configured, but it cannot produce a runnable aarch64 binary package until the target sysroot is synchronized from the Orin board.
+
+To synchronize the sysroot from the board:
+
+```bash
+ORIN_SYSROOT=$HOME/sysroots/orin \
+LIVOX_WS_ON_ORIN=$HOME/ws_livox/install \
+./scripts/sync_orin_sysroot.sh user@orin-host
+```
+
+Then cross-compile with the host default `aarch64-linux-gnu-g++`:
+
+```bash
+ORIN_SYSROOT=$HOME/sysroots/orin ./scripts/build_orin_cross.sh
+```
+
+Or cross-compile with the downloaded Buildroot SDK:
+
+```bash
+ORIN_SYSROOT=$HOME/sysroots/orin \
+ORIN_TOOLCHAIN_ROOT=$PWD/toolchains/aarch64--glibc--stable-final \
+./scripts/build_orin_cross.sh
+```
+
+The downloaded Buildroot SDK provides GCC 9.3.0 and a minimal `aarch64` sysroot, but it does not contain the target ROS 2, PCL, or Livox installations. Keep using the Orin-synchronized sysroot as `ORIN_SYSROOT`; use `ORIN_TOOLCHAIN_ROOT` only to choose this compiler.
+
+Then package the aarch64 runtime install tree:
+
+```bash
+MAP_PATH=$PWD/FAST_LIO/PCD/omni_dog_map.pcd ./scripts/package_orin_runtime.sh
+```
+
+Until that sysroot exists, use the source package path:
+
+```bash
+MAP_PATH=$PWD/FAST_LIO/PCD/omni_dog_map.pcd ./scripts/package_orin_source.sh
+```
+
+Copy the generated `dist/omni_slam_orin_source_*.tar.gz` to Orin, extract it, and run:
+
+```bash
+./scripts/build_native_orin.sh
+source /opt/ros/humble/setup.bash
+source ~/ws_livox/install/setup.bash
+source install/setup.bash
+ros2 launch fast_lio omni_dog_relocalization.launch.py map_path:=$PWD/FAST_LIO/PCD/omni_dog_map.pcd
+```

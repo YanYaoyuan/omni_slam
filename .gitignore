@@ -8,3 +8,9 @@ __pycache__/
 *.bag
 *.db3
 *.mcap
+dist
+build_orin
+install_orin
+toolchains/*
+!toolchains/
+!toolchains/*.cmake
