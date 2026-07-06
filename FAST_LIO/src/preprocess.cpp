@@ -578,13 +578,6 @@ void Preprocess::livox_pointcloud2_handler(const sensor_msgs::msg::PointCloud2::
     if (!std::isfinite(stamp))
       return 0.0;
 
-    if (stamp > 1.0e14)
-      return stamp * 1.0e-9; // absolute nanoseconds
-    if (stamp > 1.0e11)
-      return stamp * 1.0e-6; // absolute microseconds
-    if (stamp > 1.0e8)
-      return stamp; // absolute seconds
-
     switch (time_unit)
     {
     case SEC:

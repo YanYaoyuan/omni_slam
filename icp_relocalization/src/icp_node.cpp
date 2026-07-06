@@ -8,6 +8,7 @@
 #include <pcl/registration/icp.h>
 #include <pcl/filters/voxel_grid.h>
 #include <Eigen/Geometry>
+#include <stdexcept>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Transform.h>
@@ -98,7 +99,8 @@ public:
         // Load the target point cloud from a PCD file
         if (pcl::io::loadPCDFile<pcl::PointXYZ>(map_path, *target_cloud_) == -1)
         {
-            RCLCPP_ERROR(this->get_logger(), "Couldn't read file target.pcd");
+            RCLCPP_FATAL(this->get_logger(), "Couldn't read map file: %s", map_path.c_str());
+            throw std::runtime_error("failed to load ICP map");
         }
         RCLCPP_INFO(this->get_logger(), "Loaded %d data points from target.pcd", target_cloud_->width * target_cloud_->height);
 

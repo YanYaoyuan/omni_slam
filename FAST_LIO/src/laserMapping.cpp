@@ -37,6 +37,7 @@
 #include <math.h>
 #include <thread>
 #include <fstream>
+#include <stdexcept>
 #include <csignal>
 #include <chrono>
 #include <unistd.h>
@@ -382,6 +383,11 @@ public:
         this->get_parameter_or<string>("prior_map_path", prior_map_path, "");
 
         RCLCPP_INFO(this->get_logger(), "p_pre->lidar_type %d", p_pre->lidar_type);
+        if (extrinT.size() != 3 || extrinR.size() != 9)
+        {
+            RCLCPP_FATAL(this->get_logger(), "Invalid LiDAR-IMU extrinsic: mapping.extrinsic_T must have 3 values and mapping.extrinsic_R must have 9 values.");
+            throw std::runtime_error("invalid LiDAR-IMU extrinsic");
+        }
 
         path.header.stamp = this->get_clock()->now();
         path.header.frame_id = odom_frame;
