@@ -1,3 +1,10 @@
 build
 install
 log
+ros_logs
+__pycache__/
+*.pyc
+*.pcd
+*.bag
+*.db3
+*.mcap

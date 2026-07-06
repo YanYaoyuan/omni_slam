@@ -6,6 +6,10 @@ Modified Fast-LIO2 for localization in prior map.
 
 Blue point is the prior map, white point is current scan. When the white point stop twinkling, icp registration successed, and fast-lio2 starts in relocalization mode.
 
+## Deployment
+
+See [DEPLOY_ORIN.md](DEPLOY_ORIN.md) for Nvidia Orin build, packaging, mapping, relocalization, and cross-compilation notes.
+
 ## Usage
 
 ### Mapping
