@@ -11,10 +11,14 @@ if [[ ! -f "/opt/ros/$ROS_DISTRO_TARGET/setup.bash" ]]; then
   echo "[build_native_orin] ERROR: missing /opt/ros/$ROS_DISTRO_TARGET/setup.bash" >&2
   exit 1
 fi
+set +u
 source "/opt/ros/$ROS_DISTRO_TARGET/setup.bash"
+set -u
 
 if [[ -f "$LIVOX_SETUP" ]]; then
+  set +u
   source "$LIVOX_SETUP"
+  set -u
 else
   echo "[build_native_orin] WARNING: Livox setup not found: $LIVOX_SETUP" >&2
 fi

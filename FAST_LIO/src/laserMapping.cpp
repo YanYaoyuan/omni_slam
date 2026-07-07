@@ -41,6 +41,8 @@
 #include <csignal>
 #include <chrono>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <Python.h>
 #include <so3_math.h>
 #include <rclcpp/rclcpp.hpp>
@@ -92,6 +94,78 @@ condition_variable sig_buffer;
 
 string root_dir = ROOT_DIR;
 string map_file_path, lid_topic, imu_topic;
+
+static bool ensure_directory(const string &dir)
+{
+    if (dir.empty() || dir == ".")
+    {
+        return true;
+    }
+    size_t pos = 0;
+    do
+    {
+        pos = dir.find('/', pos + 1);
+        string subdir = dir.substr(0, pos);
+        if (subdir.empty())
+        {
+            continue;
+        }
+        struct stat st;
+        if (stat(subdir.c_str(), &st) == 0)
+        {
+            if (!S_ISDIR(st.st_mode))
+            {
+                return false;
+            }
+            continue;
+        }
+        if (mkdir(subdir.c_str(), 0755) != 0 && errno != EEXIST)
+        {
+            return false;
+        }
+    } while (pos != string::npos);
+    return true;
+}
+
+static string parent_directory(const string &path)
+{
+    size_t slash = path.find_last_of('/');
+    if (slash == string::npos)
+    {
+        return ".";
+    }
+    if (slash == 0)
+    {
+        return "/";
+    }
+    return path.substr(0, slash);
+}
+
+static bool save_cloud_to_pcd(const string &path, const PointCloudXYZI::Ptr &cloud)
+{
+    if (path.empty())
+    {
+        cerr << "PCD save path is empty" << endl;
+        return false;
+    }
+    string dir = parent_directory(path);
+    if (!ensure_directory(dir))
+    {
+        cerr << "Failed to create PCD directory: " << dir << endl;
+        return false;
+    }
+    try
+    {
+        pcl::PCDWriter pcd_writer;
+        pcd_writer.writeBinary(path, *cloud);
+    }
+    catch (const pcl::IOException &e)
+    {
+        cerr << "Failed to save PCD to " << path << ": " << e.what() << endl;
+        return false;
+    }
+    return true;
+}
 
 double res_mean_last = 0.05, total_residual = 0.0;
 double last_timestamp_lidar = 0, last_timestamp_imu = -1.0;
@@ -968,8 +1042,7 @@ private:
 
     void save_to_pcd()
     {
-        pcl::PCDWriter pcd_writer;
-        pcd_writer.writeBinary(map_file_path, *pcl_wait_pub);
+        save_cloud_to_pcd(map_file_path, pcl_wait_pub);
     }
 
     template <typename T>
@@ -1293,16 +1366,16 @@ int main(int argc, char **argv)
     /* 2. pcd save will largely influence the real-time performences **/
     if (pcl_wait_pub->size() > 0 && pcd_save_en)
     {
-        string file_name = string("scans.pcd");
-        string all_points_dir(string(string(ROOT_DIR) + "PCD/") + file_name);
-        pcl::PCDWriter pcd_writer;
-        cout << "current scan saved to /PCD/" << file_name << endl;
-        pcd_writer.writeBinary(all_points_dir, *pcl_wait_pub);
+        cout << "current scan saved to " << map_file_path << endl;
+        save_cloud_to_pcd(map_file_path, pcl_wait_pub);
     }
     fout_out.close();
     fout_pre.close();
     fout_dbg.close();
-    fclose(fp);
+    if (fp != nullptr)
+    {
+        fclose(fp);
+    }
 
     if (runtime_pos_log)
     {

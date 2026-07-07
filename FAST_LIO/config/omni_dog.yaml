@@ -9,7 +9,7 @@
         filter_size_map: 0.5
         cube_side_length: 1000.0
         runtime_pos_log_enable: false
-        map_file_path: "./omni_dog_map.pcd"
+        map_file_path: "./maps/scans.pcd"
 
         common:
             odom_frame_id: "odom"

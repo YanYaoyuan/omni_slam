@@ -26,13 +26,19 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROS_DISTRO_TARGET=${ROS_DISTRO_TARGET:-humble}
 LIVOX_SETUP=${LIVOX_SETUP:-$HOME/ws_livox/install/setup.bash}
+set +u
 source "/opt/ros/$ROS_DISTRO_TARGET/setup.bash"
+set -u
 if [[ -f "$LIVOX_SETUP" ]]; then
+  set +u
   source "$LIVOX_SETUP"
+  set -u
 else
   echo "[setup_env] WARNING: Livox setup not found: $LIVOX_SETUP" >&2
 fi
+set +u
 source "$SCRIPT_DIR/install/setup.bash"
+set -u
 EOS
 
 cat > "$PKG_DIR/run_mapping.sh" <<'EOS'
