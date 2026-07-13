@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 OUT_DIR=${OUT_DIR:-$ROOT_DIR/dist}
 VERSION=${VERSION:-$(date +%Y%m%d_%H%M%S)}
-MAP_PATH=${MAP_PATH:-$ROOT_DIR/FAST_LIO/PCD/omni_dog_map.pcd}
+MAP_PATH=${MAP_PATH:-$ROOT_DIR/FAST_LIO/PCD/map.pcd}
 PKG_DIR="$OUT_DIR/omni_slam_orin_source_$VERSION"
 TARBALL="$OUT_DIR/omni_slam_orin_source_$VERSION.tar.gz"
 
@@ -33,7 +33,7 @@ rsync -a --delete \
 
 mkdir -p "$PKG_DIR/FAST_LIO/PCD"
 if [[ -f "$MAP_PATH" ]]; then
-  cp "$MAP_PATH" "$PKG_DIR/FAST_LIO/PCD/omni_dog_map.pcd"
+  cp "$MAP_PATH" "$PKG_DIR/FAST_LIO/PCD/map.pcd"
 else
   echo "[package_orin_source] WARNING: map not found: $MAP_PATH" >&2
 fi
@@ -52,7 +52,7 @@ source install/setup.bash
 ros2 launch fast_lio omni_dog.launch.py
 
 # Relocalization
-ros2 launch fast_lio omni_dog_relocalization.launch.py map_path:=$PWD/FAST_LIO/PCD/omni_dog_map.pcd
+ros2 launch fast_lio omni_dog_relocalization.launch.py map_path:=$PWD/FAST_LIO/PCD/map.pcd
 ```
 
 If Livox setup is elsewhere:

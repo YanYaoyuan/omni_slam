@@ -41,7 +41,7 @@ def generate_launch_description():
           {'solver_max_iter':100},
           {'max_correspondence_distance':0.1},
           {'RANSAC_outlier_rejection_threshold':0.5},
-          {'map_path':'/home/sentry_ws/src/FAST_LIO/PCD/scans.pcd'},
+          {'map_path':'/home/sentry_ws/src/FAST_LIO/PCD/map.pcd'},
           {'fitness_score_thre':0.2}, # 是最近点距离的平均值，越小越严格
           {'converged_count_thre':40}, # pcl pub at 20 hz, 2s
           {'pcl_type':'livox'},

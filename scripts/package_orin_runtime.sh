@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 INSTALL_BASE=${ORIN_INSTALL_BASE:-$ROOT_DIR/install_orin}
-MAP_PATH=${MAP_PATH:-$ROOT_DIR/FAST_LIO/PCD/omni_dog_map.pcd}
+MAP_PATH=${MAP_PATH:-$ROOT_DIR/FAST_LIO/PCD/map.pcd}
 OUT_DIR=${OUT_DIR:-$ROOT_DIR/dist}
 VERSION=${VERSION:-$(date +%Y%m%d_%H%M%S)}
 PKG_DIR="$OUT_DIR/omni_slam_orin_$VERSION"
@@ -18,7 +18,7 @@ die() { echo "[package_orin_runtime] ERROR: $*" >&2; exit 1; }
 rm -rf "$PKG_DIR"
 mkdir -p "$PKG_DIR/maps" "$PKG_DIR/scripts"
 cp -a "$INSTALL_BASE" "$PKG_DIR/install"
-cp "$MAP_PATH" "$PKG_DIR/maps/omni_dog_map.pcd"
+cp "$MAP_PATH" "$PKG_DIR/maps/map.pcd"
 
 cat > "$PKG_DIR/setup_env.sh" <<'EOS'
 #!/usr/bin/env bash
@@ -54,7 +54,7 @@ cat > "$PKG_DIR/run_relocalization.sh" <<'EOS'
 set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "$SCRIPT_DIR/setup_env.sh"
-MAP_PATH=${MAP_PATH:-$SCRIPT_DIR/maps/omni_dog_map.pcd}
+MAP_PATH=${MAP_PATH:-$SCRIPT_DIR/maps/map.pcd}
 exec ros2 launch fast_lio omni_dog_relocalization.launch.py map_path:="$MAP_PATH" "$@"
 EOS
 
@@ -79,7 +79,7 @@ export LIVOX_SETUP=/path/to/ws_livox/install/setup.bash
 Default map:
 
 ```bash
-maps/omni_dog_map.pcd
+maps/map.pcd
 ```
 EOS
 

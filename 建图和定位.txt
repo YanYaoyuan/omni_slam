@@ -1,0 +1,12 @@
+建图：
+source install/setup.bash
+ros2 launch fast_lio omni_dog.launch.py use_sim_time:=false
+
+
+定位：
+cd ~/wheel_dog_20260708/omni_slam
+source /opt/ros/humble/setup.bash
+source /heng/livox_ros_driver2_ws/install/setup.bash
+source install/setup.bash
+
+ros2 launch fast_lio omni_dog_relocalization.launch.py   map_path:=/home/hzy/wheel_dog_20260708/omni_slam/maps/map.pcd   fitness_score_thre:=2.5   max_correspondence_distance:=1.0   converged_count_thre:=5

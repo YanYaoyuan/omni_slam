@@ -1,34 +1,61 @@
-﻿# Fast-LIO2-Localization
+# omni_slam 启动命令
 
-Modified Fast-LIO2 for localization in prior map.
-
-![](./reloc.gif)
-
-Blue point is the prior map, white point is current scan. When the white point stop twinkling, icp registration successed, and fast-lio2 starts in relocalization mode.
-
-## Deployment
-
-See [DEPLOY_ORIN.md](DEPLOY_ORIN.md) for Nvidia Orin build, packaging, mapping, relocalization, and cross-compilation notes.
-
-## Usage
-
-### Mapping
-
-Same as Fast-LIO2.
+目录：
 
 ```bash
-ros2 launch fast_lio mapping.launch.py
+cd /home/robot/1_slam_20260709
 ```
 
-### Relocalization
+## 建图
 
-A example of launch file is provided at `example.launch.py`. It will call the `icp_node` and localization.launch.py to do re-localization. 
+```bash
+bash 1_mapping.sh
+```
 
-**IMPORTANT**
+停止建图：在建图终端按 `Ctrl+C`。
 
-1. CHANGE the `map_path` in `example.launch.py` AND `prior_map_path` in `FAST_LIO/config/fast_lio_relocalization_param.yaml` to the path of the map you want to localize in, THEY SHOULD BE THE SAME.
-2. Give an initial guess of the pose of the robot in the map by changing `initial_x`, `initial_y` etc. in `example.launch.py`, or give your initial guess in the rviz using `2D Pose Estimation`.
+地图默认保存到：
 
-## Notice 
+```text
+/home/robot/1_slam_20260709/maps/map.pcd
+```
 
-I'd love to hear from you if you have any suggestions or find any bugs. Please feel free to open an issue or make a pull request or contact me in any way you like.
+## 定位
+
+```bash
+bash 2_localizing.sh
+```
+
+默认使用地图：
+
+```text
+/home/robot/1_slam_20260709/maps/map.pcd
+```
+
+指定其他地图：
+
+```bash
+MAP_PATH=/path/to/xxx.pcd bash 2_localizing.sh
+```
+
+## 检查雷达和 IMU
+
+```bash
+source /opt/ros/humble/setup.bash
+export ROS_DOMAIN_ID=24
+export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+ros2 topic list | grep -E "/front_lidar|/front_lidar/imu"
+```
+
+输入话题：
+
+```text
+/front_lidar
+/front_lidar/imu
+```
+
+定位输出：
+
+```text
+/odometry
+```

@@ -1,8 +1,10 @@
 // #include <ros/ros.h>
 #include <rclcpp/rclcpp.hpp>
-#include <pcl_conversions/pcl_conversions.h>
+#include "ros_pcl_conversion.hpp"
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#ifdef FAST_LIO_USE_LIVOX
 #include <livox_ros_driver2/msg/custom_msg.hpp>
+#endif
 
 using namespace std;
 
@@ -17,7 +19,8 @@ enum LID_TYPE
   VELO16,
   OUST64,
   MID360,
-  LIVOX_POINTCLOUD2
+  LIVOX_POINTCLOUD2,
+  VANJEE
 }; //{1, 2, 3}
 enum TIME_UNIT
 {
@@ -83,6 +86,21 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_ros::Point,
                                   (float, x, x)(float, y, y)(float, z, z)(float, intensity,
                                                                           intensity)(float, time, time)(uint16_t, ring,
                                                                                                         ring))
+
+namespace vanjee_ros
+{
+  struct EIGEN_ALIGN16 Point
+  {
+    PCL_ADD_POINT4D;
+    float intensity;
+    uint16_t ring;
+    double timestamp;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  };
+}
+POINT_CLOUD_REGISTER_POINT_STRUCT(vanjee_ros::Point,
+                                  (float, x, x)(float, y, y)(float, z, z)(float, intensity, intensity)
+                                  (uint16_t, ring, ring)(double, timestamp, timestamp))
 
 namespace ouster_ros
 {
@@ -163,7 +181,9 @@ class Preprocess
   Preprocess();
   ~Preprocess();
   
+#ifdef FAST_LIO_USE_LIVOX
   void process(const livox_ros_driver2::msg::CustomMsg::UniquePtr &msg, PointCloudXYZI::Ptr &pcl_out);
+#endif
   void process(const sensor_msgs::msg::PointCloud2::UniquePtr &msg, PointCloudXYZI::Ptr &pcl_out);
   void set(bool feat_en, int lid_type, double bld, int pfilt_num);
 
@@ -178,9 +198,12 @@ class Preprocess
   // ros::Publisher pub_full, pub_surf, pub_corn;
 
 private:
+#ifdef FAST_LIO_USE_LIVOX
   void avia_handler(const livox_ros_driver2::msg::CustomMsg::UniquePtr &msg);
+#endif
   void oust64_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void velodyne_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
+  void vanjee_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void mid360_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void livox_pointcloud2_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void default_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);

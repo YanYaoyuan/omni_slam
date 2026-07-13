@@ -48,11 +48,13 @@ void Preprocess::set(bool feat_en, int lid_type, double bld, int pfilt_num)
   point_filter_num = pfilt_num;
 }
 
+#ifdef FAST_LIO_USE_LIVOX
 void Preprocess::process(const livox_ros_driver2::msg::CustomMsg::UniquePtr &msg, PointCloudXYZI::Ptr &pcl_out)
 {
   avia_handler(msg);
   *pcl_out = pl_surf;
 }
+#endif
 
 void Preprocess::process(const sensor_msgs::msg::PointCloud2::UniquePtr &msg, PointCloudXYZI::Ptr &pcl_out)
 {
@@ -93,6 +95,10 @@ void Preprocess::process(const sensor_msgs::msg::PointCloud2::UniquePtr &msg, Po
     livox_pointcloud2_handler(msg);
     break;
 
+  case VANJEE:
+    vanjee_handler(msg);
+    break;
+
   default:
     default_handler(msg);
     break;
@@ -100,6 +106,7 @@ void Preprocess::process(const sensor_msgs::msg::PointCloud2::UniquePtr &msg, Po
   *pcl_out = pl_surf;
 }
 
+#ifdef FAST_LIO_USE_LIVOX
 void Preprocess::avia_handler(const livox_ros_driver2::msg::CustomMsg::UniquePtr &msg)
 {
   pl_surf.clear();
@@ -195,6 +202,56 @@ void Preprocess::avia_handler(const livox_ros_driver2::msg::CustomMsg::UniquePtr
         }
       }
     }
+  }
+}
+#endif
+
+void Preprocess::vanjee_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg)
+{
+  pl_surf.clear();
+  pl_corn.clear();
+  pl_full.clear();
+
+  pcl::PointCloud<vanjee_ros::Point> original_cloud;
+  pcl::fromROSMsg(*msg, original_cloud);
+  if (original_cloud.empty()) {
+    return;
+  }
+
+  pl_surf.reserve(original_cloud.size() / std::max(1, point_filter_num) + 1);
+  const double first_timestamp = original_cloud.front().timestamp;
+
+  for (std::size_t index = 0; index < original_cloud.size(); ++index) {
+    if (index % static_cast<std::size_t>(std::max(1, point_filter_num)) != 0) {
+      continue;
+    }
+
+    const auto &source = original_cloud[index];
+    if (!std::isfinite(source.x) || !std::isfinite(source.y) || !std::isfinite(source.z) ||
+        !std::isfinite(source.timestamp)) {
+      continue;
+    }
+
+    const double squared_range = source.x * source.x + source.y * source.y + source.z * source.z;
+    if (squared_range < blind * blind) {
+      continue;
+    }
+
+    const double offset_ms = (source.timestamp - first_timestamp) * 1000.0;
+    if (offset_ms < -1.0 || offset_ms > 1000.0) {
+      continue;
+    }
+
+    PointType point;
+    point.x = source.x;
+    point.y = source.y;
+    point.z = source.z;
+    point.intensity = source.intensity;
+    point.normal_x = 0.0f;
+    point.normal_y = 0.0f;
+    point.normal_z = 0.0f;
+    point.curvature = static_cast<float>(std::max(0.0, offset_ms));
+    pl_surf.push_back(point);
   }
 }
 

@@ -5,17 +5,15 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-ADD_COMPILE_OPTIONS(-std=c++14)
-ADD_COMPILE_OPTIONS(-std=c++14)
-set(CMAKE_CXX_FLAGS "-std=c++14 -O3")
+set(CMAKE_CXX_FLAGS "-O3")
 
 add_definitions(-DROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/\")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fexceptions")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread -std=c++0x -std=c++14 -fexceptions")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fexceptions")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 message("Current CPU archtecture: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -44,9 +42,6 @@ find_package(OpenMP QUIET)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}   ${OpenMP_C_FLAGS}")
 
-find_package(PythonLibs REQUIRED)
-find_path(MATPLOTLIB_CPP_INCLUDE_DIRS "matplotlibcpp.h")
-
 # ROS dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -57,9 +52,10 @@ find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(visualization_msgs REQUIRED)
-find_package(pcl_ros REQUIRED)
-find_package(pcl_conversions REQUIRED)
-find_package(livox_ros_driver2 REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(livox_ros_driver2 QUIET)
 find_package(rosidl_default_generators REQUIRED)
 
 set(dependencies
@@ -71,14 +67,34 @@ set(dependencies
   std_msgs
   std_srvs
   visualization_msgs
-  pcl_ros
-  pcl_conversions
-  livox_ros_driver2
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
 )
 
+if(livox_ros_driver2_FOUND)
+  list(APPEND dependencies livox_ros_driver2)
+  add_compile_definitions(FAST_LIO_USE_LIVOX)
+  message(STATUS "FAST-LIO Livox CustomMsg support enabled")
+else()
+  message(STATUS "FAST-LIO Livox CustomMsg support disabled")
+endif()
+
 # Thirdparty libraries
+set(OMNI_SLAM_DEPS_ROOT "" CACHE PATH "Private dependency root used on dog3")
 find_package(Eigen3 REQUIRED)
-find_package(PCL REQUIRED COMPONENTS common io)
+if(OMNI_SLAM_DEPS_ROOT)
+  set(PCL_INCLUDE_DIRS
+    "${OMNI_SLAM_DEPS_ROOT}/usr/include/pcl-1.12"
+    "${OMNI_SLAM_DEPS_ROOT}/usr/include"
+  )
+  set(OMNI_PCL_LIBRARY_DIR "${OMNI_SLAM_DEPS_ROOT}/usr/lib/aarch64-linux-gnu")
+  find_library(PCL_COMMON_LIBRARY pcl_common PATHS "${OMNI_PCL_LIBRARY_DIR}" NO_DEFAULT_PATH REQUIRED)
+  find_library(PCL_FILTERS_LIBRARY pcl_filters PATHS "${OMNI_PCL_LIBRARY_DIR}" NO_DEFAULT_PATH REQUIRED)
+  set(PCL_LIBRARIES ${PCL_FILTERS_LIBRARY} ${PCL_COMMON_LIBRARY})
+else()
+  find_package(PCL REQUIRED COMPONENTS common filters)
+endif()
 
 message(Eigen: ${EIGEN3_INCLUDE_DIR})
 message(STATUS "PCL: ${PCL_INCLUDE_DIRS}")
@@ -95,11 +111,16 @@ ament_export_dependencies(rosidl_default_runtime)
 add_executable(fastlio_mapping src/laserMapping.cpp include/ikd-Tree/ikd_Tree.cpp src/preprocess.cpp)
 target_include_directories(fastlio_mapping PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../common>
   $<INSTALL_INTERFACE:include>
   ${PCL_INCLUDE_DIRS}
 )
-target_link_libraries(fastlio_mapping ${PCL_LIBRARIES} ${PYTHON_LIBRARIES} Eigen3::Eigen)
-target_include_directories(fastlio_mapping PRIVATE ${PYTHON_INCLUDE_DIRS})
+target_link_libraries(fastlio_mapping ${PCL_LIBRARIES} Eigen3::Eigen)
+if(OMNI_SLAM_DEPS_ROOT)
+  set_target_properties(fastlio_mapping PROPERTIES
+    BUILD_RPATH "${OMNI_PCL_LIBRARY_DIR}"
+    INSTALL_RPATH "${OMNI_PCL_LIBRARY_DIR}")
+endif()
 
 list(APPEND EOL_LIST "foxy" "galactic" "eloquent" "dashing" "crystal")
 

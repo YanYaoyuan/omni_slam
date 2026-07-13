@@ -40,10 +40,11 @@
 #include <stdexcept>
 #include <csignal>
 #include <chrono>
+#include <algorithm>
+#include <cctype>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <Python.h>
 #include <so3_math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <Eigen/Core>
@@ -51,12 +52,12 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <nav_msgs/msg/path.hpp>
 #include <visualization_msgs/msg/marker.hpp>
-#include <pcl_conversions/pcl_conversions.h>
+#include "ros_pcl_conversion.hpp"
+#include <pcl/common/transforms.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl_ros/transforms.hpp>
+#include "simple_pcd_io.hpp"
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <std_srvs/srv/trigger.hpp>
@@ -67,7 +68,9 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/vector3.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#ifdef FAST_LIO_USE_LIVOX
 #include <livox_ros_driver2/msg/custom_msg.hpp>
+#endif
 #include "preprocess.h"
 #include <ikd-Tree/ikd_Tree.h>
 
@@ -93,7 +96,8 @@ mutex mtx_buffer;
 condition_variable sig_buffer;
 
 string root_dir = ROOT_DIR;
-string map_file_path, lid_topic, imu_topic;
+string map_file_path, lid_topic, imu_topic, lid_qos_reliability;
+int lid_qos_depth = 10;
 
 static bool ensure_directory(const string &dir)
 {
@@ -154,14 +158,10 @@ static bool save_cloud_to_pcd(const string &path, const PointCloudXYZI::Ptr &clo
         cerr << "Failed to create PCD directory: " << dir << endl;
         return false;
     }
-    try
+    string error;
+    if (!omni_slam::pcd::save_xyzinormal_binary(path, *cloud, &error))
     {
-        pcl::PCDWriter pcd_writer;
-        pcd_writer.writeBinary(path, *cloud);
-    }
-    catch (const pcl::IOException &e)
-    {
-        cerr << "Failed to save PCD to " << path << ": " << e.what() << endl;
+        cerr << "Failed to save PCD to " << path << ": " << error << endl;
         return false;
     }
     return true;
@@ -175,7 +175,7 @@ double cube_len = 0, HALF_FOV_COS = 0, FOV_DEG = 0, total_distance = 0, lidar_en
 int effct_feat_num = 0, time_log_counter = 0, scan_count = 0, publish_count = 0;
 int iterCount = 0, feats_down_size = 0, NUM_MAX_ITERATIONS = 0, laserCloudValidNum = 0, pcd_save_interval = -1, pcd_index = 0;
 bool point_selected_surf[100000] = {0};
-bool lidar_pushed, flg_first_scan = true, flg_exit = false, flg_EKF_inited;
+bool lidar_pushed, flg_first_scan = true, flg_EKF_inited;
 bool scan_pub_en = false, dense_pub_en = false, scan_body_pub_en = false;
 bool effect_pub_en = false, map_pub_en = false, ikd_tree_pub_en = false;
 bool is_first_lidar = true;
@@ -235,13 +235,6 @@ bool locate_in_prior_map = false;
 string prior_map_path;
 FILE *fp;
 ofstream fout_pre, fout_out, fout_dbg;
-
-void SigHandle(int sig)
-{
-    flg_exit = true;
-    std::cout << "catch sig" << sig << std::endl;
-    sig_buffer.notify_all();
-}
 
 void h_share_model(state_ikfom &s, esekfom::dyn_share_datastruct<double> &ekfom_data)
 {
@@ -381,6 +374,8 @@ public:
         this->declare_parameter<string>("map_file_path", "");
         this->declare_parameter<string>("common.lid_topic", "/livox/lidar");
         this->declare_parameter<string>("common.imu_topic", "/livox/imu");
+        this->declare_parameter<string>("common.lid_qos_reliability", "best_effort");
+        this->declare_parameter<int>("common.lid_qos_depth", 10);
         this->declare_parameter<bool>("common.time_sync_en", false);
         this->declare_parameter<double>("common.time_offset_lidar_to_imu", 0.0);
         this->declare_parameter<string>("common.odom_frame_id", "odom");
@@ -424,6 +419,8 @@ public:
         this->get_parameter_or<string>("map_file_path", map_file_path, "");
         this->get_parameter_or<string>("common.lid_topic", lid_topic, "/livox/lidar");
         this->get_parameter_or<string>("common.imu_topic", imu_topic, "/livox/imu");
+        this->get_parameter_or<string>("common.lid_qos_reliability", lid_qos_reliability, "best_effort");
+        this->get_parameter_or<int>("common.lid_qos_depth", lid_qos_depth, 10);
         this->get_parameter_or<bool>("common.time_sync_en", time_sync_en, false);
         this->get_parameter_or<string>("common.odom_frame_id", odom_frame, "odom");
         this->get_parameter_or<string>("common.sensor_frame_id", sensor_frame, "sensor");
@@ -457,6 +454,21 @@ public:
         this->get_parameter_or<string>("prior_map_path", prior_map_path, "");
 
         RCLCPP_INFO(this->get_logger(), "p_pre->lidar_type %d", p_pre->lidar_type);
+        std::transform(lid_qos_reliability.begin(), lid_qos_reliability.end(), lid_qos_reliability.begin(), ::tolower);
+        const int lidar_qos_depth_safe = std::max(1, lid_qos_depth);
+        rclcpp::QoS lidar_qos{rclcpp::KeepLast(lidar_qos_depth_safe)};
+        lidar_qos.durability_volatile();
+        if (lid_qos_reliability == "reliable")
+        {
+            lidar_qos.reliable();
+        }
+        else
+        {
+            lidar_qos.best_effort();
+            lid_qos_reliability = "best_effort";
+        }
+        RCLCPP_INFO(this->get_logger(), "LiDAR subscription QoS: reliability=%s depth=%d",
+                    lid_qos_reliability.c_str(), lidar_qos_depth_safe);
         if (extrinT.size() != 3 || extrinR.size() != 9)
         {
             RCLCPP_FATAL(this->get_logger(), "Invalid LiDAR-IMU extrinsic: mapping.extrinsic_T must have 3 values and mapping.extrinsic_R must have 9 values.");
@@ -509,15 +521,20 @@ public:
         /*** ROS subscribe initialization ***/
         if (p_pre->lidar_type == AVIA)
         {
-            sub_pcl_livox_ = this->create_subscription<livox_ros_driver2::msg::CustomMsg>(lid_topic, 20, std::bind(&LaserMappingNode::livox_pcl_cbk, this, std::placeholders::_1));
+#ifdef FAST_LIO_USE_LIVOX
+            sub_pcl_livox_ = this->create_subscription<livox_ros_driver2::msg::CustomMsg>(lid_topic, lidar_qos, std::bind(&LaserMappingNode::livox_pcl_cbk, this, std::placeholders::_1));
+#else
+            throw std::runtime_error("FAST-LIO was built without Livox CustomMsg support");
+#endif
         }
         else
         {
-            sub_pcl_pc_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(lid_topic, rclcpp::SensorDataQoS(), std::bind(&LaserMappingNode::standard_pcl_cbk, this, std::placeholders::_1));
+            sub_pcl_pc_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(lid_topic, lidar_qos, std::bind(&LaserMappingNode::standard_pcl_cbk, this, std::placeholders::_1));
         }
         if (locate_in_prior_map)
         {
-            sub_init_pose_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/icp_result", 10, std::bind(&LaserMappingNode::initial_pose_cbk, this, std::placeholders::_1));
+            auto init_pose_qos = rclcpp::QoS(rclcpp::KeepLast(1)).reliable().transient_local();
+            sub_init_pose_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/icp_result", init_pose_qos, std::bind(&LaserMappingNode::initial_pose_cbk, this, std::placeholders::_1));
         }
         sub_imu_ = this->create_subscription<sensor_msgs::msg::Imu>(imu_topic, 10, std::bind(&LaserMappingNode::imu_cbk, this, std::placeholders::_1));
         pubLaserCloudFull_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/cloud_registered", 20);
@@ -542,9 +559,10 @@ public:
         {
             RCLCPP_INFO(this->get_logger(), "Loading prior map...");
             // load prior map
-            if (pcl::io::loadPCDFile<PointType>(prior_map_path, *prior_map) == -1) // Replace with your file name
+            string pcd_error;
+            if (!omni_slam::pcd::load_xyzinormal(prior_map_path, *prior_map, &pcd_error))
             {
-                RCLCPP_ERROR(this->get_logger(), "Failed to load PCD file\n");
+                RCLCPP_ERROR(this->get_logger(), "Failed to load PCD file: %s", pcd_error.c_str());
                 return;
             }
             // downsample the prior map
@@ -564,7 +582,9 @@ private:
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pubPath_;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr sub_imu_;
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_pcl_pc_;
+#ifdef FAST_LIO_USE_LIVOX
     rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr sub_pcl_livox_;
+#endif
     rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr sub_init_pose_;
 
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
@@ -580,6 +600,16 @@ private:
     double epsi[23] = {0.001};
     bool initial_pose_received = false;
     geometry_msgs::msg::PoseWithCovarianceStamped initial_pose;
+
+    void reset_sync_buffers_locked(const char *reason)
+    {
+        lidar_buffer.clear();
+        time_buffer.clear();
+        imu_buffer.clear();
+        Measures.imu.clear();
+        lidar_pushed = false;
+        RCLCPP_DEBUG(this->get_logger(), "%s, clear lidar/imu sync buffers", reason);
+    }
 
     inline void dump_lio_state_to_log(FILE *fp)
     {
@@ -738,8 +768,7 @@ private:
         double preprocess_start_time = omp_get_wtime();
         if (!is_first_lidar && cur_time < last_timestamp_lidar)
         {
-            RCLCPP_ERROR(this->get_logger(), "lidar loop back, clear buffer");
-            lidar_buffer.clear();
+            reset_sync_buffers_locked("lidar loop back");
         }
         if (is_first_lidar)
         {
@@ -758,6 +787,7 @@ private:
 
     double timediff_lidar_wrt_imu = 0.0;
     bool timediff_set_flg = false;
+#ifdef FAST_LIO_USE_LIVOX
     void livox_pcl_cbk(const livox_ros_driver2::msg::CustomMsg::UniquePtr msg)
     {
         if (locate_in_prior_map && !initial_pose_received)
@@ -770,8 +800,7 @@ private:
         scan_count++;
         if (!is_first_lidar && cur_time < last_timestamp_lidar)
         {
-            std::cerr << "lidar loop back, clear buffer" << std::endl;
-            lidar_buffer.clear();
+            reset_sync_buffers_locked("lidar loop back");
         }
         if (is_first_lidar)
         {
@@ -800,6 +829,7 @@ private:
         mtx_buffer.unlock();
         sig_buffer.notify_all();
     }
+#endif
 
     void imu_cbk(const sensor_msgs::msg::Imu::UniquePtr msg_in)
     {
@@ -823,8 +853,7 @@ private:
 
         if (timestamp < last_timestamp_imu)
         {
-            std::cerr << "lidar loop back, clear buffer" << std::endl;
-            imu_buffer.clear();
+            reset_sync_buffers_locked("imu loop back");
         }
 
         last_timestamp_imu = timestamp;
@@ -1094,6 +1123,15 @@ private:
             odomAftMapped = odom_to_base_msg;
         }
         pubOdomAftMapped->publish(odomAftMapped);
+        if (locate_in_prior_map)
+        {
+            RCLCPP_INFO_THROTTLE(
+                this->get_logger(), *this->get_clock(), 500,
+                "定位成功：%.6f %.6f %.6f",
+                odomAftMapped.pose.pose.position.x,
+                odomAftMapped.pose.pose.position.y,
+                odomAftMapped.pose.pose.position.z);
+        }
         auto P = kf.get_P();
         for (int i = 0; i < 6; i++)
         {
@@ -1200,7 +1238,17 @@ private:
                     // }
                     tf2::Transform trans;
                     tf2::fromMsg(initial_pose.pose.pose, trans);
-                    pcl_ros::transformPointCloud(*feats_down_prior_map, *feats_down_prior_map, trans.inverse());
+                    const tf2::Transform inverse_trans = trans.inverse();
+                    Eigen::Matrix4f transform_matrix = Eigen::Matrix4f::Identity();
+                    for (int row = 0; row < 3; ++row)
+                    {
+                        for (int column = 0; column < 3; ++column)
+                        {
+                            transform_matrix(row, column) = inverse_trans.getBasis()[row][column];
+                        }
+                        transform_matrix(row, 3) = inverse_trans.getOrigin()[row];
+                    }
+                    pcl::transformPointCloud(*feats_down_prior_map, *feats_down_prior_map, transform_matrix);
 
                     // puiblish the transformed prior map
                     sensor_msgs::msg::PointCloud2 prior_map_msg;
@@ -1349,16 +1397,24 @@ private:
 
     void initial_pose_cbk(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
     {
+        const bool first_initial_pose = !initial_pose_received;
         initial_pose = *msg;
         initial_pose_received = true;
+        if (first_initial_pose)
+        {
+            RCLCPP_INFO(
+                this->get_logger(),
+                "Received initial pose from /icp_result: x=%.6f y=%.6f z=%.6f",
+                initial_pose.pose.pose.position.x,
+                initial_pose.pose.pose.position.y,
+                initial_pose.pose.pose.position.z);
+        }
     }
 };
 
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-
-    signal(SIGINT, SigHandle);
 
     rclcpp::spin(std::make_shared<LaserMappingNode>());
     /**************** save map ****************/
