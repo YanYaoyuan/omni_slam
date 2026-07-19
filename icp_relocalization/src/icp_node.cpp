@@ -8,6 +8,7 @@
 #include <pcl/registration/icp.h>
 #include <pcl/filters/voxel_grid.h>
 #include <Eigen/Geometry>
+#include <cmath>
 #include <stdexcept>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
@@ -119,11 +120,52 @@ public:
     }
 
 private:
+    void filter_input_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr & cloud)
+    {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZ>);
+        filtered->reserve(cloud->size());
+
+        constexpr float min_range_squared = 0.3f * 0.3f;
+        constexpr float max_range_squared = 30.0f * 30.0f;
+        for (const auto & point : cloud->points)
+        {
+            if (!std::isfinite(point.x) || !std::isfinite(point.y) || !std::isfinite(point.z))
+            {
+                continue;
+            }
+            const float range_squared =
+                point.x * point.x + point.y * point.y + point.z * point.z;
+            if (range_squared < min_range_squared || range_squared > max_range_squared)
+            {
+                continue;
+            }
+            filtered->push_back(point);
+        }
+
+        filtered->width = filtered->size();
+        filtered->height = 1;
+        filtered->is_dense = true;
+        if (filtered->size() != cloud->size())
+        {
+            RCLCPP_DEBUG(
+                this->get_logger(), "Filtered %zu invalid/out-of-range points from ICP input",
+                cloud->size() - filtered->size());
+        }
+        cloud.swap(filtered);
+    }
+
     void cloud_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
     {
         // Convert the incoming point cloud to PCL format
         pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromROSMsg(*msg, *input_cloud);
+        filter_input_cloud(input_cloud);
+
+        if (input_cloud->empty())
+        {
+            RCLCPP_WARN(this->get_logger(), "ICP input cloud is empty after filtering");
+            return;
+        }
 
         // Downsample the input cloud
         pcl::VoxelGrid<pcl::PointXYZ> sor_scan;
@@ -151,20 +193,27 @@ private:
         icp.align(final_cloud, initGuess);
 
         // Get fitness score
-        double fitness_score = icp.getFitnessScore();
+        double fitness_score = icp.getFitnessScore(max_correspondence_distance);
         RCLCPP_INFO(this->get_logger(), "ICP fitness score: %f", fitness_score);
 
         if (fitness_score < fitness_score_thre && icp.hasConverged())
         {
             converged_count++;
-            RCLCPP_INFO(this->get_logger(), "ICP converged, count: %d", converged_count);
+            const Eigen::Matrix4f transformation_result = icp.getFinalTransformation();
+            const double yaw = std::atan2(
+                transformation_result(1, 0), transformation_result(0, 0));
+            RCLCPP_INFO(
+                this->get_logger(),
+                "Relocalization candidate [%d/%d]: X=%.3f Y=%.3f Z=%.3f YAW=%.3f rad (%.1f deg), fitness=%.6f",
+                converged_count, converged_count_thre,
+                transformation_result(0, 3), transformation_result(1, 3),
+                transformation_result(2, 3), yaw, yaw * 180.0 / M_PI, fitness_score);
             if(converged_count < converged_count_thre)
             {
                 RCLCPP_INFO(this->get_logger(), "ICP converged, but not enough count, no pose is published");
                 return;
             }
             // Convert the transformation_result result to a PoseWithCovarianceStamped message and publish it
-            Eigen::Matrix4f transformation_result = icp.getFinalTransformation();
             geometry_msgs::msg::PoseWithCovarianceStamped pose_msg;
             pose_msg.header.stamp = this->now();
             pose_msg.header.frame_id = map_frame;
@@ -179,6 +228,11 @@ private:
             pose_msg.pose.pose.orientation.z = q.z();
             pose_msg.pose.pose.orientation.w = q.w();
             publisher_->publish(pose_msg);
+            RCLCPP_INFO(
+                this->get_logger(),
+                "RELOCALIZATION SUCCEEDED: published /icp_result, X=%.3f Y=%.3f Z=%.3f YAW=%.3f rad (%.1f deg), fitness=%.6f",
+                transformation_result(0, 3), transformation_result(1, 3),
+                transformation_result(2, 3), yaw, yaw * 180.0 / M_PI, fitness_score);
 
             // Transform the input cloud using the ICP result
             pcl::transformPointCloud(*input_cloud, *input_cloud, transformation_result);
@@ -222,6 +276,13 @@ private:
         }
         input_cloud->width = input_cloud->size();
         input_cloud->height = 1;
+        filter_input_cloud(input_cloud);
+
+        if (input_cloud->empty())
+        {
+            RCLCPP_WARN(this->get_logger(), "ICP input cloud is empty after filtering");
+            return;
+        }
 
         // Downsample the input cloud
         pcl::VoxelGrid<pcl::PointXYZ> sor_scan;
@@ -249,7 +310,7 @@ private:
         icp.align(final_cloud, initGuess);
 
         // Get fitness score
-        double fitness_score = icp.getFitnessScore();
+        double fitness_score = icp.getFitnessScore(max_correspondence_distance);
         RCLCPP_INFO(this->get_logger(), "ICP fitness score: %f", fitness_score);
 
         if (icp.hasConverged() && fitness_score < fitness_score_thre && converged_count > converged_count_thre)

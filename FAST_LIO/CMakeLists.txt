@@ -59,8 +59,13 @@ find_package(std_srvs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
-find_package(livox_ros_driver2 REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+
+option(USE_LIVOX_CUSTOM_MSG "Build Livox CustomMsg support" OFF)
+if(USE_LIVOX_CUSTOM_MSG)
+  find_package(livox_ros_driver2 REQUIRED)
+  add_definitions(-DUSE_LIVOX)
+endif()
 
 set(dependencies
   rclcpp
@@ -73,8 +78,11 @@ set(dependencies
   visualization_msgs
   pcl_ros
   pcl_conversions
-  livox_ros_driver2
 )
+
+if(USE_LIVOX_CUSTOM_MSG)
+  list(APPEND dependencies livox_ros_driver2)
+endif()
 
 # Thirdparty libraries
 find_package(Eigen3 REQUIRED)

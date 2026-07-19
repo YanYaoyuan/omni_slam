@@ -67,7 +67,9 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/vector3.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#ifdef USE_LIVOX
 #include <livox_ros_driver2/msg/custom_msg.hpp>
+#endif
 #include "preprocess.h"
 #include <ikd-Tree/ikd_Tree.h>
 
@@ -507,11 +509,13 @@ public:
             cout << "~~~~" << ROOT_DIR << " doesn't exist" << endl;
 
         /*** ROS subscribe initialization ***/
+#ifdef USE_LIVOX
         if (p_pre->lidar_type == AVIA)
         {
             sub_pcl_livox_ = this->create_subscription<livox_ros_driver2::msg::CustomMsg>(lid_topic, 20, std::bind(&LaserMappingNode::livox_pcl_cbk, this, std::placeholders::_1));
         }
         else
+#endif
         {
             sub_pcl_pc_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(lid_topic, rclcpp::SensorDataQoS(), std::bind(&LaserMappingNode::standard_pcl_cbk, this, std::placeholders::_1));
         }
@@ -564,7 +568,9 @@ private:
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pubPath_;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr sub_imu_;
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_pcl_pc_;
+#ifdef USE_LIVOX
     rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr sub_pcl_livox_;
+#endif
     rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr sub_init_pose_;
 
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
@@ -758,6 +764,7 @@ private:
 
     double timediff_lidar_wrt_imu = 0.0;
     bool timediff_set_flg = false;
+#ifdef USE_LIVOX
     void livox_pcl_cbk(const livox_ros_driver2::msg::CustomMsg::UniquePtr msg)
     {
         if (locate_in_prior_map && !initial_pose_received)
@@ -800,6 +807,7 @@ private:
         mtx_buffer.unlock();
         sig_buffer.notify_all();
     }
+#endif
 
     void imu_cbk(const sensor_msgs::msg::Imu::UniquePtr msg_in)
     {

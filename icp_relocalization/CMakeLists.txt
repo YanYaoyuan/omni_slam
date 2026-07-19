@@ -6,7 +6,7 @@ add_compile_options(-Wextra -Wpedantic)
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g")
 set(CMAKE_BUILD_TYPE Release)
 
-set(USE_LIVOX 1)
+option(USE_LIVOX "Build Livox CustomMsg support" OFF)
 # define use_livox
 if(USE_LIVOX)
   add_definitions(-DUSE_LIVOX)
