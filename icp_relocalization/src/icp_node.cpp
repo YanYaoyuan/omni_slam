@@ -215,7 +215,12 @@ private:
             }
             // Convert the transformation_result result to a PoseWithCovarianceStamped message and publish it
             geometry_msgs::msg::PoseWithCovarianceStamped pose_msg;
-            pose_msg.header.stamp = this->now();
+            pose_msg.header.stamp = msg->header.stamp;
+            if (pose_msg.header.stamp.sec == 0 &&
+                pose_msg.header.stamp.nanosec == 0)
+            {
+                pose_msg.header.stamp = this->now();
+            }
             pose_msg.header.frame_id = map_frame;
             pose_msg.pose.pose.position.x = transformation_result(0, 3);
             pose_msg.pose.pose.position.y = transformation_result(1, 3);
@@ -319,7 +324,12 @@ private:
             Eigen::Matrix4f transformation_result = icp.getFinalTransformation();
             // Convert the transformation_result result to a PoseWithCovarianceStamped message and publish it
             geometry_msgs::msg::PoseWithCovarianceStamped pose_msg;
-            pose_msg.header.stamp = this->now();
+            pose_msg.header.stamp = msg->header.stamp;
+            if (pose_msg.header.stamp.sec == 0 &&
+                pose_msg.header.stamp.nanosec == 0)
+            {
+                pose_msg.header.stamp = this->now();
+            }
             pose_msg.header.frame_id = map_frame;
             pose_msg.pose.pose.position.x = transformation_result(0, 3);
             pose_msg.pose.pose.position.y = transformation_result(1, 3);

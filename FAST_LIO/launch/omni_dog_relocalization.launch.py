@@ -71,6 +71,7 @@ def generate_launch_description():
         parameters=[
             {'map_frame_id': 'lio_map'},
             {'odom_frame_id': 'lio_odom'},
+            {'icp_result_topic': '/icp_result'},
         ])
 
     global_odometry_node = Node(
@@ -82,6 +83,10 @@ def generate_launch_description():
             {'input_topic': '/state_estimation'},
             {'output_topic': '/state_estimation_global'},
             {'target_frame': 'lio_map'},
+            {'source_frame': 'lio_odom'},
+            {'child_frame': 'livox_frame'},
+            {'initial_translation_tolerance': 0.5},
+            {'initial_rotation_tolerance': 0.35},
         ])
 
     icp_node = Node(

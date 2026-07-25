@@ -1,4 +1,5 @@
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -28,16 +29,43 @@ public:
             "output_topic", "/state_estimation_global");
         target_frame_ = this->declare_parameter<std::string>(
             "target_frame", "lio_map");
+        source_frame_ = this->declare_parameter<std::string>(
+            "source_frame", "lio_odom");
+        child_frame_ = this->declare_parameter<std::string>(
+            "child_frame", "livox_frame");
+        initial_translation_tolerance_ = this->declare_parameter<double>(
+            "initial_translation_tolerance", 0.5);
+        initial_rotation_tolerance_ = this->declare_parameter<double>(
+            "initial_rotation_tolerance", 0.35);
 
-        if (input_topic_.empty() || output_topic_.empty() || target_frame_.empty())
+        if (input_topic_.empty() ||
+            output_topic_.empty() ||
+            target_frame_.empty() ||
+            source_frame_.empty() ||
+            child_frame_.empty())
         {
             throw std::invalid_argument(
-                "input_topic, output_topic, and target_frame must not be empty");
+                "topic and frame parameters must not be empty");
         }
         if (input_topic_ == output_topic_)
         {
             throw std::invalid_argument(
                 "input_topic and output_topic must be different");
+        }
+        if (target_frame_ == source_frame_ ||
+            target_frame_ == child_frame_ ||
+            source_frame_ == child_frame_)
+        {
+            throw std::invalid_argument(
+                "target_frame, source_frame, and child_frame must be different");
+        }
+        if (!std::isfinite(initial_translation_tolerance_) ||
+            !std::isfinite(initial_rotation_tolerance_) ||
+            initial_translation_tolerance_ < 0.0 ||
+            initial_rotation_tolerance_ < 0.0)
+        {
+            throw std::invalid_argument(
+                "initial pose tolerances must be finite and non-negative");
         }
 
         tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -56,10 +84,13 @@ public:
 
         RCLCPP_INFO(
             this->get_logger(),
-            "Converting odometry from %s to %s in frame %s",
+            "Converting %s (%s -> %s) to %s (%s -> %s)",
             input_topic_.c_str(),
+            source_frame_.c_str(),
+            child_frame_.c_str(),
             output_topic_.c_str(),
-            target_frame_.c_str());
+            target_frame_.c_str(),
+            child_frame_.c_str());
     }
 
 private:
@@ -108,22 +139,88 @@ private:
 
     void odometryCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
     {
-        if (msg->header.frame_id.empty())
+        if (msg->header.frame_id != source_frame_ ||
+            msg->child_frame_id != child_frame_)
         {
-            RCLCPP_WARN_THROTTLE(
+            RCLCPP_ERROR_THROTTLE(
                 this->get_logger(),
                 *this->get_clock(),
                 2000,
-                "Ignoring odometry with an empty frame_id");
+                "Rejecting %s with frames '%s' -> '%s'; expected '%s' -> '%s'",
+                input_topic_.c_str(),
+                msg->header.frame_id.c_str(),
+                msg->child_frame_id.c_str(),
+                source_frame_.c_str(),
+                child_frame_.c_str());
             return;
         }
 
-        if (msg->header.frame_id == target_frame_)
+        const auto &position = msg->pose.pose.position;
+        const auto &orientation = msg->pose.pose.orientation;
+        if (!std::isfinite(position.x) ||
+            !std::isfinite(position.y) ||
+            !std::isfinite(position.z) ||
+            !std::isfinite(orientation.x) ||
+            !std::isfinite(orientation.y) ||
+            !std::isfinite(orientation.z) ||
+            !std::isfinite(orientation.w))
         {
-            nav_msgs::msg::Odometry output = *msg;
-            output.header.frame_id = target_frame_;
-            global_odom_pub_->publish(output);
+            RCLCPP_ERROR_THROTTLE(
+                this->get_logger(),
+                *this->get_clock(),
+                2000,
+                "Rejecting %s because its pose contains a non-finite value",
+                input_topic_.c_str());
             return;
+        }
+
+        tf2::Quaternion source_rotation(
+            orientation.x,
+            orientation.y,
+            orientation.z,
+            orientation.w);
+        if (source_rotation.length2() < 1.0e-12)
+        {
+            RCLCPP_ERROR_THROTTLE(
+                this->get_logger(),
+                *this->get_clock(),
+                2000,
+                "Rejecting %s because its quaternion has near-zero length",
+                input_topic_.c_str());
+            return;
+        }
+        source_rotation.normalize();
+
+        if (!initial_local_pose_checked_)
+        {
+            initial_local_pose_checked_ = true;
+            const double translation =
+                std::sqrt(
+                    position.x * position.x +
+                    position.y * position.y +
+                    position.z * position.z);
+            const double rotation = source_rotation.getAngleShortestPath();
+            if (translation > initial_translation_tolerance_ ||
+                rotation > initial_rotation_tolerance_)
+            {
+                RCLCPP_WARN(
+                    this->get_logger(),
+                    "The first local pose is not close to identity "
+                    "(translation %.3f m, rotation %.3f rad). "
+                    "The current ICP-as-map-to-odom initialization assumes an "
+                    "approximately identity first local pose.",
+                    translation,
+                    rotation);
+            }
+            else
+            {
+                RCLCPP_INFO(
+                    this->get_logger(),
+                    "First local pose identity check passed "
+                    "(translation %.3f m, rotation %.3f rad)",
+                    translation,
+                    rotation);
+            }
         }
 
         geometry_msgs::msg::TransformStamped target_from_source;
@@ -150,6 +247,7 @@ private:
         geometry_msgs::msg::PoseStamped source_pose;
         source_pose.header = msg->header;
         source_pose.pose = msg->pose.pose;
+        source_pose.pose.orientation = tf2::toMsg(source_rotation);
 
         geometry_msgs::msg::PoseStamped global_pose;
         tf2::doTransform(source_pose, global_pose, target_from_source);
@@ -176,6 +274,11 @@ private:
     std::string input_topic_;
     std::string output_topic_;
     std::string target_frame_;
+    std::string source_frame_;
+    std::string child_frame_;
+    double initial_translation_tolerance_;
+    double initial_rotation_tolerance_;
+    bool initial_local_pose_checked_ = false;
 
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
