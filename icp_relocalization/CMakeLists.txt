@@ -17,6 +17,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(pcl_ros REQUIRED)
@@ -52,6 +53,17 @@ ament_target_dependencies(
   tf2_geometry_msgs
 )
 
+add_executable(global_pointcloud_publisher src/global_pointcloud_publisher.cpp)
+ament_target_dependencies(
+  global_pointcloud_publisher
+  rclcpp
+  sensor_msgs
+  geometry_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+)
+
 add_executable(sac_ia_gicp
   src/sac_ia_gicp.cpp
 )
@@ -65,7 +77,12 @@ install(
 
 # Install nodes
 install(
-  TARGETS icp_node transform_publisher global_odometry_publisher sac_ia_gicp
+  TARGETS
+    icp_node
+    transform_publisher
+    global_odometry_publisher
+    global_pointcloud_publisher
+    sac_ia_gicp
   DESTINATION lib/${PROJECT_NAME}
 )
 

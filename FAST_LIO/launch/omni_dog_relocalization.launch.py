@@ -89,6 +89,18 @@ def generate_launch_description():
             {'initial_rotation_tolerance': 0.35},
         ])
 
+    global_pointcloud_node = Node(
+        package='icp_relocalization',
+        executable='global_pointcloud_publisher',
+        name='global_pointcloud_publisher',
+        output='screen',
+        parameters=[
+            {'input_topic': '/cloud_registered'},
+            {'output_topic': '/cloud_registered_global'},
+            {'target_frame': 'lio_map'},
+            {'source_frame': 'lio_odom'},
+        ])
+
     icp_node = Node(
         package='icp_relocalization',
         executable='icp_node',
@@ -117,7 +129,10 @@ def generate_launch_description():
         executable='fastlio_mapping',
         parameters=[
             config_file,
-            {'prior_map_path': map_path},
+            {
+                'prior_map_path': map_path,
+                'common.odom_frame_id': 'lio_odom',
+            },
         ],
         output='screen',
         remappings=[('/Odometry', '/state_estimation')])
@@ -144,5 +159,6 @@ def generate_launch_description():
     ld.add_action(declare_pointcloud_topic)
     ld.add_action(map_odom_trans)
     ld.add_action(global_odometry_node)
+    ld.add_action(global_pointcloud_node)
     ld.add_action(delayed_start_lio)
     return ld

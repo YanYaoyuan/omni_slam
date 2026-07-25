@@ -12,6 +12,10 @@ See [DEPLOY_ORIN.md](DEPLOY_ORIN.md) for Nvidia Orin build, packaging, mapping, 
 
 Additional service and systemd examples are documented in [docs/orin_deployment.md](docs/orin_deployment.md).
 
+The `lio_map` route recording and `/planning/global_path` publishing tools are
+documented in
+[tools/global_path_tools/README.md](tools/global_path_tools/README.md).
+
 ## Usage
 
 ### Mapping

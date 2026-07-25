@@ -29,10 +29,16 @@ def generate_launch_description():
         executable='fastlio_mapping',
         parameters=[
             config_file,
-            {'use_sim_time': use_sim_time},
+            {
+                'use_sim_time': use_sim_time,
+                'common.odom_frame_id': 'lio_map',
+            },
         ],
         output='screen',
-        remappings=[('/Odometry', '/state_estimation')])
+        remappings=[
+            ('/Odometry', '/state_estimation_global'),
+            ('/cloud_registered', '/cloud_registered_global'),
+        ])
 
     ld = LaunchDescription()
     ld.add_action(declare_use_sim_time_cmd)
