@@ -1101,7 +1101,6 @@ private:
             odom_to_base_msg.pose.pose.orientation.w = tf_odom_to_base.getRotation().getW();
             odomAftMapped = odom_to_base_msg;
         }
-        pubOdomAftMapped->publish(odomAftMapped);
         auto P = kf.get_P();
         for (int i = 0; i < 6; i++)
         {
@@ -1113,6 +1112,7 @@ private:
             odomAftMapped.pose.covariance[i * 6 + 4] = P(k, 1);
             odomAftMapped.pose.covariance[i * 6 + 5] = P(k, 2);
         }
+        pubOdomAftMapped->publish(odomAftMapped);
 
         geometry_msgs::msg::TransformStamped trans;
         trans.header.frame_id = odom_frame;

@@ -37,7 +37,22 @@ def generate_launch_description():
         package='icp_relocalization',
         executable='transform_publisher',
         name='transform_publisher',
-        output='screen')
+        output='screen',
+        parameters=[
+            {'map_frame_id': 'lio_map'},
+            {'odom_frame_id': 'lio_odom'},
+        ])
+
+    global_odometry_node = Node(
+        package='icp_relocalization',
+        executable='global_odometry_publisher',
+        name='global_odometry_publisher',
+        output='screen',
+        parameters=[
+            {'input_topic': '/state_estimation'},
+            {'output_topic': '/state_estimation_global'},
+            {'target_frame': 'lio_map'},
+        ])
 
     icp_node = Node(
         package='icp_relocalization',
@@ -51,7 +66,7 @@ def generate_launch_description():
             {'initial_a': ParameterValue(initial_yaw, value_type=float)},
             {'map_voxel_leaf_size': 0.2},
             {'cloud_voxel_leaf_size': 0.2},
-            {'map_frame_id': 'map'},
+            {'map_frame_id': 'lio_map'},
             {'solver_max_iter': 100},
             {'max_correspondence_distance': 1.0},
             {'RANSAC_outlier_rejection_threshold': 0.5},
@@ -87,5 +102,6 @@ def generate_launch_description():
     ld.add_action(declare_initial_z)
     ld.add_action(declare_initial_yaw)
     ld.add_action(map_odom_trans)
+    ld.add_action(global_odometry_node)
     ld.add_action(delayed_start_lio)
     return ld

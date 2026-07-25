@@ -10,6 +10,8 @@ Blue point is the prior map, white point is current scan. When the white point s
 
 See [DEPLOY_ORIN.md](DEPLOY_ORIN.md) for Nvidia Orin build, packaging, mapping, relocalization, and cross-compilation notes.
 
+Additional service and systemd examples are documented in [docs/orin_deployment.md](docs/orin_deployment.md).
+
 ## Usage
 
 ### Mapping
