@@ -16,6 +16,12 @@ def generate_launch_description():
     initial_y = LaunchConfiguration('initial_y')
     initial_z = LaunchConfiguration('initial_z')
     initial_yaw = LaunchConfiguration('initial_yaw')
+    max_correspondence_distance = LaunchConfiguration('max_correspondence_distance')
+    fitness_score_thre = LaunchConfiguration('fitness_score_thre')
+    converged_count_thre = LaunchConfiguration('converged_count_thre')
+    map_voxel_leaf_size = LaunchConfiguration('map_voxel_leaf_size')
+    cloud_voxel_leaf_size = LaunchConfiguration('cloud_voxel_leaf_size')
+    pointcloud_topic = LaunchConfiguration('pointcloud_topic')
 
     default_config_file = os.path.join(
         fast_lio_share, 'config', 'omni_dog_relocalization.yaml')
@@ -32,6 +38,30 @@ def generate_launch_description():
     declare_initial_y = DeclareLaunchArgument('initial_y', default_value='0.0')
     declare_initial_z = DeclareLaunchArgument('initial_z', default_value='0.0')
     declare_initial_yaw = DeclareLaunchArgument('initial_yaw', default_value='0.0')
+    declare_max_correspondence_distance = DeclareLaunchArgument(
+        'max_correspondence_distance',
+        default_value='1.0',
+        description='ICP max correspondence distance in meters')
+    declare_fitness_score_thre = DeclareLaunchArgument(
+        'fitness_score_thre',
+        default_value='0.2',
+        description='ICP publishes initial pose only when fitness is below this value')
+    declare_converged_count_thre = DeclareLaunchArgument(
+        'converged_count_thre',
+        default_value='10',
+        description='Number of consecutive good ICP results required before publishing pose')
+    declare_map_voxel_leaf_size = DeclareLaunchArgument(
+        'map_voxel_leaf_size',
+        default_value='0.5',
+        description='Voxel leaf size for the prior map')
+    declare_cloud_voxel_leaf_size = DeclareLaunchArgument(
+        'cloud_voxel_leaf_size',
+        default_value='0.2',
+        description='Voxel leaf size for the live scan')
+    declare_pointcloud_topic = DeclareLaunchArgument(
+        'pointcloud_topic',
+        default_value='/front_lidar',
+        description='PointCloud2 topic used by ICP')
 
     map_odom_trans = Node(
         package='icp_relocalization',
@@ -64,17 +94,17 @@ def generate_launch_description():
             {'initial_y': ParameterValue(initial_y, value_type=float)},
             {'initial_z': ParameterValue(initial_z, value_type=float)},
             {'initial_a': ParameterValue(initial_yaw, value_type=float)},
-            {'map_voxel_leaf_size': 0.2},
-            {'cloud_voxel_leaf_size': 0.2},
+            {'map_voxel_leaf_size': ParameterValue(map_voxel_leaf_size, value_type=float)},
+            {'cloud_voxel_leaf_size': ParameterValue(cloud_voxel_leaf_size, value_type=float)},
             {'map_frame_id': 'lio_map'},
             {'solver_max_iter': 100},
-            {'max_correspondence_distance': 1.0},
+            {'max_correspondence_distance': ParameterValue(max_correspondence_distance, value_type=float)},
             {'RANSAC_outlier_rejection_threshold': 0.5},
             {'map_path': map_path},
-            {'fitness_score_thre': 0.05},
-            {'converged_count_thre': 5},
+            {'fitness_score_thre': ParameterValue(fitness_score_thre, value_type=float)},
+            {'converged_count_thre': ParameterValue(converged_count_thre, value_type=int)},
             {'pcl_type': 'pointcloud2'},
-            {'pointcloud_topic': '/front_lidar'},
+            {'pointcloud_topic': pointcloud_topic},
         ])
 
     fast_lio_node = Node(
@@ -101,6 +131,12 @@ def generate_launch_description():
     ld.add_action(declare_initial_y)
     ld.add_action(declare_initial_z)
     ld.add_action(declare_initial_yaw)
+    ld.add_action(declare_max_correspondence_distance)
+    ld.add_action(declare_fitness_score_thre)
+    ld.add_action(declare_converged_count_thre)
+    ld.add_action(declare_map_voxel_leaf_size)
+    ld.add_action(declare_cloud_voxel_leaf_size)
+    ld.add_action(declare_pointcloud_topic)
     ld.add_action(map_odom_trans)
     ld.add_action(global_odometry_node)
     ld.add_action(delayed_start_lio)

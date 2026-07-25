@@ -57,6 +57,11 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "$SCRIPT_DIR/setup_env.sh"
 MAP_PATH=${MAP_PATH:-$SCRIPT_DIR/maps/omni_dog_map.pcd}
+if [[ ! -f "$MAP_PATH" ]]; then
+  echo "[run_relocalization] ERROR: map not found: $MAP_PATH" >&2
+  echo "[run_relocalization] Set MAP_PATH=/absolute/path/to/map.pcd or put the map at maps/omni_dog_map.pcd" >&2
+  exit 1
+fi
 exec ros2 launch fast_lio omni_dog_relocalization.launch.py map_path:="$MAP_PATH" "$@"
 EOS
 

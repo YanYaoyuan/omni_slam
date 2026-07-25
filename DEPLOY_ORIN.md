@@ -450,10 +450,17 @@ Current relocalization launch uses:
 
 ```yaml
 fitness_score_thre: 0.2
-converged_count_thre: 40
+converged_count_thre: 10
+max_correspondence_distance: 1.0
 ```
 
 On the real dog, tune these with live data. If relocalization is slow, reduce `converged_count_thre`; if it false-positives, lower `fitness_score_thre`.
+
+If the log repeatedly says `ICP fitness score is higher than the threshold, no pose is published`, ICP has not found a credible initial pose and Fast-LIO will keep waiting. First provide a closer initial guess, then tune the coarse matching distance:
+
+```bash
+./run_relocalization.sh initial_x:=0.0 initial_y:=0.0 initial_yaw:=0.0 max_correspondence_distance:=1.5
+```
 
 ### RViz on robot
 
