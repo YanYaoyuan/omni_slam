@@ -291,7 +291,7 @@ jobs:
       #
       # ============================================================
 
-      - name: Cross compile through robot_dev_config
+      - name: Cross compile S100
         shell: bash
         run: |
           set -euo pipefail
@@ -313,12 +313,23 @@ jobs:
               echo "Workspace:"
               pwd
 
+
+              # ========================================================
+              # Check robot_dev_config
+              # ========================================================
+
               echo
               echo "=== Check robot_dev_config ==="
 
               test -f robot_dev_config/build.sh
               test -f robot_dev_config/s100_build.sh
               test -f robot_dev_config/aarch64_toolchainfile.cmake
+              test -f robot_dev_config/ros2.repos
+
+
+              # ========================================================
+              # Install vcstool
+              # ========================================================
 
               echo
               echo "=== Prepare vcstool ==="
@@ -327,19 +338,85 @@ jobs:
 
                 echo "vcstool not found, installing..."
 
-                if command -v pip3 >/dev/null 2>&1; then
-                  pip3 install --no-cache-dir vcstool
-                else
-                  apt-get update
-                  apt-get install -y python3-pip
-                  pip3 install --no-cache-dir vcstool
-                fi
+                pip3 install \
+                  --no-cache-dir \
+                  vcstool
 
               fi
 
-              echo
               echo "vcs path:"
               command -v vcs
+
+
+              # ========================================================
+              # Generate CI-safe repos
+              #
+              # speech_agent_* 当前无法从公共 GitHub Actions
+              # Runner 匿名访问，并且 Omni SLAM 不依赖这些包。
+              # ========================================================
+
+              echo
+              echo "=== Prepare CI dependency manifest ==="
+
+              python3 - <<"PY"
+                import yaml
+
+                source = "robot_dev_config/ros2.repos"
+                target = "/tmp/ros2-ci.repos"
+
+                with open(source, "r") as f:
+                    data = yaml.safe_load(f)
+
+                remove_keys = {
+                    "box/speech_agent_asr",
+                    "box/speech_agent_audio",
+                    "box/speech_agent_tts",
+                }
+
+                repos = data.get("repositories", {})
+
+                print("Original repositories:", len(repos))
+
+                for key in list(repos.keys()):
+
+                    if key in remove_keys:
+
+                        print(
+                            "Removing unavailable dependency:",
+                            key
+                        )
+
+                        del repos[key]
+
+                print(
+                    "Remaining repositories:",
+                    len(repos)
+                )
+
+                with open(target, "w") as f:
+
+                    yaml.safe_dump(
+                        data,
+                        f,
+                        sort_keys=False
+                    )
+
+                print("Generated:", target)
+                PY
+
+
+              echo
+              echo "=== CI repos ==="
+
+              grep -n \
+                "speech_agent" \
+                /tmp/ros2-ci.repos \
+                || true
+
+
+              # ========================================================
+              # Import dependencies
+              # ========================================================
 
               echo
               echo "=== Disk before dependency import ==="
@@ -352,23 +429,65 @@ jobs:
               vcs import \
                 --recursive \
                 src \
-                < robot_dev_config/ros2.repos
+                < /tmp/ros2-ci.repos
+
+
+              echo
+              echo "=== Dependency import completed ==="
+
+
+              # ========================================================
+              # Verify sysroot
+              #
+              # ros2.repos 自己会 clone:
+              #
+              # ../../sysroot_docker
+              #
+              # 所以最终应该落在:
+              #
+              # cc_ws/sysroot_docker
+              # ========================================================
+
+              echo
+              echo "=== Verify S100 sysroot ==="
+
+              test -d ../sysroot_docker
+
+              echo "Sysroot:"
+              realpath ../sysroot_docker
+
+              ls -lah ../sysroot_docker \
+                | head -50
+
+              test -d ../sysroot_docker/usr
+
 
               echo
               echo "=== Disk after dependency import ==="
 
               df -h
 
-              echo
-              echo "=== Packages ==="
 
-              find src \
+              # ========================================================
+              # Show required Omni packages
+              # ========================================================
+
+              echo
+              echo "=== Omni packages ==="
+
+              find src/omni_slam \
                 -name package.xml \
-                | sed "s#/package.xml##" \
-                | head -200
+                -print
+
+
+              # ========================================================
+              # Build
+              # ========================================================
 
               echo
-              echo "=== S100 Build ==="
+              echo "========================================"
+              echo "Build S100"
+              echo "========================================"
 
               bash robot_dev_config/build.sh \
                 -p S100 \
@@ -379,6 +498,11 @@ jobs:
                 omni_slam_interfaces \
                 omni_slam_manager"
 
+
+              # ========================================================
+              # Verify output
+              # ========================================================
+
               echo
               echo "========================================"
               echo "S100 build completed"
@@ -388,7 +512,6 @@ jobs:
 
               du -sh install
             '
-
 
       # ============================================================
       # Verify binary architecture
