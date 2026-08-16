@@ -296,8 +296,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Keep the Python code outside the nested `bash -lc` string.
-          # This avoids both heredoc indentation errors and nested quote errors.
           cat > "${RUNNER_TEMP}/s100-cross/filter_ros2_repos.py" <<'PY'
           import sys
           import yaml
@@ -315,6 +313,7 @@ jobs:
           }
 
           repos = data.get("repositories", {})
+
           print("Original repositories:", len(repos))
 
           for key in list(repos):
@@ -325,7 +324,12 @@ jobs:
           print("Remaining repositories:", len(repos))
 
           with open(target, "w", encoding="utf-8") as f:
-              yaml.safe_dump(data, f, sort_keys=False, allow_unicode=True)
+              yaml.safe_dump(
+                  data,
+                  f,
+                  sort_keys=False,
+                  allow_unicode=True,
+              )
 
           print("Generated:", target)
           PY
