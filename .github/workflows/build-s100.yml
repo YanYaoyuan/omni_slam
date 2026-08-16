@@ -291,7 +291,7 @@ jobs:
       #
       # ============================================================
 
-      - name: Cross compile S100
+      - name: Cross compile through robot_dev_config
         shell: bash
         run: |
           set -euo pipefail
@@ -310,46 +310,65 @@ jobs:
               echo "S100 cross compilation"
               echo "========================================"
 
+              echo "Workspace:"
               pwd
 
               echo
-
-              echo "=== robot_dev_config ==="
+              echo "=== Check robot_dev_config ==="
 
               test -f robot_dev_config/build.sh
               test -f robot_dev_config/s100_build.sh
               test -f robot_dev_config/aarch64_toolchainfile.cmake
 
-              ls -lah robot_dev_config
+              echo
+              echo "=== Prepare vcstool ==="
 
+              if ! command -v vcs >/dev/null 2>&1; then
+
+                echo "vcstool not found, installing..."
+
+                if command -v pip3 >/dev/null 2>&1; then
+                  pip3 install --no-cache-dir vcstool
+                else
+                  apt-get update
+                  apt-get install -y python3-pip
+                  pip3 install --no-cache-dir vcstool
+                fi
+
+              fi
 
               echo
-
-              echo "=== Check vcs ==="
-
+              echo "vcs path:"
               command -v vcs
 
+              echo
+              echo "=== Disk before dependency import ==="
+
+              df -h
 
               echo
-
               echo "=== Import ROS/TROS dependencies ==="
 
-              vcs import src \
+              vcs import \
+                --recursive \
+                src \
                 < robot_dev_config/ros2.repos
 
+              echo
+              echo "=== Disk after dependency import ==="
+
+              df -h
 
               echo
-
               echo "=== Packages ==="
 
               find src \
                 -name package.xml \
-                | head -100
-
+                | sed "s#/package.xml##" \
+                | head -200
 
               echo
-
-              echo "=== Build S100 ==="
+              echo "=== S100 Build ==="
 
               bash robot_dev_config/build.sh \
                 -p S100 \
@@ -360,9 +379,7 @@ jobs:
                 omni_slam_interfaces \
                 omni_slam_manager"
 
-
               echo
-
               echo "========================================"
               echo "S100 build completed"
               echo "========================================"
