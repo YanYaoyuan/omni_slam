@@ -1,0 +1,97 @@
+name: Build Jetson Orin NX
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      version:
+        required: false
+        type: string
+
+concurrency:
+  group: orin-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: vars.OMNI_ENABLE_ORIN_RUNNER == 'true'
+    runs-on: [self-hosted, linux, arm64, orin]
+    timeout-minutes: 120
+    env:
+      ROS_DISTRO: humble
+      VERSION_INPUT: ${{ inputs.version }}
+      JETSON_CONTAINERS_REF: 70c149aea6126594153ef7690ec4890f8f396518
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+
+      - name: Verify trusted Orin runner
+        run: |
+          test "$(uname -m)" = aarch64
+          test -f /etc/nv_tegra_release
+          command -v docker
+          command -v git
+
+      - name: Clean runner build state and Docker cache
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/build" "${GITHUB_WORKSPACE}/install" \
+            "${GITHUB_WORKSPACE}/log" "${GITHUB_WORKSPACE}/dist"
+          docker builder prune --all --force
+          docker image prune --all --force
+          df -h
+
+      - name: Prepare pinned jetson-containers
+        run: |
+          tools_dir="${RUNNER_TEMP}/omni-jetson-containers"
+          rm -rf "${tools_dir}"
+          git clone --filter=blob:none https://github.com/dusty-nv/jetson-containers.git "${tools_dir}"
+          git -C "${tools_dir}" checkout --detach "${JETSON_CONTAINERS_REF}"
+          printf '%s\n' "JETSON_CONTAINERS_DIR=${tools_dir}" >> "${GITHUB_ENV}"
+
+      - name: Resolve ROS Humble container
+        run: |
+          cd "${JETSON_CONTAINERS_DIR}"
+          image=$(./autotag ros:humble-ros-base)
+          test -n "${image}"
+          printf '%s\n' "ORIN_BUILD_IMAGE=${image}" >> "${GITHUB_ENV}"
+
+      - name: Build and test inside Jetson container
+        run: |
+          docker run --rm --runtime nvidia --network host \
+            -v "${GITHUB_WORKSPACE}:/workspace" -w /workspace \
+            "${ORIN_BUILD_IMAGE}" bash .github/ci/build_native.sh
+
+      - name: Package Orin runtime
+        run: |
+          version="${VERSION_INPUT:-${GITHUB_REF_NAME:-${GITHUB_SHA::12}}}"
+          version="${version//\//-}"
+          name="omni-slam-orin-nx-aarch64-${version}-${GITHUB_SHA::12}"
+          mkdir -p "dist/${name}"
+          cp -a install "dist/${name}/install"
+          .github/ci/write_manifest.sh aarch64 jetson-orin-nx "${version}" "dist/${name}"
+          tar -C dist -czf "dist/${name}.tar.gz" "${name}"
+          sha256sum "dist/${name}.tar.gz" > "dist/${name}.tar.gz.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omni-slam-orin-nx-aarch64
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Clean runner after build
+        if: always()
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/build" "${GITHUB_WORKSPACE}/install" \
+            "${GITHUB_WORKSPACE}/log"
+          docker builder prune --all --force
+          docker image prune --all --force
+          df -h

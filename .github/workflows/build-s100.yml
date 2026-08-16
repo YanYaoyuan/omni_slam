@@ -1,0 +1,124 @@
+name: Build RDK S100 (cross compile)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      version:
+        required: false
+        type: string
+    secrets:
+      S100_SYSROOT_URL:
+        required: false
+
+concurrency:
+  group: s100-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    if: vars.OMNI_ENABLE_S100_BUILD == 'true'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    env:
+      VERSION_INPUT: ${{ inputs.version }}
+      S100_IMAGE: registry.d-robotics.cc/deliver/ai_toolchain_ubuntu_22_s100_s600_cpu:v3.7.0
+      ROBOT_DEV_CONFIG_REF: f44b1ad2575b34c189fd470de1db9c5ad48b6886
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clean workspace and Docker cache before build
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/build" "${GITHUB_WORKSPACE}/install" \
+            "${GITHUB_WORKSPACE}/log" "${GITHUB_WORKSPACE}/dist" \
+            "${RUNNER_TEMP}/s100-cross"
+          docker builder prune --all --force
+          docker image prune --all --force
+          df -h
+
+      - name: Prepare official D-Robotics build entry
+        run: |
+          root="${RUNNER_TEMP}/s100-cross/cc_ws/tros_ws"
+          mkdir -p "${root}/src"
+          git clone --filter=blob:none https://github.com/D-Robotics/robot_dev_config.git \
+            "${root}/robot_dev_config"
+          git -C "${root}/robot_dev_config" checkout --detach "${ROBOT_DEV_CONFIG_REF}"
+          rsync -a --delete --exclude='.git' --exclude='build*' --exclude='install*' \
+            --exclude='log' --exclude='dist' "${GITHUB_WORKSPACE}/" "${root}/src/omni_slam/"
+          printf '%s\n' "S100_CROSS_ROOT=${root}" >> "${GITHUB_ENV}"
+
+      - name: Pull pinned official toolchain image
+        run: docker pull "${S100_IMAGE}"
+
+      - name: Prepare version-matched S100 sysroot
+        env:
+          SYSROOT_URL: ${{ secrets.S100_SYSROOT_URL }}
+        run: |
+          if [[ -z "${SYSROOT_URL}" ]]; then
+            echo "S100_SYSROOT_URL must reference the official RDK OS 4 sysroot tar.gz" >&2
+            exit 1
+          fi
+          mkdir -p "${RUNNER_TEMP}/s100-cross/cc_ws/sysroot_docker"
+          curl --fail --location --retry 3 --output "${RUNNER_TEMP}/s100-sysroot.tar.gz" \
+            "${SYSROOT_URL}"
+          tar -xzf "${RUNNER_TEMP}/s100-sysroot.tar.gz" \
+            -C "${RUNNER_TEMP}/s100-cross/cc_ws/sysroot_docker" --strip-components=1
+          test -d "${RUNNER_TEMP}/s100-cross/cc_ws/sysroot_docker/usr"
+          rm -f "${RUNNER_TEMP}/s100-sysroot.tar.gz"
+
+      - name: Cross compile through robot_dev_config
+        run: |
+          docker run --rm --network host \
+            -v "${RUNNER_TEMP}/s100-cross:/mnt/s100-cross" \
+            -w /mnt/s100-cross/cc_ws/tros_ws \
+            "${S100_IMAGE}" bash -lc '
+              set -euo pipefail
+              test -f robot_dev_config/s100_build.sh
+              test -f robot_dev_config/aarch64_toolchainfile.cmake
+              command -v vcs
+              test -d ../sysroot_docker || {
+                echo "S100 sysroot missing at cc_ws/sysroot_docker" >&2
+                exit 1
+              }
+              vcs import src < robot_dev_config/ros2.repos
+              bash robot_dev_config/build.sh -p S100 \
+                -c "-DUSE_LIVOX_CUSTOM_MSG=OFF" \
+                -r "--packages-up-to fast_lio icp_relocalization omni_slam_interfaces omni_slam_manager"
+            '
+
+      - name: Package S100 runtime
+        run: |
+          test -d "${S100_CROSS_ROOT}/install"
+          version="${VERSION_INPUT:-${GITHUB_REF_NAME:-${GITHUB_SHA::12}}}"
+          version="${version//\//-}"
+          name="omni-slam-rdk-s100-aarch64-${version}-${GITHUB_SHA::12}"
+          mkdir -p "dist/${name}"
+          cp -a "${S100_CROSS_ROOT}/install" "dist/${name}/install"
+          .github/ci/write_manifest.sh aarch64 rdk-s100-rdkos-4 "${version}" "dist/${name}"
+          tar -C dist -czf "dist/${name}.tar.gz" "${name}"
+          sha256sum "dist/${name}.tar.gz" > "dist/${name}.tar.gz.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omni-slam-rdk-s100-aarch64
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Clean workspace and Docker cache after build
+        if: always()
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/build" "${GITHUB_WORKSPACE}/install" \
+            "${GITHUB_WORKSPACE}/log" "${RUNNER_TEMP}/s100-cross" \
+            "${RUNNER_TEMP}/s100-sysroot.tar.gz"
+          docker builder prune --all --force
+          docker image prune --all --force
+          df -h
