@@ -296,6 +296,8 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Keep the Python code outside the nested `bash -lc` string.
+          # This avoids both heredoc indentation errors and nested quote errors.
           cat > "${RUNNER_TEMP}/s100-cross/filter_ros2_repos.py" <<'PY'
           import sys
           import yaml
@@ -313,7 +315,6 @@ jobs:
           }
 
           repos = data.get("repositories", {})
-
           print("Original repositories:", len(repos))
 
           for key in list(repos):
@@ -324,12 +325,7 @@ jobs:
           print("Remaining repositories:", len(repos))
 
           with open(target, "w", encoding="utf-8") as f:
-              yaml.safe_dump(
-                  data,
-                  f,
-                  sort_keys=False,
-                  allow_unicode=True,
-              )
+              yaml.safe_dump(data, f, sort_keys=False, allow_unicode=True)
 
           print("Generated:", target)
           PY
@@ -341,7 +337,57 @@ jobs:
             -w /mnt/s100-cross/cc_ws/tros_ws \
             "${S100_IMAGE}" \
             bash -lc '
+
               set -euo pipefail
+
+              echo "========================================"
+              echo "S100 cross compilation"
+              echo "========================================"
+
+              echo "Workspace:"
+              pwd
+
+
+              # ========================================================
+              # Check robot_dev_config
+              # ========================================================
+
+              echo
+              echo "=== Check robot_dev_config ==="
+
+              test -f robot_dev_config/build.sh
+              test -f robot_dev_config/s100_build.sh
+              test -f robot_dev_config/aarch64_toolchainfile.cmake
+              test -f robot_dev_config/ros2.repos
+
+
+              # ========================================================
+              # Install vcstool
+              # ========================================================
+
+              echo
+              echo "=== Prepare vcstool ==="
+
+              if ! command -v vcs >/dev/null 2>&1; then
+
+                echo "vcstool not found, installing..."
+
+                pip3 install \
+                  --no-cache-dir \
+                  vcstool
+
+              fi
+
+              echo "vcs path:"
+              command -v vcs
+
+
+              # ========================================================
+              # Generate CI-safe repos
+              #
+              # speech_agent_* 当前无法从公共 GitHub Actions
+              # Runner 匿名访问，并且 Omni SLAM 不依赖这些包。
+              # ========================================================
 
               echo
               echo "=== Prepare CI dependency manifest ==="
@@ -349,6 +395,7 @@ jobs:
               python3 /mnt/s100-cross/filter_ros2_repos.py \
                 robot_dev_config/ros2.repos \
                 /tmp/ros2-ci.repos
+
 
               echo
               echo "=== CI repos ==="
