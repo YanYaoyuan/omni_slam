@@ -358,51 +358,37 @@ jobs:
               echo
               echo "=== Prepare CI dependency manifest ==="
 
-              python3 - <<"PY"
-                import yaml
+              python3 -c '
+              import yaml
 
-                source = "robot_dev_config/ros2.repos"
-                target = "/tmp/ros2-ci.repos"
+              source = "robot_dev_config/ros2.repos"
+              target = "/tmp/ros2-ci.repos"
 
-                with open(source, "r") as f:
-                    data = yaml.safe_load(f)
+              with open(source, "r") as f:
+                  data = yaml.safe_load(f)
 
-                remove_keys = {
-                    "box/speech_agent_asr",
-                    "box/speech_agent_audio",
-                    "box/speech_agent_tts",
-                }
+              remove_keys = {
+                  "box/speech_agent_asr",
+                  "box/speech_agent_audio",
+                  "box/speech_agent_tts",
+              }
 
-                repos = data.get("repositories", {})
+              repos = data.get("repositories", {})
 
-                print("Original repositories:", len(repos))
+              print("Original repositories:", len(repos))
 
-                for key in list(repos.keys()):
+              for key in list(repos.keys()):
+                  if key in remove_keys:
+                      print("Removing unavailable dependency:", key)
+                      del repos[key]
 
-                    if key in remove_keys:
+              print("Remaining repositories:", len(repos))
 
-                        print(
-                            "Removing unavailable dependency:",
-                            key
-                        )
+              with open(target, "w") as f:
+                  yaml.safe_dump(data, f, sort_keys=False)
 
-                        del repos[key]
-
-                print(
-                    "Remaining repositories:",
-                    len(repos)
-                )
-
-                with open(target, "w") as f:
-
-                    yaml.safe_dump(
-                        data,
-                        f,
-                        sort_keys=False
-                    )
-
-                print("Generated:", target)
-                PY
+              print("Generated:", target)
+              '
 
 
               echo
