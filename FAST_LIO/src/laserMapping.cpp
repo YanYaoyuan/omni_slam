@@ -150,6 +150,11 @@ static bool save_cloud_to_pcd(const string &path, const PointCloudXYZI::Ptr &clo
         cerr << "PCD save path is empty" << endl;
         return false;
     }
+    if (!cloud || cloud->empty())
+    {
+        cerr << "No point cloud data available to save to " << path << endl;
+        return false;
+    }
     string dir = parent_directory(path);
     if (!ensure_directory(dir))
     {
@@ -159,7 +164,13 @@ static bool save_cloud_to_pcd(const string &path, const PointCloudXYZI::Ptr &clo
     try
     {
         pcl::PCDWriter pcd_writer;
-        pcd_writer.writeBinary(path, *cloud);
+        const int result = pcd_writer.writeBinary(path, *cloud);
+        if (result != 0)
+        {
+            cerr << "Failed to save PCD to " << path
+                 << ": writer returned " << result << endl;
+            return false;
+        }
     }
     catch (const pcl::IOException &e)
     {
@@ -485,6 +496,45 @@ public:
         memset(point_selected_surf, true, sizeof(point_selected_surf));
         memset(res_last, -1000.0f, sizeof(res_last));
 
+        // Relocalization must fail before any ROS endpoint is advertised when
+        // its prior map is unusable.  Returning from this constructor would
+        // leave a half-initialized node visible in the graph and allow later
+        // callbacks to build an ikd-tree from an empty cloud.
+        if (locate_in_prior_map)
+        {
+            if (prior_map_path.empty() || prior_map_path.front() != '/')
+            {
+                RCLCPP_FATAL(this->get_logger(), "prior_map_path must be a non-empty absolute PCD path");
+                throw std::invalid_argument("invalid prior_map_path");
+            }
+            RCLCPP_INFO(this->get_logger(), "Loading prior map: %s", prior_map_path.c_str());
+            int load_result = -1;
+            try
+            {
+                load_result = pcl::io::loadPCDFile<PointType>(prior_map_path, *prior_map);
+            }
+            catch (const std::exception & error)
+            {
+                RCLCPP_FATAL(this->get_logger(), "Prior PCD load threw for %s: %s", prior_map_path.c_str(), error.what());
+                throw std::runtime_error("prior PCD load threw");
+            }
+            if (load_result < 0 || prior_map->empty())
+            {
+                RCLCPP_FATAL(this->get_logger(), "Prior PCD is missing, unreadable, malformed, or empty: %s", prior_map_path.c_str());
+                throw std::runtime_error("prior PCD is unusable");
+            }
+            downSizeFilterMap.setInputCloud(prior_map);
+            downSizeFilterMap.filter(*feats_down_prior_map);
+            if (feats_down_prior_map->empty())
+            {
+                RCLCPP_FATAL(this->get_logger(), "Prior PCD became empty after voxel filtering: %s", prior_map_path.c_str());
+                throw std::runtime_error("filtered prior PCD is empty");
+            }
+            RCLCPP_INFO(
+                this->get_logger(), "Prior map ready: raw_points=%zu filtered_points=%zu",
+                prior_map->size(), feats_down_prior_map->size());
+        }
+
         Lidar_T_wrt_IMU << VEC_FROM_ARRAY(extrinT);
         Lidar_R_wrt_IMU << MAT_FROM_ARRAY(extrinR);
         p_imu->set_extrinsic(Lidar_T_wrt_IMU, Lidar_R_wrt_IMU);
@@ -542,19 +592,6 @@ public:
 
         map_save_srv_ = this->create_service<std_srvs::srv::Trigger>("map_save", std::bind(&LaserMappingNode::map_save_callback, this, std::placeholders::_1, std::placeholders::_2));
 
-        if (locate_in_prior_map)
-        {
-            RCLCPP_INFO(this->get_logger(), "Loading prior map...");
-            // load prior map
-            if (pcl::io::loadPCDFile<PointType>(prior_map_path, *prior_map) == -1) // Replace with your file name
-            {
-                RCLCPP_ERROR(this->get_logger(), "Failed to load PCD file\n");
-                return;
-            }
-            // downsample the prior map
-            downSizeFilterMap.setInputCloud(prior_map);
-            downSizeFilterMap.filter(*feats_down_prior_map);
-        }
         RCLCPP_INFO(this->get_logger(), "Node init finished.");
     }
 
@@ -1048,9 +1085,9 @@ private:
         pubLaserCloudMap->publish(laserCloudMap);
     }
 
-    void save_to_pcd()
+    bool save_to_pcd()
     {
-        save_cloud_to_pcd(map_file_path, pcl_wait_pub);
+        return save_cloud_to_pcd(map_file_path, pcl_wait_pub);
     }
 
     template <typename T>
@@ -1344,9 +1381,17 @@ private:
         RCLCPP_INFO(this->get_logger(), "Saving map to %s...", map_file_path.c_str());
         if (pcd_save_en)
         {
-            save_to_pcd();
-            res->success = true;
-            res->message = "Map saved.";
+            res->success = save_to_pcd();
+            if (res->success)
+            {
+                res->message = "Map saved to " + map_file_path + ".";
+                RCLCPP_INFO(this->get_logger(), "%s", res->message.c_str());
+            }
+            else
+            {
+                res->message = "Failed to save map to " + map_file_path + ".";
+                RCLCPP_ERROR(this->get_logger(), "%s", res->message.c_str());
+            }
         }
         else
         {

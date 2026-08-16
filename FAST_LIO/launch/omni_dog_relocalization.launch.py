@@ -2,10 +2,51 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, TimerAction
+from launch.actions import (
+    DeclareLaunchArgument,
+    OpaqueFunction,
+    SetLaunchConfiguration,
+    Shutdown,
+    TimerAction,
+)
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
+
+
+def _validate_prior_map_path(raw_path):
+    path = raw_path.strip()
+    if not path:
+        raise RuntimeError('map_path is required for relocalization')
+    if not os.path.isabs(path):
+        raise RuntimeError('map_path must be an absolute PCD path')
+    normalized = os.path.realpath(path)
+    if not normalized.lower().endswith('.pcd'):
+        raise RuntimeError('map_path must reference a .pcd file')
+    if not os.path.isfile(normalized):
+        raise RuntimeError(f'prior PCD does not exist: {normalized}')
+    if not os.access(normalized, os.R_OK):
+        raise RuntimeError(f'prior PCD is not readable: {normalized}')
+    if os.path.getsize(normalized) <= 0:
+        raise RuntimeError(f'prior PCD is empty: {normalized}')
+    return normalized
+
+
+def _validate_relocalization_inputs(context):
+    validated_map = _validate_prior_map_path(
+        LaunchConfiguration('map_path').perform(context))
+    return [SetLaunchConfiguration('map_path', validated_map)]
+
+
+def _icp_exit_failed(returncode):
+    """Treat ICP's intentional zero exit as success and every other exit as fatal."""
+    return returncode != 0
+
+
+def _shutdown_on_failed_icp(event, _context):
+    if not _icp_exit_failed(event.returncode):
+        return []
+    return [Shutdown(reason=f'ICP relocalization failed with return code {event.returncode}')]
 
 
 def generate_launch_description():
@@ -72,7 +113,8 @@ def generate_launch_description():
             {'map_frame_id': 'lio_map'},
             {'odom_frame_id': 'lio_odom'},
             {'icp_result_topic': '/icp_result'},
-        ])
+        ],
+        on_exit=Shutdown(reason='localization transform publisher exited'))
 
     global_odometry_node = Node(
         package='icp_relocalization',
@@ -87,7 +129,8 @@ def generate_launch_description():
             {'child_frame': 'livox_frame'},
             {'initial_translation_tolerance': 0.5},
             {'initial_rotation_tolerance': 0.35},
-        ])
+        ],
+        on_exit=Shutdown(reason='global odometry publisher exited'))
 
     global_pointcloud_node = Node(
         package='icp_relocalization',
@@ -99,7 +142,8 @@ def generate_launch_description():
             {'output_topic': '/cloud_registered_global'},
             {'target_frame': 'lio_map'},
             {'source_frame': 'lio_odom'},
-        ])
+        ],
+        on_exit=Shutdown(reason='global pointcloud publisher exited'))
 
     icp_node = Node(
         package='icp_relocalization',
@@ -122,7 +166,10 @@ def generate_launch_description():
             {'converged_count_thre': ParameterValue(converged_count_thre, value_type=int)},
             {'pcl_type': 'pointcloud2'},
             {'pointcloud_topic': pointcloud_topic},
-        ])
+        ],
+        # icp_node deliberately exits with code 0 after publishing the initial
+        # pose. Only startup/runtime failures terminate the localization epoch.
+        on_exit=_shutdown_on_failed_icp)
 
     fast_lio_node = Node(
         package='fast_lio',
@@ -135,7 +182,8 @@ def generate_launch_description():
             },
         ],
         output='screen',
-        remappings=[('/Odometry', '/state_estimation')])
+        remappings=[('/Odometry', '/state_estimation')],
+        on_exit=Shutdown(reason='Fast-LIO localization exited'))
 
     delayed_start_lio = TimerAction(
         period=5.0,
@@ -157,6 +205,8 @@ def generate_launch_description():
     ld.add_action(declare_map_voxel_leaf_size)
     ld.add_action(declare_cloud_voxel_leaf_size)
     ld.add_action(declare_pointcloud_topic)
+    # This synchronous preflight runs before any localization node is started.
+    ld.add_action(OpaqueFunction(function=_validate_relocalization_inputs))
     ld.add_action(map_odom_trans)
     ld.add_action(global_odometry_node)
     ld.add_action(global_pointcloud_node)
