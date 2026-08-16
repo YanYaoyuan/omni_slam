@@ -171,7 +171,7 @@ jobs:
           rm -rf build install log
           df -h
           colcon build \
-            --packages-select livox_ros_driver2 fast_lio icp_relocalization \
+            --packages-select livox_ros_driver2 fast_lio icp_relocalization omni_slam_manager \
             --event-handlers console_direct+ \
             --cmake-args -DCMAKE_BUILD_TYPE=Release
 
@@ -180,7 +180,7 @@ jobs:
           source /opt/ros/${ROS_DISTRO}/setup.bash
           source ${ROS_WS}/install/setup.bash
           cd ${ROS_WS}
-          colcon test --packages-select fast_lio icp_relocalization --event-handlers console_direct+
+          colcon test --packages-select fast_lio icp_relocalization omni_slam_manager --event-handlers console_direct+
           colcon test-result --verbose
 
       - name: Upload colcon logs
