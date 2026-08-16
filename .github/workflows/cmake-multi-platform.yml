@@ -32,6 +32,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Reset CI workspace and local caches
+        run: |
+          rm -rf "${ROS_WS}"
+          rm -rf \
+            "${GITHUB_WORKSPACE}/build" \
+            "${GITHUB_WORKSPACE}/build_orin" \
+            "${GITHUB_WORKSPACE}/dist" \
+            "${GITHUB_WORKSPACE}/install" \
+            "${GITHUB_WORKSPACE}/install_orin" \
+            "${GITHUB_WORKSPACE}/log" \
+            "${GITHUB_WORKSPACE}/ros_logs" \
+            /root/.cache/colcon \
+            /root/.cache/pip
+          mkdir -p "${ROS_WS}/src"
+          df -h
+
       - name: Install build dependencies
         run: |
           apt-get update
@@ -139,6 +155,12 @@ jobs:
             --skip-keys livox_ros_driver2 \
             -y
 
+      - name: Release package-manager cache
+        run: |
+          apt-get clean
+          rm -rf /var/lib/apt/lists/* /root/.cache/pip /root/.cache/colcon
+          df -h
+
       - name: Lint shell scripts
         run: shellcheck scripts/*.sh
 
@@ -146,6 +168,8 @@ jobs:
         run: |
           source /opt/ros/${ROS_DISTRO}/setup.bash
           cd ${ROS_WS}
+          rm -rf build install log
+          df -h
           colcon build \
             --packages-select livox_ros_driver2 fast_lio icp_relocalization \
             --event-handlers console_direct+ \
@@ -163,5 +187,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: colcon-logs
+          name: colcon-logs-${{ github.run_id }}
           path: /tmp/ros_ws/log
+          retention-days: 3

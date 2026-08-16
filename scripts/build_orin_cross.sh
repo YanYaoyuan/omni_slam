@@ -38,6 +38,7 @@ if [[ "$USE_SYSROOT_TOOLCHAIN" == "1" ]]; then
 fi
 
 set +u
+# shellcheck disable=SC1090 -- the ROS distribution is selected at runtime.
 source "/opt/ros/$ROS_DISTRO_TARGET/setup.bash"
 set -u
 

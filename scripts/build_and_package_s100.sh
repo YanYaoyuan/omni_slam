@@ -56,12 +56,16 @@ if [[ "$SKIP_BUILD" != "1" ]]; then
 
   log "source ROS $ROS_DISTRO_TARGET"
   set +u
+  # shellcheck disable=SC1090 -- the ROS distribution is selected at runtime.
   source "/opt/ros/$ROS_DISTRO_TARGET/setup.bash"
   set -u
 
   if [[ -f "$LIVOX_SETUP" ]]; then
     log "source Livox: $LIVOX_SETUP"
-    set +u; source "$LIVOX_SETUP"; set -u
+    set +u
+    # shellcheck disable=SC1090 -- users may override the Livox workspace.
+    source "$LIVOX_SETUP"
+    set -u
   else
     log "警告: 未找到 Livox setup: $LIVOX_SETUP (若已装于其他路径请设置 LIVOX_SETUP)"
   fi
@@ -124,7 +128,9 @@ fi
 
 # launch 文件 -> launch/
 for sd in "$INSTALL_DIR/share/fast_lio/launch" "$INSTALL_DIR/share/icp_relocalization/launch"; do
-  [[ -d "$sd" ]] && cp -a "$sd/." "$PKG_DIR/launch/" 2>/dev/null || true
+  if [[ -d "$sd" ]]; then
+    cp -a "$sd/." "$PKG_DIR/launch/" 2>/dev/null || true
+  fi
 done
 
 # 先验地图 -> maps/
