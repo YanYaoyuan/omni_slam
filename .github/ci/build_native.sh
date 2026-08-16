@@ -8,6 +8,7 @@ colcon build --merge-install \
   --event-handlers console_direct+ \
   --cmake-args -DCMAKE_BUILD_TYPE=Release -DUSE_LIVOX_CUSTOM_MSG=OFF
 source install/setup.bash
-colcon test --packages-select fast_lio icp_relocalization omni_slam_manager \
+colcon test --merge-install \
+  --packages-select fast_lio icp_relocalization omni_slam_manager \
   --event-handlers console_direct+
 colcon test-result --verbose
