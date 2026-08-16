@@ -56,6 +56,7 @@
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/pcd_io.h>
+#include "fast_lio/atomic_file.hpp"
 #include <pcl_ros/transforms.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/imu.hpp>
@@ -129,7 +130,7 @@ static bool ensure_directory(const string &dir)
     return true;
 }
 
-static string parent_directory(const string &path)
+static string map_parent_directory(const string &path)
 {
     size_t slash = path.find_last_of('/');
     if (slash == string::npos)
@@ -155,7 +156,7 @@ static bool save_cloud_to_pcd(const string &path, const PointCloudXYZI::Ptr &clo
         cerr << "No point cloud data available to save to " << path << endl;
         return false;
     }
-    string dir = parent_directory(path);
+    string dir = map_parent_directory(path);
     if (!ensure_directory(dir))
     {
         cerr << "Failed to create PCD directory: " << dir << endl;
@@ -163,12 +164,17 @@ static bool save_cloud_to_pcd(const string &path, const PointCloudXYZI::Ptr &clo
     }
     try
     {
-        pcl::PCDWriter pcd_writer;
-        const int result = pcd_writer.writeBinary(path, *cloud);
-        if (result != 0)
+        std::string error;
+        const bool saved = fast_lio::atomic_replace_file(
+            path,
+            [&cloud](const std::string &temporary_path) {
+                pcl::PCDWriter pcd_writer;
+                return pcd_writer.writeBinary(temporary_path, *cloud) == 0;
+            },
+            &error);
+        if (!saved)
         {
-            cerr << "Failed to save PCD to " << path
-                 << ": writer returned " << result << endl;
+            cerr << "Failed to atomically save PCD to " << path << ": " << error << endl;
             return false;
         }
     }

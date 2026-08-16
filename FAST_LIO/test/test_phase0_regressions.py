@@ -49,17 +49,19 @@ class Phase0RegressionTests(unittest.TestCase):
         )
         self.assertNotRegex(callback, r"res->success\s*=\s*true\s*;")
 
-    def test_pcd_writer_rejects_empty_cloud_and_checks_return_code(self):
+    def test_pcd_writer_rejects_empty_cloud_and_uses_atomic_replace(self):
         source = (PACKAGE_ROOT / "src" / "laserMapping.cpp").read_text(
             encoding="utf-8"
         )
         writer = _function_body(source, r"\bstatic\s+bool\s+save_cloud_to_pcd\s*\(")
 
         self.assertIn("!cloud || cloud->empty()", writer)
+        self.assertIn("fast_lio::atomic_replace_file", writer)
         self.assertRegex(
-            writer, r"const\s+int\s+result\s*=\s*pcd_writer\.writeBinary"
+            writer,
+            r"pcd_writer\.writeBinary\(temporary_path,\s*\*cloud\)\s*==\s*0",
         )
-        self.assertRegex(writer, r"if\s*\(\s*result\s*!=\s*0\s*\)")
+        self.assertNotRegex(writer, r"writeBinary\(\s*path\s*,")
 
     def test_legacy_relocalization_launch_starts_icp_only_in_delay_group(self):
         launch_file = PACKAGE_ROOT / "launch" / "relocalization.launch.py"
