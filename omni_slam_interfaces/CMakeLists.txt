@@ -9,6 +9,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/SlamStatus.msg"
   "srv/StartMapping.srv"
   "srv/StopMapping.srv"
+  "srv/StopLocalization.srv"
   "action/SaveMap.action"
   "action/StartLocalization.action"
   DEPENDENCIES builtin_interfaces

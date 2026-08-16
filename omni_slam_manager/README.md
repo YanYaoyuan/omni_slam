@@ -39,6 +39,7 @@ Stable control-plane endpoints:
 - `/omni/slam/stop_mapping` (`StopMapping`)
 - `/omni/slam/save_map` (`SaveMap` action)
 - `/omni/slam/start_localization` (`StartLocalization` action)
+- `/omni/slam/stop_localization` (`StopLocalization`)
 - `/omni/slam/status` (`SlamStatus`, reliable transient-local heartbeat)
 
 The manager starts child launch processes without a shell and terminates their

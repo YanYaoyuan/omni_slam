@@ -22,7 +22,7 @@ from std_srvs.srv import Trigger
 
 from omni_slam_interfaces.action import SaveMap, StartLocalization
 from omni_slam_interfaces.msg import SlamStatus
-from omni_slam_interfaces.srv import StartMapping, StopMapping
+from omni_slam_interfaces.srv import StartMapping, StopLocalization, StopMapping
 
 from .map_store import MapAsset, MapStore, MapStoreError
 from .process_supervisor import ProcessSupervisor, ProcessSupervisorError
@@ -156,6 +156,12 @@ class SlamManagerNode(Node):
             self._stop_mapping,
             callback_group=self._callbacks,
         )
+        self.create_service(
+            StopLocalization,
+            "/omni/slam/stop_localization",
+            self._stop_localization_service,
+            callback_group=self._callbacks,
+        )
         self._save_action = ActionServer(
             self,
             SaveMap,
@@ -257,6 +263,26 @@ class SlamManagerNode(Node):
         response.accepted = False
         response.reason_code = reason
         response.message = message
+        return response
+
+    def _stop_localization_service(self, request, response):
+        del request
+        with self._lock:
+            state = self._machine.snapshot.state
+            if state not in (
+                SlamState.STARTING_LOCALIZATION,
+                SlamState.RELOCALIZING,
+                SlamState.LOCALIZED,
+                SlamState.DEGRADED,
+                SlamState.LOST,
+                SlamState.ERROR,
+            ):
+                return self._service_reject(response, "localization is not running")
+        self._stop_localization(REASON_NONE, "localization stopped by request")
+        response.accepted = True
+        response.reason_code = REASON_NONE
+        response.message = "localization stopped"
+        self._publish_status()
         return response
 
     def _save_goal(self, goal_request) -> GoalResponse:
