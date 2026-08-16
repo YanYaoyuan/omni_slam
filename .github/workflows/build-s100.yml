@@ -13,16 +13,13 @@ on:
         required: false
         type: string
 
-
 concurrency:
   group: s100-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 permissions:
   contents: read
   packages: read
-
 
 jobs:
   build:
@@ -39,11 +36,10 @@ jobs:
 
       ROBOT_DEV_CONFIG_REF: f44b1ad2575b34c189fd470de1db9c5ad48b6886
 
-
     steps:
 
       # ============================================================
-      # 1. Checkout
+      # Checkout
       # ============================================================
 
       - name: Checkout Omni SLAM
@@ -51,7 +47,7 @@ jobs:
 
 
       # ============================================================
-      # 2. Clean workspace
+      # Clean GitHub Runner
       # ============================================================
 
       - name: Clean workspace
@@ -69,13 +65,12 @@ jobs:
           docker builder prune --all --force || true
           docker image prune --all --force || true
 
-          echo
           echo "=== Disk usage ==="
           df -h
 
 
       # ============================================================
-      # 3. Free GitHub Runner disk space
+      # Free disk space
       # ============================================================
 
       - name: Free disk space
@@ -90,16 +85,14 @@ jobs:
 
           docker system prune -af || true
 
-          echo
           echo "=== Disk usage after cleanup ==="
           df -h
 
 
       # ============================================================
-      # 4. Login D-Robotics Registry
+      # Login D-Robotics registry
       #
-      # 注意：
-      # 测试阶段可以先写死。
+      # 当前先按你的要求直接写账号密码。
       # 后续建议改成 GitHub Secrets。
       # ============================================================
 
@@ -113,9 +106,8 @@ jobs:
               -u 'ccr$deliver-ronly' \
               --password-stdin
 
-
       # ============================================================
-      # 5. Pull official S100 toolchain image
+      # Pull official S100/S600 toolchain
       # ============================================================
 
       - name: Pull official S100 toolchain image
@@ -125,7 +117,6 @@ jobs:
 
           docker pull "${S100_IMAGE}"
 
-          echo
           echo "=== Toolchain image ==="
 
           docker image inspect "${S100_IMAGE}" \
@@ -133,19 +124,84 @@ jobs:
 
 
       # ============================================================
-      # 6. Prepare D-Robotics workspace
+      # Inspect official toolchain
       #
-      # Final layout:
+      # 这一段非常有用：
+      # 第一次运行时可以确认镜像内部到底有哪些 compiler/sysroot。
+      # ============================================================
+
+      - name: Inspect S100 toolchain environment
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            "${S100_IMAGE}" \
+            bash -lc '
+              set -e
+
+              echo "========================================"
+              echo "System"
+              echo "========================================"
+
+              uname -a
+              cat /etc/os-release || true
+
+              echo
+
+              echo "========================================"
+              echo "Cross compiler"
+              echo "========================================"
+
+              command -v aarch64-linux-gnu-gcc || true
+              command -v aarch64-linux-gnu-g++ || true
+
+              aarch64-linux-gnu-gcc --version || true
+
+              echo
+
+              echo "========================================"
+              echo "Possible sysroot/toolchain paths"
+              echo "========================================"
+
+              find / \
+                -maxdepth 4 \
+                \( \
+                  -iname "*sysroot*" \
+                  -o -iname "*toolchain*" \
+                  -o -iname "*aarch64*" \
+                \) \
+                2>/dev/null \
+                | head -200 || true
+
+              echo
+
+              echo "========================================"
+              echo "/opt"
+              echo "========================================"
+
+              ls -lah /opt || true
+
+              echo
+
+              echo "========================================"
+              echo "/usr/local"
+              echo "========================================"
+
+              ls -lah /usr/local || true
+            '
+
+
+      # ============================================================
+      # Prepare official D-Robotics workspace
       #
-      # s100-cross/
-      # └── cc_ws/
-      #     ├── sysroot_docker/
-      #     └── tros_ws/
-      #         ├── robot_dev_config/
-      #         └── src/
-      #             └── omni_slam/
+      # robot_dev_config 官方要求目录类似：
       #
-      # sysroot_docker will be cloned by ros2.repos.
+      # cc_ws/
+      # └── tros_ws/
+      #     ├── robot_dev_config/
+      #     └── src/
+      #
       # ============================================================
 
       - name: Prepare D-Robotics build workspace
@@ -155,11 +211,9 @@ jobs:
 
           root="${RUNNER_TEMP}/s100-cross/cc_ws/tros_ws"
 
-          echo "S100 workspace:"
-          echo "${root}"
+          echo "S100 workspace: ${root}"
 
           mkdir -p "${root}/src"
-
 
           # --------------------------------------------------------
           # Clone official robot_dev_config
@@ -170,14 +224,11 @@ jobs:
             https://github.com/D-Robotics/robot_dev_config.git \
             "${root}/robot_dev_config"
 
-
           git -C "${root}/robot_dev_config" \
             checkout \
             --detach \
             "${ROBOT_DEV_CONFIG_REF}"
 
-
-          echo
           echo "robot_dev_config revision:"
 
           git -C "${root}/robot_dev_config" \
@@ -185,7 +236,7 @@ jobs:
 
 
           # --------------------------------------------------------
-          # Copy Omni SLAM repository into TROS workspace
+          # Copy current Omni SLAM source
           # --------------------------------------------------------
 
           mkdir -p "${root}/src/omni_slam"
@@ -204,7 +255,7 @@ jobs:
 
 
           # --------------------------------------------------------
-          # Verify FAST-LIO source
+          # Verify important source
           # --------------------------------------------------------
 
           test -f \
@@ -212,7 +263,7 @@ jobs:
 
 
           # --------------------------------------------------------
-          # Export workspace path
+          # Export workspace path for later steps
           # --------------------------------------------------------
 
           echo "S100_CROSS_ROOT=${root}" \
@@ -220,6 +271,7 @@ jobs:
 
 
           echo
+
           echo "=== Workspace structure ==="
 
           find "${RUNNER_TEMP}/s100-cross/cc_ws" \
@@ -229,135 +281,14 @@ jobs:
 
 
       # ============================================================
-      # 7. Generate CI-safe ros2.repos
-      #
-      # D-Robotics ros2.repos contains:
-      #
-      #   speech_agent_asr
-      #   speech_agent_audio
-      #   speech_agent_tts
-      #
-      # These repos currently require GitHub authentication.
-      #
-      # Omni SLAM does not depend on them, so remove them before
-      # vcs import.
+      # Cross compile
       #
       # IMPORTANT:
       #
-      # Do this OUTSIDE docker run.
+      # 不再手工下载 sysroot。
       #
-      # This avoids nested bash/heredoc indentation problems.
-      # ============================================================
-
-      - name: Prepare filtered ros2.repos
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          root="${RUNNER_TEMP}/s100-cross/cc_ws/tros_ws"
-
-          echo
-          echo "=== Install PyYAML on GitHub Runner ==="
-
-          python3 -m pip install \
-            --user \
-            --disable-pip-version-check \
-            pyyaml
-
-
-          echo
-          echo "=== Filter ros2.repos ==="
-
-          python3 - <<'PY'
-          import os
-          import yaml
-
-          root = os.path.join(
-              os.environ["RUNNER_TEMP"],
-              "s100-cross",
-              "cc_ws",
-              "tros_ws",
-          )
-
-          source = os.path.join(
-              root,
-              "robot_dev_config",
-              "ros2.repos",
-          )
-
-          target = os.path.join(
-              root,
-              "robot_dev_config",
-              "ros2-ci.repos",
-          )
-
-          remove_names = {
-              "speech_agent_asr",
-              "speech_agent_audio",
-              "speech_agent_tts",
-          }
-
-          with open(source, "r", encoding="utf-8") as f:
-              data = yaml.safe_load(f)
-
-          repositories = data.get("repositories", {})
-
-          print("Original repository count:", len(repositories))
-
-          removed = []
-
-          for key in list(repositories.keys()):
-              basename = key.rstrip("/").split("/")[-1]
-
-              if basename in remove_names:
-                  print("Removing unavailable repository:", key)
-                  removed.append(key)
-                  del repositories[key]
-
-          if not removed:
-              print("WARNING: no speech_agent repositories were found")
-
-          print("Removed repository count:", len(removed))
-          print("Remaining repository count:", len(repositories))
-
-          with open(target, "w", encoding="utf-8") as f:
-              yaml.safe_dump(
-                  data,
-                  f,
-                  sort_keys=False,
-                  allow_unicode=True,
-              )
-
-          print("Generated:", target)
-          PY
-
-
-          echo
-          echo "=== Verify speech_agent repos are removed ==="
-
-          if grep -n "speech_agent_" \
-            "${root}/robot_dev_config/ros2-ci.repos"; then
-
-            echo
-            echo "ERROR: speech_agent repositories still exist."
-            exit 1
-
-          else
-
-            echo "OK: speech_agent repositories removed."
-
-          fi
-
-
-          echo
-          echo "=== ros2-ci.repos ==="
-
-          head -80 \
-            "${root}/robot_dev_config/ros2-ci.repos"
-
-
-      # ============================================================
-      # 8. Cross compile S100
+      # 先使用官方 v3.7.0 toolchain image 中已有环境进行构建。
+      #
       # ============================================================
 
       - name: Cross compile S100
@@ -375,20 +306,17 @@ jobs:
 
               set -euo pipefail
 
-
               echo "========================================"
               echo "S100 cross compilation"
               echo "========================================"
 
-              echo
               echo "Workspace:"
-
               pwd
 
 
-              # ====================================================
+              # ========================================================
               # Check robot_dev_config
-              # ====================================================
+              # ========================================================
 
               echo
               echo "=== Check robot_dev_config ==="
@@ -396,12 +324,12 @@ jobs:
               test -f robot_dev_config/build.sh
               test -f robot_dev_config/s100_build.sh
               test -f robot_dev_config/aarch64_toolchainfile.cmake
-              test -f robot_dev_config/ros2-ci.repos
+              test -f robot_dev_config/ros2.repos
 
 
-              # ====================================================
+              # ========================================================
               # Install vcstool
-              # ====================================================
+              # ========================================================
 
               echo
               echo "=== Prepare vcstool ==="
@@ -416,36 +344,84 @@ jobs:
 
               fi
 
-
-              echo
               echo "vcs path:"
-
               command -v vcs
 
-              vcs --version || true
+
+              # ========================================================
+              # Generate CI-safe repos
+              #
+              # speech_agent_* 当前无法从公共 GitHub Actions
+              # Runner 匿名访问，并且 Omni SLAM 不依赖这些包。
+              # ========================================================
+
+              echo
+              echo "=== Prepare CI dependency manifest ==="
+
+              python3 - <<"PY"
+                import yaml
+
+                source = "robot_dev_config/ros2.repos"
+                target = "/tmp/ros2-ci.repos"
+
+                with open(source, "r") as f:
+                    data = yaml.safe_load(f)
+
+                remove_keys = {
+                    "box/speech_agent_asr",
+                    "box/speech_agent_audio",
+                    "box/speech_agent_tts",
+                }
+
+                repos = data.get("repositories", {})
+
+                print("Original repositories:", len(repos))
+
+                for key in list(repos.keys()):
+
+                    if key in remove_keys:
+
+                        print(
+                            "Removing unavailable dependency:",
+                            key
+                        )
+
+                        del repos[key]
+
+                print(
+                    "Remaining repositories:",
+                    len(repos)
+                )
+
+                with open(target, "w") as f:
+
+                    yaml.safe_dump(
+                        data,
+                        f,
+                        sort_keys=False
+                    )
+
+                print("Generated:", target)
+                PY
 
 
-              # ====================================================
-              # Disk before dependencies
-              # ====================================================
+              echo
+              echo "=== CI repos ==="
+
+              grep -n \
+                "speech_agent" \
+                /tmp/ros2-ci.repos \
+                || true
+
+
+              # ========================================================
+              # Import dependencies
+              # ========================================================
 
               echo
               echo "=== Disk before dependency import ==="
 
               df -h
-
-
-              # ====================================================
-              # Import ROS / TROS dependencies
-              #
-              # ros2-ci.repos still contains:
-              #
-              # ../../sysroot_docker
-              #
-              # so sysroot will automatically appear at:
-              #
-              # /mnt/s100-cross/cc_ws/sysroot_docker
-              # ====================================================
 
               echo
               echo "=== Import ROS/TROS dependencies ==="
@@ -453,57 +429,38 @@ jobs:
               vcs import \
                 --recursive \
                 src \
-                < robot_dev_config/ros2-ci.repos
+                < /tmp/ros2-ci.repos
 
 
               echo
               echo "=== Dependency import completed ==="
 
 
-              # ====================================================
+              # ========================================================
               # Verify sysroot
-              # ====================================================
+              #
+              # ros2.repos 自己会 clone:
+              #
+              # ../../sysroot_docker
+              #
+              # 所以最终应该落在:
+              #
+              # cc_ws/sysroot_docker
+              # ========================================================
 
               echo
               echo "=== Verify S100 sysroot ==="
 
               test -d ../sysroot_docker
 
-
-              echo "Sysroot path:"
-
+              echo "Sysroot:"
               realpath ../sysroot_docker
-
-
-              test -d ../sysroot_docker/usr
-
-
-              echo
-              echo "=== Sysroot top-level ==="
 
               ls -lah ../sysroot_docker \
                 | head -50
 
+              test -d ../sysroot_docker/usr
 
-              # ====================================================
-              # Verify TROS ARM build repository
-              # ====================================================
-
-              echo
-              echo "=== Verify tros_arm_build ==="
-
-              test -d ../tros_arm_build || true
-
-              find .. \
-                -maxdepth 2 \
-                -type d \
-                -name "*arm_build*" \
-                -print
-
-
-              # ====================================================
-              # Disk after dependencies
-              # ====================================================
 
               echo
               echo "=== Disk after dependency import ==="
@@ -511,27 +468,26 @@ jobs:
               df -h
 
 
-              # ====================================================
-              # Show Omni packages
-              # ====================================================
+              # ========================================================
+              # Show required Omni packages
+              # ========================================================
 
               echo
-              echo "=== Omni ROS packages ==="
+              echo "=== Omni packages ==="
 
               find src/omni_slam \
                 -name package.xml \
                 -print
 
 
-              # ====================================================
+              # ========================================================
               # Build
-              # ====================================================
+              # ========================================================
 
               echo
               echo "========================================"
-              echo "Build RDK S100"
+              echo "Build S100"
               echo "========================================"
-
 
               bash robot_dev_config/build.sh \
                 -p S100 \
@@ -543,40 +499,28 @@ jobs:
                 omni_slam_manager"
 
 
-              # ====================================================
-              # Verify build
-              # ====================================================
+              # ========================================================
+              # Verify output
+              # ========================================================
 
               echo
               echo "========================================"
               echo "S100 build completed"
               echo "========================================"
 
-
               test -d install
 
-
-              echo
-              echo "=== Install size ==="
-
               du -sh install
-
-
-              echo
-              echo "=== Install content ==="
-
-              find install \
-                -maxdepth 2 \
-                -type d \
-                | head -100
-
             '
 
-
       # ============================================================
-      # 9. Verify generated binary architecture
+      # Verify binary architecture
       #
-      # Ensures x86 ELF did not accidentally get packaged.
+      # 防止出现非常隐蔽的问题：
+      #
+      # GitHub x86 Runner 构建成功，
+      # 结果却生成了 x86_64 ELF。
+      #
       # ============================================================
 
       - name: Verify ARM64 binaries
@@ -586,13 +530,13 @@ jobs:
 
           test -d "${S100_CROSS_ROOT}/install"
 
-          echo
           echo "=== Install size ==="
 
           du -sh "${S100_CROSS_ROOT}/install"
 
 
           echo
+
           echo "=== ELF architecture check ==="
 
           count=0
@@ -608,13 +552,12 @@ jobs:
 
               count=$((count + 1))
 
-
               if ! echo "${info}" | \
-                grep -Eq \
-                "ARM aarch64|ARM64|aarch64"; then
+                grep -Eq "ARM aarch64|ARM64"; then
 
                 echo
-                echo "ERROR: Non-ARM64 binary detected:"
+                echo "ERROR:"
+                echo "Non ARM64 binary detected:"
                 echo "${file_path}"
                 echo
 
@@ -624,8 +567,7 @@ jobs:
 
             fi
 
-
-            if [[ "${count}" -ge 50 ]]; then
+            if [[ "${count}" -ge 30 ]]; then
               break
             fi
 
@@ -638,19 +580,13 @@ jobs:
 
           if [[ "${count}" -eq 0 ]]; then
 
-            echo
             echo "WARNING: No executable ELF files found."
-
-          else
-
-            echo
-            echo "Checked ARM64 ELF files: ${count}"
 
           fi
 
 
       # ============================================================
-      # 10. Package S100 runtime
+      # Package runtime
       # ============================================================
 
       - name: Package S100 runtime
@@ -667,21 +603,15 @@ jobs:
 
           version="${VERSION_INPUT:-}"
 
-
           if [[ -z "${version}" ]]; then
 
             if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
-
               version="${GITHUB_REF_NAME}"
-
             else
-
               version="${GITHUB_SHA::12}"
-
             fi
 
           fi
-
 
           version="${version//\//-}"
 
@@ -693,20 +623,11 @@ jobs:
           name="omni-slam-rdk-s100-aarch64-${version}-${GITHUB_SHA::12}"
 
 
-          echo
-          echo "Package name:"
-          echo "${name}"
-
-
-          # --------------------------------------------------------
-          # Prepare dist
-          # --------------------------------------------------------
-
           mkdir -p "dist/${name}"
 
 
           # --------------------------------------------------------
-          # Copy install tree
+          # Copy install
           # --------------------------------------------------------
 
           cp -a \
@@ -715,37 +636,14 @@ jobs:
 
 
           # --------------------------------------------------------
-          # Write manifest
+          # Manifest
           # --------------------------------------------------------
 
-          if [[ -x ".github/ci/write_manifest.sh" ]]; then
-
-            .github/ci/write_manifest.sh \
-              aarch64 \
-              rdk-s100-rdkos-4 \
-              "${version}" \
-              "dist/${name}"
-
-          elif [[ -f ".github/ci/write_manifest.sh" ]]; then
-
-            bash .github/ci/write_manifest.sh \
-              aarch64 \
-              rdk-s100-rdkos-4 \
-              "${version}" \
-              "dist/${name}"
-
-          else
-
-            echo "WARNING: .github/ci/write_manifest.sh not found"
-
-            cat > "dist/${name}/manifest.txt" <<EOF
-platform=rdk-s100-rdkos-4
-arch=aarch64
-version=${version}
-commit=${GITHUB_SHA}
-EOF
-
-          fi
+          .github/ci/write_manifest.sh \
+            aarch64 \
+            rdk-s100-rdkos-4 \
+            "${version}" \
+            "dist/${name}"
 
 
           # --------------------------------------------------------
@@ -768,9 +666,8 @@ EOF
 
 
           echo
-          echo "========================================"
-          echo "Release artifacts"
-          echo "========================================"
+
+          echo "=== Release artifacts ==="
 
           ls -lh \
             "dist/${name}.tar.gz" \
@@ -778,7 +675,7 @@ EOF
 
 
       # ============================================================
-      # 11. Upload artifact
+      # Upload
       # ============================================================
 
       - name: Upload S100 artifact
@@ -796,7 +693,7 @@ EOF
 
 
       # ============================================================
-      # 12. Cleanup
+      # Cleanup
       # ============================================================
 
       - name: Cleanup
@@ -820,6 +717,7 @@ EOF
             --force || true
 
           echo
+
           echo "=== Final disk usage ==="
 
           df -h
