@@ -171,7 +171,7 @@ jobs:
           rm -rf build install log
           df -h
           colcon build \
-            --packages-select livox_ros_driver2 fast_lio icp_relocalization omni_slam_manager \
+            --packages-select livox_ros_driver2 fast_lio icp_relocalization omni_slam_interfaces omni_slam_manager \
             --event-handlers console_direct+ \
             --cmake-args -DCMAKE_BUILD_TYPE=Release
 
