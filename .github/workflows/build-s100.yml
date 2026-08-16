@@ -6,6 +6,11 @@ on:
       - main
 
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (optional)"
+        required: false
+        type: string
 
   workflow_call:
     inputs:
