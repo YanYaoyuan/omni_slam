@@ -6,7 +6,7 @@
   <maintainer email="yan@example.com">Omni maintainers</maintainer>
   <license>Apache-2.0</license>
 
-  <buildtool_depend>ament_python</buildtool_depend>
+  <buildtool_depend>python3-setuptools</buildtool_depend>
   <exec_depend>python3</exec_depend>
   <test_depend>python3-pytest</test_depend>
 
