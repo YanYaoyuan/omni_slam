@@ -53,6 +53,18 @@ class MapStoreTests(unittest.TestCase):
         self.assertEqual(second.version, 2)
         self.assertEqual(first.pcd_path.read_bytes(), b"first")
         self.assertEqual(store.current("warehouse").pcd_path.read_bytes(), b"second")
+        self.assertEqual(store.version("warehouse", 1), first)
+
+    def test_import_can_stage_version_without_switching_current(self):
+        source = _pcd(self.root / "source.pcd", b"first")
+        store = MapStore(self.root / "maps")
+        first = store.import_pcd("warehouse", source)
+        source.write_bytes(b"candidate")
+        candidate = store.import_pcd("warehouse", source, publish_current=False)
+
+        self.assertEqual(candidate.version, 2)
+        self.assertEqual(store.current("warehouse"), first)
+        self.assertEqual(store.version("warehouse", 2), candidate)
 
     def test_invalid_map_id_is_rejected(self):
         source = _pcd(self.root / "source.pcd")

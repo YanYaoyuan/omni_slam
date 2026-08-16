@@ -17,6 +17,8 @@ class SlamStateMachineTests(unittest.TestCase):
         snapshot = machine.transition(SlamState.MAP_READY)
         self.assertEqual(snapshot.mode, SlamMode.MAPPING)
         self.assertEqual(snapshot.state, SlamState.MAP_READY)
+        machine.transition(SlamState.SAVING)
+        machine.transition(SlamState.MAP_READY)
         machine.transition(SlamState.STOPPING)
         self.assertEqual(machine.transition(SlamState.STOPPED).mode, SlamMode.STOPPED)
 

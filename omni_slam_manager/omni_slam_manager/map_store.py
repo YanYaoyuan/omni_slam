@@ -85,6 +85,7 @@ class MapStore:
         *,
         calibration_hash: str = "",
         metadata: Optional[Dict[str, object]] = None,
+        publish_current: bool = True,
     ) -> MapAsset:
         """Import a non-empty PCD and atomically publish it as current."""
 
@@ -135,8 +136,9 @@ class MapStore:
                 os.replace(staging_directory, final_directory)
                 _fsync_directory(versions_directory)
 
-                os.symlink(f"versions/{version_name}", current_tmp)
-                os.replace(current_tmp, map_directory / "current")
+                if publish_current:
+                    os.symlink(f"versions/{version_name}", current_tmp)
+                    os.replace(current_tmp, map_directory / "current")
                 _fsync_directory(map_directory)
             except Exception:
                 if current_tmp.is_symlink():
@@ -168,6 +170,20 @@ class MapStore:
         ):
             raise MapStoreError(f"current map pointer escapes version store: {current}")
         asset = self._asset_from_directory(map_id, resolved)
+        if verify:
+            self.verify(asset)
+        return asset
+
+    def version(self, map_id: str, version: int, *, verify: bool = True) -> MapAsset:
+        map_id = self.validate_map_id(map_id)
+        if version <= 0 or version > 999999:
+            raise MapStoreError("map version must be in range 1..999999")
+        directory = self.root / map_id / "versions" / f"v{version:06d}"
+        if not directory.is_dir():
+            raise MapStoreError(f"map version does not exist: {map_id} v{version:06d}")
+        asset = self._asset_from_directory(map_id, directory)
+        if asset.version != version:
+            raise MapStoreError(f"map manifest version mismatch: {directory}")
         if verify:
             self.verify(asset)
         return asset

@@ -46,6 +46,7 @@ _ALLOWED: Dict[SlamState, FrozenSet[SlamState]] = {
     SlamState.MAP_READY: frozenset(
         (
             SlamState.MAPPING,
+            SlamState.SAVING,
             SlamState.STOPPING,
             SlamState.STARTING_LOCALIZATION,
             SlamState.ERROR,

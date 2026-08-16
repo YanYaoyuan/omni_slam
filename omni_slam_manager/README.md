@@ -24,3 +24,25 @@ map.  `MapStore.current()` verifies SHA-256 by default before returning a map.
 
 The ROS state machine, typed status and actions will be layered on this storage
 primitive; callers should not modify files inside `versions/`.
+
+Start the manager without starting FAST-LIO:
+
+```bash
+ros2 launch omni_slam_manager manager.launch.py \
+  map_root:=/var/lib/omni/maps \
+  map_source_path:=/tmp/omni_slam_work/map.pcd
+```
+
+Stable control-plane endpoints:
+
+- `/omni/slam/start_mapping` (`StartMapping`)
+- `/omni/slam/stop_mapping` (`StopMapping`)
+- `/omni/slam/save_map` (`SaveMap` action)
+- `/omni/slam/start_localization` (`StartLocalization` action)
+- `/omni/slam/status` (`SlamStatus`, reliable transient-local heartbeat)
+
+The manager starts child launch processes without a shell and terminates their
+entire process group on stop, cancellation or shutdown.  Mapping is not marked
+ready until cloud, IMU and odometry telemetry are all fresh.  Localization is
+not marked `LOCALIZED` until an ICP initial pose has been followed by fresh
+odometry.
