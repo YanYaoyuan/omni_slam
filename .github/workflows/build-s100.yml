@@ -402,7 +402,7 @@ jobs:
                     )
 
                 print("Generated:", target)
-                PY
+              PY
 
 
               echo
