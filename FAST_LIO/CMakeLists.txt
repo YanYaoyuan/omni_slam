@@ -133,4 +133,16 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_gtest(test_atomic_file test/test_atomic_file.cpp)
+  target_include_directories(test_atomic_file PRIVATE include)
+  ament_add_pytest_test(phase0_regressions
+    test/test_phase0_regressions.py
+  )
+endif()
+
+install(DIRECTORY include/fast_lio/ DESTINATION include/fast_lio)
+
 ament_package()

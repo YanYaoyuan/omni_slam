@@ -12,11 +12,15 @@ if [[ ! -f "/opt/ros/$ROS_DISTRO_TARGET/setup.bash" ]]; then
   exit 1
 fi
 set +u
+# The ROS distribution is selected at runtime.
+# shellcheck disable=SC1090
 source "/opt/ros/$ROS_DISTRO_TARGET/setup.bash"
 set -u
 
 if [[ -f "$LIVOX_SETUP" ]]; then
   set +u
+  # Users may override the Livox workspace.
+  # shellcheck disable=SC1090
   source "$LIVOX_SETUP"
   set -u
 else

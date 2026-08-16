@@ -1,0 +1,5 @@
+bool discard_unsaved
+---
+bool accepted
+uint32 reason_code
+string message

@@ -1,0 +1,18 @@
+string map_id
+string calibration_hash
+bool make_current
+---
+bool success
+string map_id
+uint32 map_version
+string map_path
+string map_checksum
+uint32 reason_code
+string message
+---
+uint8 STAGE_REQUESTING_FAST_LIO_SAVE=1
+uint8 STAGE_IMPORTING_ASSET=2
+uint8 STAGE_VERIFYING_CHECKSUM=3
+uint8 stage
+float32 progress
+string message

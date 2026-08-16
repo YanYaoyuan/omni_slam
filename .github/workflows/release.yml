@@ -1,0 +1,65 @@
+name: Release multi-platform runtime
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Existing semantic version (for dry-run artifact build)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  preflight:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Require all production builders
+        env:
+          ORIN_ENABLED: ${{ vars.OMNI_ENABLE_ORIN_RUNNER }}
+          S100_ENABLED: ${{ vars.OMNI_ENABLE_S100_BUILD }}
+        run: |
+          test "${ORIN_ENABLED}" = true || { echo 'OMNI_ENABLE_ORIN_RUNNER must be true'; exit 1; }
+          test "${S100_ENABLED}" = true || { echo 'OMNI_ENABLE_S100_BUILD must be true'; exit 1; }
+
+  x86:
+    needs: preflight
+    uses: ./.github/workflows/build-x86.yml
+    with:
+      version: ${{ inputs.version || github.ref_name }}
+
+  orin:
+    needs: preflight
+    uses: ./.github/workflows/build-orin.yml
+    with:
+      version: ${{ inputs.version || github.ref_name }}
+
+  s100:
+    needs: preflight
+    uses: ./.github/workflows/build-s100.yml
+    with:
+      version: ${{ inputs.version || github.ref_name }}
+    secrets: inherit
+
+  publish:
+    if: github.event_name == 'push'
+    needs: [x86, orin, s100]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - name: Verify checksums
+        run: |
+          cd release-assets
+          sha256sum --check *.sha256
+      - name: Publish immutable GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" release-assets/* \
+            --repo "${GITHUB_REPOSITORY}" --generate-notes --verify-tag
