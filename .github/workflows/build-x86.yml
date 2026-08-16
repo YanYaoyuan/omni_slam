@@ -63,12 +63,15 @@ jobs:
         run: |
           mkdir -p "${ROS_WS}/src/omni_slam" "${ROS_WS}/src/livox_ros_driver2/msg"
           rsync -a --delete \
-            --exclude='.git' --exclude='.github' --exclude='build*' \
-            --exclude='install*' --exclude='dist' --exclude='log' \
+            --exclude='/.git/' --exclude='/.github/' \
+            --exclude='/build/' --exclude='/build_orin/' \
+            --exclude='/install/' --exclude='/install_orin/' \
+            --exclude='/dist/' --exclude='/log/' --exclude='/ros_logs/' \
             "${GITHUB_WORKSPACE}/" "${ROS_WS}/src/omni_slam/"
           cp .github/ci/livox_stub/package.xml "${ROS_WS}/src/livox_ros_driver2/"
           cp .github/ci/livox_stub/CMakeLists.txt "${ROS_WS}/src/livox_ros_driver2/"
           cp .github/ci/livox_stub/msg/*.msg "${ROS_WS}/src/livox_ros_driver2/msg/"
+          test -f "${ROS_WS}/src/omni_slam/FAST_LIO/include/IKFoM_toolkit/mtk/build_manifold.hpp"
 
       - name: Install ROS dependencies
         run: |

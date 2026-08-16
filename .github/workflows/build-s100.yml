@@ -49,8 +49,12 @@ jobs:
           git clone --filter=blob:none https://github.com/D-Robotics/robot_dev_config.git \
             "${root}/robot_dev_config"
           git -C "${root}/robot_dev_config" checkout --detach "${ROBOT_DEV_CONFIG_REF}"
-          rsync -a --delete --exclude='.git' --exclude='build*' --exclude='install*' \
-            --exclude='log' --exclude='dist' "${GITHUB_WORKSPACE}/" "${root}/src/omni_slam/"
+          rsync -a --delete --exclude='/.git/' \
+            --exclude='/build/' --exclude='/build_orin/' \
+            --exclude='/install/' --exclude='/install_orin/' \
+            --exclude='/log/' --exclude='/dist/' \
+            "${GITHUB_WORKSPACE}/" "${root}/src/omni_slam/"
+          test -f "${root}/src/omni_slam/FAST_LIO/include/IKFoM_toolkit/mtk/build_manifold.hpp"
           printf '%s\n' "S100_CROSS_ROOT=${root}" >> "${GITHUB_ENV}"
 
       - name: Pull pinned official toolchain image
