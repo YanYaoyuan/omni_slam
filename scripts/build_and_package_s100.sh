@@ -56,14 +56,16 @@ if [[ "$SKIP_BUILD" != "1" ]]; then
 
   log "source ROS $ROS_DISTRO_TARGET"
   set +u
-  # shellcheck disable=SC1090 -- the ROS distribution is selected at runtime.
+  # The ROS distribution is selected at runtime.
+  # shellcheck disable=SC1090
   source "/opt/ros/$ROS_DISTRO_TARGET/setup.bash"
   set -u
 
   if [[ -f "$LIVOX_SETUP" ]]; then
     log "source Livox: $LIVOX_SETUP"
     set +u
-    # shellcheck disable=SC1090 -- users may override the Livox workspace.
+    # Users may override the Livox workspace.
+    # shellcheck disable=SC1090
     source "$LIVOX_SETUP"
     set -u
   else
