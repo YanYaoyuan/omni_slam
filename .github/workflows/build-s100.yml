@@ -489,6 +489,29 @@ jobs:
               echo "=== Prepare S100 build environment ==="
 
               # --------------------------------------------------------
+              # Basic build tools
+              # --------------------------------------------------------
+
+              apt-get update
+
+              DEBIAN_FRONTEND=noninteractive apt-get install -y \
+                cmake \
+                make \
+                ninja-build \
+                gcc \
+                g++ \
+                pkg-config
+
+              echo
+              echo "cmake:"
+              command -v cmake
+              cmake --version
+
+              echo
+              echo "make:"
+              command -v make
+
+              # --------------------------------------------------------
               # colcon
               # --------------------------------------------------------
 
@@ -500,9 +523,37 @@ jobs:
                   colcon-common-extensions
               fi
 
+              echo
               echo "colcon:"
               command -v colcon
-              colcon --version || true
+
+              # 注意：colcon 没有普通的 --version 参数
+              colcon version-check || true
+
+              # --------------------------------------------------------
+              # ROS2 Humble compatibility
+              # --------------------------------------------------------
+
+              if [ ! -f /opt/ros/humble/setup.bash ]; then
+
+                echo
+                echo "WARNING: /opt/ros/humble/setup.bash does not exist"
+
+                mkdir -p /opt/ros/humble
+
+                cat > /opt/ros/humble/setup.bash <<'EOF'
+              # CI compatibility stub.
+              # robot_dev_config/build.sh unconditionally sources this file.
+              export ROS_DISTRO=humble
+              EOF
+
+              fi
+
+              echo
+              echo "=== Build tools ==="
+              command -v cmake
+              command -v colcon
+              echo "ROS_DISTRO=${ROS_DISTRO:-}"
 
 
               # --------------------------------------------------------
