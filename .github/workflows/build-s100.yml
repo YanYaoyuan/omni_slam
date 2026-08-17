@@ -541,11 +541,10 @@ jobs:
 
                 mkdir -p /opt/ros/humble
 
-                cat > /opt/ros/humble/setup.bash <<'EOF'
-              # CI compatibility stub.
-              # robot_dev_config/build.sh unconditionally sources this file.
-              export ROS_DISTRO=humble
-              EOF
+                printf "%s\n" \
+                  "# CI compatibility stub" \
+                  "export ROS_DISTRO=humble" \
+                  > /opt/ros/humble/setup.bash
 
               fi
 
