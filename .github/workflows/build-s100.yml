@@ -485,9 +485,67 @@ jobs:
                 -print
 
 
-              # ========================================================
-              # Build
-              # ========================================================
+              echo
+              echo "=== Prepare S100 build environment ==="
+
+              # --------------------------------------------------------
+              # colcon
+              # --------------------------------------------------------
+
+              if ! command -v colcon >/dev/null 2>&1; then
+                echo "colcon not found, installing..."
+
+                python3 -m pip install \
+                  --no-cache-dir \
+                  colcon-common-extensions
+              fi
+
+              echo "colcon:"
+              command -v colcon
+              colcon --version || true
+
+
+              # --------------------------------------------------------
+              # ROS / TogetherROS environment
+              # --------------------------------------------------------
+
+              if [ -f /opt/tros/humble/setup.bash ]; then
+
+                echo "Found TogetherROS:"
+                echo "/opt/tros/humble/setup.bash"
+
+                source /opt/tros/humble/setup.bash
+
+                # robot_dev_config/build.sh hard-codes
+                # /opt/ros/humble/setup.bash
+                mkdir -p /opt/ros/humble
+
+                ln -sf \
+                  /opt/tros/humble/setup.bash \
+                  /opt/ros/humble/setup.bash
+
+              elif [ -f /opt/ros/humble/setup.bash ]; then
+
+                echo "Found ROS2 Humble:"
+                echo "/opt/ros/humble/setup.bash"
+
+                source /opt/ros/humble/setup.bash
+
+              else
+
+                echo "WARNING:"
+                echo "Neither /opt/tros/humble nor /opt/ros/humble exists."
+
+              fi
+
+
+              echo
+              echo "=== Build environment ==="
+
+              echo "ROS_DISTRO=${ROS_DISTRO:-}"
+              echo "AMENT_PREFIX_PATH=${AMENT_PREFIX_PATH:-}"
+
+              command -v colcon
 
               echo
               echo "========================================"
