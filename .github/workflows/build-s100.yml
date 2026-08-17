@@ -532,6 +532,7 @@ jobs:
                 ros-humble-sensor-msgs \
                 ros-humble-geometry-msgs \
                 ros-humble-nav-msgs \
+                ros-humble-visualization-msgs \
                 ros-humble-tf2 \
                 ros-humble-tf2-ros \
                 ros-humble-tf2-geometry-msgs
