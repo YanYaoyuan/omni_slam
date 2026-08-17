@@ -538,7 +538,9 @@ jobs:
               echo
               echo "=== Source ROS2 Humble ==="
 
+              set +u
               source /opt/ros/humble/setup.bash
+              set -u
 
               echo "ROS_DISTRO=${ROS_DISTRO:-}"
               echo "AMENT_PREFIX_PATH=${AMENT_PREFIX_PATH:-}"
@@ -591,7 +593,9 @@ jobs:
                 echo "Found ROS2 Humble:"
                 echo "/opt/ros/humble/setup.bash"
 
+                set +u
                 source /opt/ros/humble/setup.bash
+                set -u
 
               else
 
