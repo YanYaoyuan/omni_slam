@@ -528,6 +528,7 @@ jobs:
                 ros-humble-rosidl-default-runtime \
                 ros-humble-rclcpp \
                 ros-humble-std-msgs \
+                ros-humble-std-srvs \
                 ros-humble-sensor-msgs \
                 ros-humble-geometry-msgs \
                 ros-humble-nav-msgs \
