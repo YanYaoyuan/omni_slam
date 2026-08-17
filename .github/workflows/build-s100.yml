@@ -488,10 +488,6 @@ jobs:
               echo
               echo "=== Prepare S100 build environment ==="
 
-              # --------------------------------------------------------
-              # Basic build tools
-              # --------------------------------------------------------
-
               apt-get update
 
               DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -500,34 +496,42 @@ jobs:
                 ninja-build \
                 gcc \
                 g++ \
+                gcc-aarch64-linux-gnu \
+                g++-aarch64-linux-gnu \
+                binutils-aarch64-linux-gnu \
                 pkg-config
 
               echo
-              echo "cmake:"
+              echo "=== Native build tools ==="
+
               command -v cmake
               cmake --version
 
-              echo
-              echo "make:"
               command -v make
 
-              # --------------------------------------------------------
-              # colcon
-              # --------------------------------------------------------
+              echo
+              echo "=== AArch64 cross compiler ==="
+
+              command -v aarch64-linux-gnu-gcc
+              command -v aarch64-linux-gnu-g++
+
+              aarch64-linux-gnu-gcc --version
+              aarch64-linux-gnu-g++ --version
 
               if ! command -v colcon >/dev/null 2>&1; then
+
                 echo "colcon not found, installing..."
 
                 python3 -m pip install \
                   --no-cache-dir \
                   colcon-common-extensions
+
               fi
 
               echo
               echo "colcon:"
               command -v colcon
 
-              # 注意：colcon 没有普通的 --version 参数
               colcon version-check || true
 
               # --------------------------------------------------------
