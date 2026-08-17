@@ -499,64 +499,72 @@ jobs:
                 gcc-aarch64-linux-gnu \
                 g++-aarch64-linux-gnu \
                 binutils-aarch64-linux-gnu \
-                pkg-config
+                pkg-config \
+                curl \
+                gnupg \
+                lsb-release \
+                software-properties-common
 
               echo
-              echo "=== Native build tools ==="
+              echo "=== Configure ROS2 apt repository ==="
 
-              command -v cmake
-              cmake --version
+              mkdir -p /etc/apt/keyrings
 
-              command -v make
+              curl -fsSL \
+                https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+                -o /etc/apt/keyrings/ros-archive-keyring.gpg
+
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo ${UBUNTU_CODENAME}) main" \
+                > /etc/apt/sources.list.d/ros2.list
+
+              apt-get update
 
               echo
-              echo "=== AArch64 cross compiler ==="
+              echo "=== Install ROS2 Humble build packages ==="
+
+              DEBIAN_FRONTEND=noninteractive apt-get install -y \
+                ros-humble-ament-cmake \
+                ros-humble-rosidl-default-generators \
+                ros-humble-rosidl-default-runtime \
+                ros-humble-rclcpp \
+                ros-humble-std-msgs \
+                ros-humble-sensor-msgs \
+                ros-humble-geometry-msgs \
+                ros-humble-nav-msgs \
+                ros-humble-tf2 \
+                ros-humble-tf2-ros \
+                ros-humble-tf2-geometry-msgs
+
+              echo
+              echo "=== Source ROS2 Humble ==="
+
+              source /opt/ros/humble/setup.bash
+
+              echo "ROS_DISTRO=${ROS_DISTRO:-}"
+              echo "AMENT_PREFIX_PATH=${AMENT_PREFIX_PATH:-}"
+              echo "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH:-}"
+
+              test -f \
+                /opt/ros/humble/share/ament_cmake/cmake/ament_cmakeConfig.cmake
+
+              echo
+              echo "=== Cross compiler ==="
 
               command -v aarch64-linux-gnu-gcc
               command -v aarch64-linux-gnu-g++
 
               aarch64-linux-gnu-gcc --version
-              aarch64-linux-gnu-g++ --version
+
+              echo
+              echo "=== colcon ==="
 
               if ! command -v colcon >/dev/null 2>&1; then
-
-                echo "colcon not found, installing..."
-
                 python3 -m pip install \
                   --no-cache-dir \
                   colcon-common-extensions
-
               fi
 
-              echo
-              echo "colcon:"
               command -v colcon
-
-              colcon version-check || true
-
-              # --------------------------------------------------------
-              # ROS2 Humble compatibility
-              # --------------------------------------------------------
-
-              if [ ! -f /opt/ros/humble/setup.bash ]; then
-
-                echo
-                echo "WARNING: /opt/ros/humble/setup.bash does not exist"
-
-                mkdir -p /opt/ros/humble
-
-                printf "%s\n" \
-                  "# CI compatibility stub" \
-                  "export ROS_DISTRO=humble" \
-                  > /opt/ros/humble/setup.bash
-
-              fi
-
-              echo
-              echo "=== Build tools ==="
-              command -v cmake
-              command -v colcon
-              echo "ROS_DISTRO=${ROS_DISTRO:-}"
 
 
               # --------------------------------------------------------
