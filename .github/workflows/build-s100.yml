@@ -460,7 +460,11 @@ jobs:
               ls -lah ../sysroot_docker \
                 | head -50
 
-              test -d ../sysroot_docker/usr
+              test -d ../sysroot_docker/usr_s100
+
+              echo
+              echo "=== S100 sysroot contents ==="
+              ls -lah ../sysroot_docker/usr_s100 | head -50
 
 
               echo
