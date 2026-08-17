@@ -17,6 +17,11 @@ on:
       version:
         required: false
         type: string
+    secrets:
+      DROBOTICS_REGISTRY_USERNAME:
+        required: true
+      DROBOTICS_REGISTRY_PASSWORD:
+        required: true
 
 concurrency:
   group: s100-${{ github.workflow }}-${{ github.ref }}
@@ -40,6 +45,11 @@ jobs:
       S100_IMAGE: registry.d-robotics.cc/deliver/ai_toolchain_ubuntu_22_s100_s600_cpu:v3.7.0
 
       ROBOT_DEV_CONFIG_REF: f44b1ad2575b34c189fd470de1db9c5ad48b6886
+
+      # robot_dev_config/ros2.repos points at the floating develop branch.
+      # Pin the revision that was current with ROBOT_DEV_CONFIG_REF so the
+      # target sysroot cannot silently change between CI runs.
+      S100_SYSROOT_REF: de9fa286f71a72d24c349477cd59f41cc2cc3d8f
 
     steps:
 
@@ -97,18 +107,24 @@ jobs:
       # ============================================================
       # Login D-Robotics registry
       #
-      # 当前先按你的要求直接写账号密码。
-      # 后续建议改成 GitHub Secrets。
+      # Configure these as GitHub Actions repository secrets. Never put the
+      # registry password in the workflow or repository history.
       # ============================================================
 
       - name: Login D-Robotics Registry
         shell: bash
+        env:
+          REGISTRY_USERNAME: ${{ secrets.DROBOTICS_REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.DROBOTICS_REGISTRY_PASSWORD }}
         run: |
           set -euo pipefail
 
-          echo 'VLaeatrjF9yGf6I44trT74zKhUpZSVlr' | \
+          test -n "${REGISTRY_USERNAME}"
+          test -n "${REGISTRY_PASSWORD}"
+
+          printf '%s' "${REGISTRY_PASSWORD}" | \
             docker login registry.d-robotics.cc \
-              -u 'ccr$deliver-ronly' \
+              --username "${REGISTRY_USERNAME}" \
               --password-stdin
 
       # ============================================================
@@ -307,6 +323,7 @@ jobs:
 
           source = sys.argv[1]
           target = sys.argv[2]
+          sysroot_ref = sys.argv[3]
 
           with open(source, "r", encoding="utf-8") as f:
               data = yaml.safe_load(f)
@@ -325,6 +342,13 @@ jobs:
               if key in remove_keys:
                   print("Removing unavailable dependency:", key)
                   del repos[key]
+
+          sysroot_key = "../../sysroot_docker"
+          if sysroot_key not in repos:
+              raise KeyError(f"Missing {sysroot_key!r} in {source}")
+
+          print("Pinning sysroot revision:", sysroot_ref)
+          repos[sysroot_key]["version"] = sysroot_ref
 
           print("Remaining repositories:", len(repos))
 
@@ -403,7 +427,8 @@ jobs:
 
               python3 /mnt/s100-cross/filter_ros2_repos.py \
                 robot_dev_config/ros2.repos \
-                /tmp/ros2-ci.repos
+                /tmp/ros2-ci.repos \
+                "${S100_SYSROOT_REF}"
 
 
               echo
@@ -462,9 +487,91 @@ jobs:
 
               test -d ../sysroot_docker/usr_s100
 
+              actual_sysroot_ref="$(git -C ../sysroot_docker rev-parse HEAD)"
+              test "${actual_sysroot_ref}" = "${S100_SYSROOT_REF}"
+
+              echo "Pinned sysroot revision: ${actual_sysroot_ref}"
+
               echo
               echo "=== S100 sysroot contents ==="
               ls -lah ../sysroot_docker/usr_s100 | head -50
+
+
+              # ========================================================
+              # Complete the ARM64 Qt runtime in the official sysroot
+              #
+              # The pinned sysroot contains Qt5 CMake metadata used by
+              # VTK/PCL, but omits the matching libQt5*.so runtime files.
+              # Download the Jammy ARM64 packages without installing them
+              # into the x86_64 build container, then extract only those
+              # packages into the S100 sysroot.
+              # ========================================================
+
+              echo
+              echo "=== Verify S100 ARM64 Qt5 sysroot ==="
+
+              apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y file
+
+              qt_core="../sysroot_docker/usr_s100/lib/aarch64-linux-gnu/libQt5Core.so.5.15.3"
+
+              if [ ! -e "${qt_core}" ]; then
+                echo "Qt5 ARM64 runtime is missing; hydrating the target sysroot"
+
+                qt_deb_dir="/tmp/s100-qt-arm64"
+                arm64_apt_dir="/tmp/s100-arm64-apt"
+                mkdir -p \
+                  "${qt_deb_dir}" \
+                  "${arm64_apt_dir}/lists/partial"
+
+                printf "%s\n" \
+                  "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main universe restricted multiverse" \
+                  "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main universe restricted multiverse" \
+                  "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main universe restricted multiverse" \
+                  > "${arm64_apt_dir}/sources.list"
+
+                arm64_apt_options=(
+                  -o "APT::Architecture=arm64"
+                  -o "APT::Architectures=arm64"
+                  -o "Dir::Etc::sourcelist=${arm64_apt_dir}/sources.list"
+                  -o "Dir::Etc::sourceparts=-"
+                  -o "Dir::State::lists=${arm64_apt_dir}/lists"
+                )
+
+                apt-get "${arm64_apt_options[@]}" update
+
+                cd "${qt_deb_dir}"
+
+                apt-get "${arm64_apt_options[@]}" download \
+                  qtbase5-dev:arm64 \
+                  libqt5core5a:arm64 \
+                  libqt5dbus5:arm64 \
+                  libqt5network5:arm64 \
+                  libqt5gui5:arm64 \
+                  libqt5widgets5:arm64 \
+                  libqt5opengl5:arm64 \
+                  libqt5opengl5-dev:arm64 \
+                  libqt5printsupport5:arm64 \
+                  libqt5concurrent5:arm64 \
+                  libqt5test5:arm64
+
+                while IFS= read -r -d "" deb; do
+                  echo "Extracting ${deb}"
+                  dpkg-deb --extract \
+                    "${deb}" \
+                    /mnt/s100-cross/cc_ws/sysroot_docker/usr_s100
+                done < <(find "${qt_deb_dir}" -maxdepth 1 -name "*.deb" -print0)
+
+                cd /mnt/s100-cross/cc_ws/tros_ws
+              fi
+
+              test -e "${qt_core}"
+              test -e ../sysroot_docker/usr_s100/lib/aarch64-linux-gnu/libQt5Gui.so.5.15.3
+              test -e ../sysroot_docker/usr_s100/lib/aarch64-linux-gnu/libQt5Widgets.so.5.15.3
+              test -e ../sysroot_docker/usr_s100/lib/aarch64-linux-gnu/libQt5OpenGL.so.5.15.3
+
+              file "${qt_core}"
+              file "${qt_core}" | grep -Eq "ARM aarch64|ARM64"
 
 
               echo
@@ -647,6 +754,15 @@ jobs:
                 omni_slam_interfaces \
                 omni_slam_manager"
 
+              # robot_dev_config/build.sh converts a failed colcon command
+              # into a successful echo. Check the actual required outputs
+              # here so an empty install tree can never pass CI.
+              test -x install/lib/fast_lio/fastlio_mapping
+              test -x install/lib/icp_relocalization/icp_node
+              test -x install/lib/icp_relocalization/transform_publisher
+              test -f install/share/omni_slam_interfaces/package.xml
+              test -f install/share/omni_slam_manager/package.xml
+
 
               # ========================================================
               # Verify output
@@ -728,9 +844,8 @@ jobs:
 
 
           if [[ "${count}" -eq 0 ]]; then
-
-            echo "WARNING: No executable ELF files found."
-
+            echo "ERROR: No executable ELF files found."
+            exit 1
           fi
 
 

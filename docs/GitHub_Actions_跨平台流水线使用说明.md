@@ -43,10 +43,11 @@ Orin 流水线在构建前后执行 Docker builder/image prune，并清除 colco
 - CPU 工具链镜像：`registry.d-robotics.cc/deliver/ai_toolchain_ubuntu_22_s100_s600_cpu:v3.7.0`
 - `D-Robotics/robot_dev_config`：`f44b1ad2575b34c189fd470de1db9c5ad48b6886`
 - 官方入口：`bash robot_dev_config/build.sh -p S100`
+- GitHub Actions Secrets：`DROBOTICS_REGISTRY_USERNAME` 和 `DROBOTICS_REGISTRY_PASSWORD`
 
 注意：OpenExplorer 算法工具链镜像与 TROS 交叉编译 sysroot 必须版本匹配。首次启用前应在手动 workflow_dispatch 中验证镜像内存在 `s100_build.sh`、`aarch64_toolchainfile.cmake` 以及构建需要的 sysroot。缺失时流水线会失败，不会退回本机编译。
 
-`robot_dev_config` 要求 sysroot 位于工作区的 `cc_ws/sysroot_docker`。流水线通过 `S100_SYSROOT_URL` 下载并解压到该目录，然后才执行官方 `build.sh -p S100`。缺少 sysroot 或目录结构不正确时会直接失败，避免用错误宿主库生成不可运行产物。
+`robot_dev_config` 要求 sysroot 位于工作区的 `cc_ws/sysroot_docker`。流水线通过 `ros2.repos` 导入 sysroot，但会把其浮动的 `develop` 分支改写为经验证的固定提交。官方 sysroot 中 Qt5 CMake 元数据所需的 Jammy ARM64 Qt5 库会在容器内下载并解压到 `usr_s100`，不会将 x86_64 宿主库混入目标 sysroot。构建前会检查 Qt5 ARM64 ELF，构建后会检查 FAST-LIO/ICP 真实可执行文件；缺失时流水线直接失败。
 
 ## 缓存和存储策略
 
