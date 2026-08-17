@@ -522,20 +522,38 @@ jobs:
               echo
               echo "=== Install ROS2 Humble build packages ==="
 
+              echo
+              echo "=== Install ROS2 / SLAM dependencies ==="
+              
               DEBIAN_FRONTEND=noninteractive apt-get install -y \
                 ros-humble-ament-cmake \
                 ros-humble-rosidl-default-generators \
                 ros-humble-rosidl-default-runtime \
                 ros-humble-rclcpp \
+                ros-humble-rclcpp-components \
                 ros-humble-std-msgs \
                 ros-humble-std-srvs \
                 ros-humble-sensor-msgs \
                 ros-humble-geometry-msgs \
                 ros-humble-nav-msgs \
                 ros-humble-visualization-msgs \
+                ros-humble-builtin-interfaces \
                 ros-humble-tf2 \
                 ros-humble-tf2-ros \
-                ros-humble-tf2-geometry-msgs
+                ros-humble-tf2-geometry-msgs \
+                ros-humble-message-filters \
+                ros-humble-pcl-ros \
+                ros-humble-pcl-conversions \
+                libpcl-dev \
+                libeigen3-dev \
+                libboost-all-dev \
+                libyaml-cpp-dev \
+                libflann-dev \
+                libqhull-dev \
+                liblz4-dev \
+                libusb-1.0-0-dev \
+                libgoogle-glog-dev \
+                libgflags-dev
 
               echo
               echo "=== Source ROS2 Humble ==="
