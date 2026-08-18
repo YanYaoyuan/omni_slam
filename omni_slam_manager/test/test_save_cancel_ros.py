@@ -30,6 +30,24 @@ class _StubFuture:
         return self._result
 
 
+class _CancelOnResultFuture:
+    """Completes immediately; reading the result also flips the goal's
+    cancel flag. Simulates a cancel arriving in the microsecond window
+    between the service response and the manager's import step —
+    deterministic where real timers cannot target that window."""
+
+    def __init__(self, goal_handle, result):
+        self._goal_handle = goal_handle
+        self._result = result
+
+    def done(self) -> bool:
+        return True
+
+    def result(self):
+        self._goal_handle.cancel_now()
+        return self._result
+
+
 class _StubSaveClient:
     def __init__(self, future: _StubFuture):
         self._future = future
@@ -66,13 +84,17 @@ class _GoalHandle:
     def __init__(self, goal, cancel_at=None):
         self.request = goal
         self._cancel_at = cancel_at
+        self._force_cancel = False
         self._start = time.monotonic()
         self.terminal = None
         self.feedbacks = []
 
+    def cancel_now(self) -> None:
+        self._force_cancel = True
+
     @property
     def is_cancel_requested(self) -> bool:
-        return (
+        return self._force_cancel or (
             self._cancel_at is not None
             and time.monotonic() - self._start >= self._cancel_at
         )
@@ -154,10 +176,12 @@ class SaveMapCancelTests(unittest.TestCase):
 
         node = self._make_node()
         try:
+            # Reading the (immediately-ready) result flips the cancel flag,
+            # so the cancel lands exactly in the response->import window.
+            handle = _GoalHandle(self._make_goal())
             node._map_save_client = _StubSaveClient(
-                _StubFuture(delay=0.1, result=self._success_response())
+                _CancelOnResultFuture(handle, self._success_response())
             )
-            handle = _GoalHandle(self._make_goal(), cancel_at=0.2)
             result = node._execute_save_map(handle)
 
             self.assertEqual(handle.terminal, "canceled")
