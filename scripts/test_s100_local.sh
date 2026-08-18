@@ -155,4 +155,4 @@ S100_CLEAN="${S100_CLEAN:-1}" \
   "${ROOT_DIR}/scripts/build_s100_cross.sh"
 
 log "local S100 build succeeded"
-log "install tree: ${LOCAL_BASE}/workspace/cc_ws/tros_ws/install"
+log "runtime bundle: ${LOCAL_BASE}/workspace/cc_ws/tros_ws/runtime"

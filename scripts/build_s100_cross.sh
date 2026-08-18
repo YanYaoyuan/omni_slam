@@ -298,7 +298,8 @@ for required_command in \
   cmake \
   colcon \
   curl \
-  file; do
+  file \
+  readelf; do
   if ! command -v "${required_command}" >/dev/null 2>&1; then
     echo "ERROR: official TROS image is missing: ${required_command}" >&2
     exit 1
@@ -476,8 +477,20 @@ if (( elf_count == 0 )); then
   exit 1
 fi
 
+echo "=== Assemble deployable S100 runtime ==="
+bash src/omni_slam/scripts/package_s100_runtime.sh \
+  install \
+  ../sysroot_docker \
+  runtime
+
+test -x runtime/bin/fastlio_mapping
+test -x runtime/bin/icp_node
+test -d runtime/config/fast_lio
+test -s runtime/lib/DEPENDENCIES.txt
+
 du -sh install
 echo "S100 cross build completed"
 CONTAINER
 
 log "build output: ${TROS_ROOT}/install"
+log "runtime bundle: ${TROS_ROOT}/runtime"

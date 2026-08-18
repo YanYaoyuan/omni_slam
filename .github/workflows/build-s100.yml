@@ -90,8 +90,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          test -x "${S100_CROSS_ROOT}/install/lib/fast_lio/fastlio_mapping"
-          test -x "${S100_CROSS_ROOT}/install/lib/icp_relocalization/icp_node"
+          runtime_root="${S100_CROSS_ROOT}/runtime"
+          test -x "${runtime_root}/bin/fastlio_mapping"
+          test -x "${runtime_root}/bin/icp_node"
+          test -d "${runtime_root}/config/fast_lio"
+          test -s "${runtime_root}/lib/DEPENDENCIES.txt"
 
           version="${VERSION_INPUT:-}"
           if [[ -z "${version}" ]]; then
@@ -106,7 +109,7 @@ jobs:
           name="omni-slam-rdk-s100-aarch64-${version}-${GITHUB_SHA::12}"
 
           mkdir -p "dist/${name}"
-          cp -a "${S100_CROSS_ROOT}/install" "dist/${name}/install"
+          cp -a "${runtime_root}/." "dist/${name}/"
 
           .github/ci/write_manifest.sh \
             aarch64 \
@@ -115,20 +118,13 @@ jobs:
             "dist/${name}"
 
           tar -C dist -czf "dist/${name}.tar.gz" "${name}"
-          sha256sum "dist/${name}.tar.gz" \
-            > "dist/${name}.tar.gz.sha256"
-
-          ls -lh \
-            "dist/${name}.tar.gz" \
-            "dist/${name}.tar.gz.sha256"
+          ls -lh "dist/${name}.tar.gz"
 
       - name: Upload S100 artifact
         uses: actions/upload-artifact@v4
         with:
           name: omni-slam-rdk-s100-aarch64
-          path: |
-            dist/*.tar.gz
-            dist/*.sha256
+          path: dist/*.tar.gz
           if-no-files-found: error
           retention-days: 3
 
@@ -136,7 +132,13 @@ jobs:
         if: always()
         shell: bash
         run: |
-          rm -rf \
+          set -euo pipefail
+          test -n "${GITHUB_WORKSPACE}"
+          test -n "${RUNNER_TEMP}"
+
+          # The official toolchain container writes the mounted build tree as
+          # root on GitHub-hosted runners. Use sudo for deterministic cleanup.
+          sudo rm -rf \
             "${GITHUB_WORKSPACE}/dist" \
             "${RUNNER_TEMP}/s100-cross"
 

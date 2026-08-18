@@ -64,16 +64,19 @@ Orin 流水线在构建前后执行 Docker builder/image prune，并清除 colco
 - Docker 数据：`/data/docker-s100`
 - Docker 客户端配置：`/data/docker-s100/config`
 - 源码/sysroot/colcon 工作区：`/data/omni-s100-local`
-- 编译产物：`/data/omni-s100-local/workspace/cc_ws/tros_ws/install`
+- colcon 安装树：`/data/omni-s100-local/workspace/cc_ws/tros_ws/install`
+- 可部署应用包：`/data/omni-s100-local/workspace/cc_ws/tros_ws/runtime`
 
 该 Docker daemon 不读写系统 Docker 的 `/var/lib/docker`，也不会清理其他项目的镜像或容器。至少需要 50 GiB 可用空间。
+
+S100 的 tar.gz 解压后直接得到应用前缀：`bin/` 是执行入口，`config/` 是运行配置，`lib/` 包含应用库以及递归解析得到的 ARM64 ROS/PCL/VTK 等动态依赖，`share/` 保留 ROS ament 索引、launch、rviz 和消息接口。部署到板端后先执行 `source setup.bash`。glibc 等 RDK OS 基础库不会打进包内，以免覆盖板端系统 ABI。S100 Artifact 暂不生成单独的 `.sha256` 文件。
 
 ## 缓存和存储策略
 
 - 不使用 `actions/cache`。
 - 每次构建前、后清理 colcon 与 Docker 构建缓存。
 - 普通运行产物保留 3 天，失败日志保留 2 天。
-- tag Release 只保留最终 tar.gz 与 SHA-256，不上传 build/log 中间目录。
+- tag Release 只保留最终运行包，不上传 build/log 中间目录；S100 当前只上传 tar.gz，不附带独立 SHA-256 文件。
 
 ## 发布
 
@@ -84,4 +87,4 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-`release.yml` 只有在 x86、Orin NX、S100 三个平台全部成功且校验和通过后才创建不可变版本资产。
+`release.yml` 只有在 x86、Orin NX、S100 三个平台全部成功后才创建不可变版本资产；存在校验和文件的平台仍会执行校验。
