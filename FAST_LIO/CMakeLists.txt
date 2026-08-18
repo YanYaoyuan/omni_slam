@@ -57,9 +57,47 @@ find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+
+# Ubuntu 22.04's Qhull config exports Qhull::qhull_r, while the ROS Humble
+# pcl_ros Debian export refers to PCL's compatibility target QHULL::QHULL.
+# Depending on CMake's config/module lookup order, PCL may not create that
+# compatibility target itself, which then breaks generation of every target
+# using pcl_ros.  Define the missing bridge before importing pcl_ros.
+find_package(Qhull CONFIG QUIET)
+if(TARGET Qhull::qhull_r AND NOT TARGET QHULL::QHULL)
+  add_library(QHULL::QHULL INTERFACE IMPORTED)
+  set_property(TARGET QHULL::QHULL PROPERTY
+    INTERFACE_LINK_LIBRARIES Qhull::qhull_r
+  )
+endif()
+
+find_package(PCL REQUIRED COMPONENTS common io filters kdtree)
 find_package(pcl_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+
+# The upstream ARM64 pcl_ros Debian export captures every PCL component and
+# native /usr include path.  In a sysroot build that incorrectly pulls in the
+# unused VTK/X11 visualization stack.  Retain the ROS/tf2 and PCL components
+# used by pcl_ros_tf while keeping native builds untouched.
+if(CMAKE_CROSSCOMPILING AND TARGET pcl_ros::pcl_ros_tf)
+  set_target_properties(pcl_ros::pcl_ros_tf PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES
+      "/opt/ros/humble/include/pcl_ros;/opt/ros/humble/include/pcl_conversions;${PCL_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES
+      "rclcpp::rclcpp;tf2::tf2;tf2_ros::tf2_ros;tf2_geometry_msgs::tf2_geometry_msgs;pcl_common"
+  )
+endif()
+if(CMAKE_CROSSCOMPILING AND TARGET pcl_ros::pcd_to_pointcloud_lib)
+  set_target_properties(pcl_ros::pcd_to_pointcloud_lib PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES
+      "/opt/ros/humble/include/pcl_ros;/opt/ros/humble/include/pcl_conversions;${PCL_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "rclcpp::rclcpp;pcl_common;pcl_io"
+  )
+endif()
 
 option(USE_LIVOX_CUSTOM_MSG "Build Livox CustomMsg support" OFF)
 if(USE_LIVOX_CUSTOM_MSG)
@@ -76,6 +114,9 @@ set(dependencies
   std_msgs
   std_srvs
   visualization_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
   pcl_ros
   pcl_conversions
 )
@@ -86,7 +127,6 @@ endif()
 
 # Thirdparty libraries
 find_package(Eigen3 REQUIRED)
-find_package(PCL REQUIRED COMPONENTS common io)
 
 message(Eigen: ${EIGEN3_INCLUDE_DIR})
 message(STATUS "PCL: ${PCL_INCLUDE_DIRS}")
@@ -101,12 +141,26 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 ament_export_dependencies(rosidl_default_runtime)
 
 add_executable(fastlio_mapping src/laserMapping.cpp include/ikd-Tree/ikd_Tree.cpp src/preprocess.cpp)
+
+if(CMAKE_CROSSCOMPILING)
+  target_link_options(fastlio_mapping PRIVATE
+    "-Wl,-rpath-link,${CMAKE_SYSROOT}/usr/lib/aarch64-linux-gnu"
+  )
+endif()
 target_include_directories(fastlio_mapping PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
   ${PCL_INCLUDE_DIRS}
 )
-target_link_libraries(fastlio_mapping ${PCL_LIBRARIES} ${PYTHON_LIBRARIES} Eigen3::Eigen)
+target_link_libraries(
+  fastlio_mapping
+  pcl_common
+  pcl_io
+  pcl_filters
+  pcl_kdtree
+  ${PYTHON_LIBRARIES}
+  Eigen3::Eigen
+)
 target_include_directories(fastlio_mapping PRIVATE ${PYTHON_INCLUDE_DIRS})
 
 list(APPEND EOL_LIST "foxy" "galactic" "eloquent" "dashing" "crystal")

@@ -19,7 +19,8 @@ enum LID_TYPE
   VELO16,
   OUST64,
   MID360,
-  LIVOX_POINTCLOUD2
+  LIVOX_POINTCLOUD2,
+  VANJEE
 }; //{1, 2, 3}
 enum TIME_UNIT
 {
@@ -189,6 +190,7 @@ private:
   void velodyne_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void mid360_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void livox_pointcloud2_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
+  void vanjee_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void default_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void give_feature(PointCloudXYZI &pl, vector<orgtype> &types);
   void pub_func(PointCloudXYZI &pl, const rclcpp::Time &ct);

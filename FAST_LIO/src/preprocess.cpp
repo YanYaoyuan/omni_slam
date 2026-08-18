@@ -2,12 +2,72 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <limits>
 
 #include <pcl/common/common.h>
 
 #define RETURN0 0x00
 #define RETURN0AND1 0x10
+
+namespace
+{
+const sensor_msgs::msg::PointField *find_field(
+    const sensor_msgs::msg::PointCloud2 &msg, const std::string &name)
+{
+  const auto it = std::find_if(msg.fields.begin(), msg.fields.end(), [&name](const auto &field) {
+    return field.name == name;
+  });
+  return it == msg.fields.end() ? nullptr : &(*it);
+}
+
+template <typename T>
+double read_number(const uint8_t *data)
+{
+  T value;
+  std::memcpy(&value, data, sizeof(value));
+  return static_cast<double>(value);
+}
+
+bool read_field(
+    const uint8_t *point, const sensor_msgs::msg::PointField *field, double &value)
+{
+  if (field == nullptr)
+    return false;
+
+  const uint8_t *data = point + field->offset;
+  switch (field->datatype)
+  {
+  case sensor_msgs::msg::PointField::INT8:
+    value = read_number<int8_t>(data);
+    break;
+  case sensor_msgs::msg::PointField::UINT8:
+    value = read_number<uint8_t>(data);
+    break;
+  case sensor_msgs::msg::PointField::INT16:
+    value = read_number<int16_t>(data);
+    break;
+  case sensor_msgs::msg::PointField::UINT16:
+    value = read_number<uint16_t>(data);
+    break;
+  case sensor_msgs::msg::PointField::INT32:
+    value = read_number<int32_t>(data);
+    break;
+  case sensor_msgs::msg::PointField::UINT32:
+    value = read_number<uint32_t>(data);
+    break;
+  case sensor_msgs::msg::PointField::FLOAT32:
+    value = read_number<float>(data);
+    break;
+  case sensor_msgs::msg::PointField::FLOAT64:
+    value = read_number<double>(data);
+    break;
+  default:
+    return false;
+  }
+  return std::isfinite(value);
+}
+} // namespace
 
 Preprocess::Preprocess() : feature_enabled(0), lidar_type(AVIA), blind(0.01), point_filter_num(1)
 {
@@ -93,6 +153,10 @@ void Preprocess::process(const sensor_msgs::msg::PointCloud2::UniquePtr &msg, Po
 
   case LIVOX_POINTCLOUD2:
     livox_pointcloud2_handler(msg);
+    break;
+
+  case VANJEE:
+    vanjee_handler(msg);
     break;
 
   default:
@@ -638,6 +702,150 @@ void Preprocess::livox_pointcloud2_handler(const sensor_msgs::msg::PointCloud2::
     {
       pl_surf.push_back(std::move(added_pt));
     }
+  }
+
+  std::sort(pl_surf.points.begin(), pl_surf.points.end(), [](const PointType &a, const PointType &b) {
+    return a.curvature < b.curvature;
+  });
+}
+
+void Preprocess::vanjee_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg)
+{
+  pl_surf.clear();
+  pl_corn.clear();
+  pl_full.clear();
+
+  if (msg->is_bigendian)
+  {
+    RCLCPP_ERROR_ONCE(
+        rclcpp::get_logger("fast_lio.preprocess"),
+        "Vanjee big-endian PointCloud2 is not supported");
+    return;
+  }
+
+  const auto *field_x = find_field(*msg, "x");
+  const auto *field_y = find_field(*msg, "y");
+  const auto *field_z = find_field(*msg, "z");
+  const auto *field_intensity = find_field(*msg, "intensity");
+  const auto *field_ring = find_field(*msg, "ring");
+  const auto *field_timestamp = find_field(*msg, "timestamp");
+  if (field_timestamp == nullptr)
+    field_timestamp = find_field(*msg, "time");
+
+  if (field_x == nullptr || field_y == nullptr || field_z == nullptr)
+  {
+    RCLCPP_ERROR_ONCE(
+        rclcpp::get_logger("fast_lio.preprocess"),
+        "Vanjee PointCloud2 must contain x, y and z fields");
+    return;
+  }
+
+  const size_t point_count = static_cast<size_t>(msg->width) * msg->height;
+  if (point_count == 0 || msg->point_step == 0)
+    return;
+
+  auto point_data = [&msg](size_t index) -> const uint8_t * {
+    const size_t row = index / msg->width;
+    const size_t column = index % msg->width;
+    return msg->data.data() + row * msg->row_step + column * msg->point_step;
+  };
+
+  double first_timestamp = std::numeric_limits<double>::max();
+  double last_timestamp = std::numeric_limits<double>::lowest();
+  if (field_timestamp != nullptr)
+  {
+    for (size_t i = 0; i < point_count; ++i)
+    {
+      double timestamp = 0.0;
+      if (read_field(point_data(i), field_timestamp, timestamp))
+      {
+        first_timestamp = std::min(first_timestamp, timestamp);
+        last_timestamp = std::max(last_timestamp, timestamp);
+      }
+    }
+  }
+
+  given_offset_time = first_timestamp != std::numeric_limits<double>::max() &&
+                      (last_timestamp - first_timestamp) * time_unit_scale > 1.0e-6;
+  if (!given_offset_time && field_ring == nullptr)
+  {
+    RCLCPP_WARN_ONCE(
+        rclcpp::get_logger("fast_lio.preprocess"),
+        "Vanjee PointCloud2 has no usable timestamp/time or ring field; "
+        "per-point time will be zero");
+  }
+  if (feature_enabled)
+  {
+    RCLCPP_WARN_ONCE(
+        rclcpp::get_logger("fast_lio.preprocess"),
+        "Vanjee preprocessing currently publishes surface points only; "
+        "keep feature_extract_enable=false");
+  }
+
+  const int scan_count = std::max(1, N_SCANS);
+  const double omega_l = 0.361 * SCAN_RATE;
+  std::vector<bool> is_first(scan_count, true);
+  std::vector<double> first_yaw(scan_count, 0.0);
+  std::vector<float> last_offset(scan_count, 0.0f);
+  const int filter_step = std::max(1, point_filter_num);
+  pl_surf.reserve(point_count / filter_step + 1);
+
+  for (size_t i = 0; i < point_count; ++i)
+  {
+    const uint8_t *data = point_data(i);
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
+    if (!read_field(data, field_x, x) || !read_field(data, field_y, y) ||
+        !read_field(data, field_z, z))
+      continue;
+
+    double ring_value = 0.0;
+    const bool has_ring = read_field(data, field_ring, ring_value);
+    const int ring = has_ring ? static_cast<int>(ring_value) : 0;
+    if (ring < 0 || ring >= scan_count)
+      continue;
+
+    float offset_ms = 0.0f;
+    double timestamp = 0.0;
+    if (given_offset_time && read_field(data, field_timestamp, timestamp))
+    {
+      offset_ms = static_cast<float>(
+          std::max(0.0, (timestamp - first_timestamp) * time_unit_scale));
+    }
+    else if (field_ring != nullptr && omega_l > 0.0)
+    {
+      const double yaw = std::atan2(y, x) * 57.29577951308232;
+      if (is_first[ring])
+      {
+        first_yaw[ring] = yaw;
+        is_first[ring] = false;
+      }
+      else
+      {
+        offset_ms = static_cast<float>(
+            (first_yaw[ring] - yaw + (yaw > first_yaw[ring] ? 360.0 : 0.0)) / omega_l);
+        if (offset_ms < last_offset[ring])
+          offset_ms += static_cast<float>(360.0 / omega_l);
+      }
+      last_offset[ring] = offset_ms;
+    }
+
+    if (i % filter_step != 0 || x * x + y * y + z * z <= blind * blind)
+      continue;
+
+    double intensity = 0.0;
+    read_field(data, field_intensity, intensity);
+    PointType point;
+    point.x = static_cast<float>(x);
+    point.y = static_cast<float>(y);
+    point.z = static_cast<float>(z);
+    point.intensity = static_cast<float>(intensity);
+    point.normal_x = 0.0f;
+    point.normal_y = 0.0f;
+    point.normal_z = 0.0f;
+    point.curvature = offset_ms;
+    pl_surf.push_back(std::move(point));
   }
 
   std::sort(pl_surf.points.begin(), pl_surf.points.end(), [](const PointType &a, const PointType &b) {
