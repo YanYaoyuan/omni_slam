@@ -110,6 +110,15 @@ class WaitWithCancelTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             wait_with_cancel(lambda: False, lambda: False, -1.0)
 
+    def test_non_callable_flags_raise_type_error(self):
+        # Regression: rclpy exposes is_cancel_requested as a property, so
+        # passing the attribute (a bool) instead of a callable used to
+        # blow up mid-wait with "'bool' object is not callable".
+        with self.assertRaises(TypeError):
+            wait_with_cancel(lambda: False, False, 1.0)
+        with self.assertRaises(TypeError):
+            wait_with_cancel(False, lambda: False, 1.0)
+
     def test_real_cancel_is_honored_promptly(self):
         # A cancel flag flipped by a real thread must be honored well under
         # the 30 s service timeout this wait replaces.

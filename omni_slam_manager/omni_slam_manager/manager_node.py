@@ -368,8 +368,12 @@ class SlamManagerNode(Node):
                 goal_handle, result, REASON_MAP_SAVE_UNAVAILABLE, "map_save service unavailable"
             )
         future = self._map_save_client.call_async(Trigger.Request())
+        # rclpy exposes is_cancel_requested as a *property*: pass a
+        # zero-arg callable, not the bool value.
         if not wait_with_cancel(
-            future.done, goal_handle.is_cancel_requested, self._save_timeout
+            future.done,
+            lambda: goal_handle.is_cancel_requested,
+            self._save_timeout,
         ):
             if goal_handle.is_cancel_requested:
                 return self._cancel_save(goal_handle, result)

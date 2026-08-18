@@ -27,6 +27,10 @@ def wait_with_cancel(
     Returns True when the call completed, False on cancel or timeout.
     ``sleep``/``now`` are injectable so tests can run without real waits.
     """
+    if not callable(done) or not callable(cancel_requested):
+        # e.g. a bare ``goal_handle.is_cancel_requested`` (a property ->
+        # bool) instead of ``lambda: goal_handle.is_cancel_requested``.
+        raise TypeError("done and cancel_requested must be zero-arg callables")
     if poll_sec <= 0.0:
         raise ValueError("poll_sec must be positive")
     if timeout < 0.0:

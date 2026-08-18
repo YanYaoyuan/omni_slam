@@ -44,6 +44,20 @@ class SaveMapCancelRegressionTests(unittest.TestCase):
         self.assertRegex(execute, r"wait_with_cancel\(")
         self.assertRegex(execute, r"_cancel_save\(goal_handle, result\)")
 
+    def test_save_map_wait_gets_callable_cancel_flag(self):
+        # rclpy's is_cancel_requested is a property: the wait must receive
+        # a zero-arg callable, never the bare attribute (a bool).
+        source = _manager_source()
+        execute = source[source.index("def _execute_save_map("):]
+        execute = execute[: execute.index("\n    def ")]
+        self.assertRegex(
+            execute, r"lambda:\s*goal_handle\.is_cancel_requested"
+        )
+        # The original bug: passing the property value directly.
+        self.assertNotRegex(
+            execute, r"future\.done,\s*goal_handle\.is_cancel_requested\b"
+        )
+
     def test_save_cancel_rolls_back_to_mapping(self):
         source = _manager_source()
         self.assertRegex(source, r"REASON_SAVE_CANCELLED\s*=\s*1104")
