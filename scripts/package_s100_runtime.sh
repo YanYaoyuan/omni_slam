@@ -92,7 +92,11 @@ Omni SLAM for RDK S100
 
 1. Copy this directory to the S100.
 2. Run: source setup.bash
-3. Start a binary from bin/, or use the launch files under share/.
+3. Run: omni_slam_ctl manager-start
+4. Run: omni_slam_ctl help
+
+Logs from the manager and its mapping/localization child processes are under
+/userdata/omni/log. Use `omni_slam_ctl logs-follow` to follow the current log.
 
 The bundle includes application-specific ARM64 shared-library dependencies.
 The board must provide RDK OS and ROS 2 Humble/TogetheROS under /opt/tros/humble
@@ -194,6 +198,7 @@ sort -u -o "${dependency_manifest}" "${dependency_manifest}"
 
 test -x "${output_root}/bin/fastlio_mapping"
 test -x "${output_root}/bin/icp_node"
+test -x "${output_root}/bin/omni_slam_ctl"
 test -d "${output_root}/config/fast_lio"
 test -d "${output_root}/share/ament_index"
 

@@ -21,6 +21,20 @@ class ProcessSupervisorTests(unittest.TestCase):
         with self.assertRaises(ProcessSupervisorError):
             expand_command("echo {missing}")
 
+    def test_vbot_localization_arguments_are_expanded(self):
+        command = expand_command(
+            "ros2 launch fast_lio vbot_relocalization.launch.py "
+            "map_path:={map_path} initial_x:={initial_x} initial_yaw:={initial_yaw}",
+            {
+                "map_path": "/userdata/omni/maps/factory a/map.pcd",
+                "initial_x": "2.5",
+                "initial_yaw": "1.57",
+            },
+        )
+        self.assertIn("map_path:=/userdata/omni/maps/factory a/map.pcd", command)
+        self.assertIn("initial_x:=2.5", command)
+        self.assertIn("initial_yaw:=1.57", command)
+
     def test_start_and_stop_process_group(self):
         supervisor = ProcessSupervisor()
         supervisor.start(f'{sys.executable} -c "import time; time.sleep(30)"')

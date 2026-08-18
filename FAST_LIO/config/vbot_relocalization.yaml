@@ -1,0 +1,57 @@
+/**:
+    ros__parameters:
+        locate_in_prior_map: true
+        prior_map_path: ""
+        feature_extract_enable: false
+        point_filter_num: 3
+        max_iteration: 3
+        filter_size_surf: 0.5
+        filter_size_map: 0.5
+        cube_side_length: 1000.0
+        runtime_pos_log_enable: false
+        map_file_path: ""
+
+        common:
+            odom_frame_id: "lio_odom"
+            sensor_frame_id: "lidar_frame"
+            base_frame_id: "base_link"
+            send_odom_base_tf: false
+            lid_topic: "/lidar_points"
+            imu_topic: "/lidar_imu"
+            time_sync_en: false
+            time_offset_lidar_to_imu: 0.0
+
+        preprocess:
+            # 6 = Vanjee PointCloud2: x/y/z/intensity/ring/timestamp。
+            lidar_type: 6
+            scan_line: 16
+            blind: 0.5
+            # vbot 驱动的 timestamp 字段单位为秒。
+            timestamp_unit: 0
+            scan_rate: 5
+
+        mapping:
+            acc_cov: 0.1
+            gyr_cov: 0.1
+            b_acc_cov: 0.0001
+            b_gyr_cov: 0.0001
+            fov_degree: 360.0
+            det_range: 60.0
+            extrinsic_est_en: false
+            # T_I_L = inverse(T_B_I) * T_B_L，由 vbot_calib.yaml 推导。
+            extrinsic_T: [0.0130608009, -0.0168667183, 0.0455456366]
+            extrinsic_R: [0.9999891405,  0.0038087908, -0.0026854994,
+                         -0.0037736391,  0.9999086978,  0.0129751988,
+                          0.0027346740, -0.0129649238,  0.9999122123]
+
+        publish:
+            path_en: false
+            effect_map_en: false
+            map_en: false
+            scan_publish_en: true
+            dense_publish_en: true
+            scan_bodyframe_pub_en: true
+
+        pcd_save:
+            pcd_save_en: false
+            interval: -1

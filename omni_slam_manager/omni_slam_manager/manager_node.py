@@ -50,6 +50,34 @@ REASON_LOCALIZATION_TIMEOUT = 1202
 REASON_LOCALIZATION_CANCELLED = 1203
 
 
+ROBOT_PROFILES = {
+    "omni_dog": {
+        "mapping_command": (
+            "ros2 launch fast_lio omni_dog.launch.py "
+            "map_path:={map_source_path}"
+        ),
+        "localization_command": (
+            "ros2 launch fast_lio omni_dog_relocalization.launch.py "
+            "map_path:={map_path} initial_x:={initial_x} initial_y:={initial_y} "
+            "initial_z:={initial_z} initial_yaw:={initial_yaw}"
+        ),
+        "imu_topic": "/front_lidar/imu",
+    },
+    "vbot": {
+        "mapping_command": (
+            "ros2 launch fast_lio vbot.launch.py "
+            "map_path:={map_source_path}"
+        ),
+        "localization_command": (
+            "ros2 launch fast_lio vbot_relocalization.launch.py "
+            "map_path:={map_path} initial_x:={initial_x} initial_y:={initial_y} "
+            "initial_z:={initial_z} initial_yaw:={initial_yaw}"
+        ),
+        "imu_topic": "/lidar_imu",
+    },
+}
+
+
 class SlamManagerNode(Node):
     def __init__(self) -> None:
         super().__init__("omni_slam_manager")
@@ -58,19 +86,28 @@ class SlamManagerNode(Node):
         self._machine = SlamStateMachine()
         self._process = ProcessSupervisor()
 
+        self.declare_parameter("robot_profile", "omni_dog")
+        robot_profile = str(self.get_parameter("robot_profile").value)
+        if robot_profile not in ROBOT_PROFILES:
+            raise ValueError(
+                f"unsupported robot_profile '{robot_profile}'; "
+                f"expected one of {sorted(ROBOT_PROFILES)}"
+            )
+        profile = ROBOT_PROFILES[robot_profile]
+
         self.declare_parameter("map_root", "/var/lib/omni/maps")
         self.declare_parameter("map_source_path", "/tmp/omni_slam_work/map.pcd")
         self.declare_parameter(
             "mapping_command",
-            "ros2 launch fast_lio omni_dog.launch.py map_path:={map_source_path}",
+            profile["mapping_command"],
         )
         self.declare_parameter(
             "localization_command",
-            "ros2 launch fast_lio omni_dog_relocalization.launch.py map_path:={map_path}",
+            profile["localization_command"],
         )
         self.declare_parameter("map_save_service", "/map_save")
         self.declare_parameter("cloud_topic", "/cloud_registered_global")
-        self.declare_parameter("imu_topic", "/front_lidar/imu")
+        self.declare_parameter("imu_topic", profile["imu_topic"])
         self.declare_parameter("odom_topic", "/state_estimation_global")
         self.declare_parameter("initial_pose_topic", "/icp_result")
         self.declare_parameter("status_period_ms", 500)
@@ -126,6 +163,8 @@ class SlamManagerNode(Node):
         self._active_asset: Optional[MapAsset] = None
         self._mapping_dirty = False
         self._mapping_session_id = ""
+
+        self.get_logger().info(f"Using SLAM robot profile: {robot_profile}")
 
         status_qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
@@ -478,6 +517,14 @@ class SlamManagerNode(Node):
         goal_handle.publish_feedback(feedback)
 
     def _localization_goal(self, goal_request) -> GoalResponse:
+        initial_guess = (
+            goal_request.initial_x,
+            goal_request.initial_y,
+            goal_request.initial_z,
+            goal_request.initial_yaw,
+        )
+        if not all(math.isfinite(float(value)) for value in initial_guess):
+            return GoalResponse.REJECT
         with self._lock:
             if self._machine.snapshot.state != SlamState.STOPPED:
                 return GoalResponse.REJECT
@@ -509,7 +556,14 @@ class SlamManagerNode(Node):
             self._machine.transition(SlamState.STARTING_LOCALIZATION)
             try:
                 self._process.start(
-                    self._localization_command, {"map_path": str(asset.pcd_path)}
+                    self._localization_command,
+                    {
+                        "map_path": str(asset.pcd_path),
+                        "initial_x": str(float(goal_handle.request.initial_x)),
+                        "initial_y": str(float(goal_handle.request.initial_y)),
+                        "initial_z": str(float(goal_handle.request.initial_z)),
+                        "initial_yaw": str(float(goal_handle.request.initial_yaw)),
+                    },
                 )
                 self._machine.transition(SlamState.RELOCALIZING)
             except ProcessSupervisorError as error:

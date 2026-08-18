@@ -11,14 +11,24 @@ class RosContractTests(unittest.TestCase):
         from omni_slam_interfaces.action import SaveMap, StartLocalization
         from omni_slam_interfaces.msg import SlamStatus
         from omni_slam_interfaces.srv import StartMapping, StopLocalization, StopMapping
-        from omni_slam_manager.manager_node import SlamManagerNode, main
+        from omni_slam_manager.manager_node import ROBOT_PROFILES, SlamManagerNode, main
 
         self.assertEqual(SlamStatus.STATE_LOCALIZED, 7)
         self.assertEqual(SaveMap.Feedback.STAGE_VERIFYING_CHECKSUM, 3)
-        self.assertIsNotNone(StartLocalization.Goal())
+        localization_goal = StartLocalization.Goal()
+        self.assertEqual(localization_goal.initial_x, 0.0)
+        self.assertEqual(localization_goal.initial_y, 0.0)
+        self.assertEqual(localization_goal.initial_z, 0.0)
+        self.assertEqual(localization_goal.initial_yaw, 0.0)
         self.assertIsNotNone(StartMapping.Request())
         self.assertIsNotNone(StopMapping.Request())
         self.assertIsNotNone(StopLocalization.Request())
+        self.assertIn("vbot.launch.py", ROBOT_PROFILES["vbot"]["mapping_command"])
+        self.assertIn(
+            "vbot_relocalization.launch.py",
+            ROBOT_PROFILES["vbot"]["localization_command"],
+        )
+        self.assertEqual(ROBOT_PROFILES["vbot"]["imu_topic"], "/lidar_imu")
         self.assertTrue(callable(main))
         self.assertTrue(issubclass(SlamManagerNode, object))
 
