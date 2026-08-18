@@ -18,15 +18,23 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import Imu, PointCloud2
+from std_msgs.msg import Float64
 from std_srvs.srv import Trigger
 
 from omni_slam_interfaces.action import SaveMap, StartLocalization
 from omni_slam_interfaces.msg import SlamStatus
 from omni_slam_interfaces.srv import StartMapping, StopLocalization, StopMapping
 
+from .cancel_wait import wait_with_cancel
 from .map_store import MapAsset, MapStore, MapStoreError
 from .process_supervisor import ProcessSupervisor, ProcessSupervisorError
 from .state_machine import InvalidTransition, SlamState, SlamStateMachine
+from .telemetry_monitor import (
+    FitnessTracker,
+    PoseJumpTracker,
+    PoseSample,
+    yaw_from_quaternion,
+)
 
 
 REASON_NONE = 0
@@ -36,6 +44,7 @@ REASON_PROCESS_EXITED = 1003
 REASON_MAP_SAVE_UNAVAILABLE = 1101
 REASON_MAP_SAVE_FAILED = 1102
 REASON_MAP_IMPORT_FAILED = 1103
+REASON_SAVE_CANCELLED = 1104
 REASON_MAP_INVALID = 1201
 REASON_LOCALIZATION_TIMEOUT = 1202
 REASON_LOCALIZATION_CANCELLED = 1203
@@ -69,6 +78,10 @@ class SlamManagerNode(Node):
         self.declare_parameter("localization_lost_timeout_ms", 3000)
         self.declare_parameter("process_stop_timeout_sec", 5.0)
         self.declare_parameter("map_save_timeout_sec", 30.0)
+        self.declare_parameter("icp_fitness_topic", "/icp_fitness")
+        self.declare_parameter("pose_jump_position_threshold_m", 0.5)
+        self.declare_parameter("pose_jump_yaw_threshold_deg", 45.0)
+        self.declare_parameter("pose_jump_refractory_sec", 0.5)
 
         self._map_source_path = Path(
             self.get_parameter("map_source_path").value
@@ -98,6 +111,18 @@ class SlamManagerNode(Node):
         self._last_odom: Optional[float] = None
         self._last_initial_pose: Optional[float] = None
         self._pose_covariance_norm = math.nan
+        self._pose_jumps = PoseJumpTracker(
+            position_threshold_m=float(
+                self.get_parameter("pose_jump_position_threshold_m").value
+            ),
+            yaw_threshold_rad=math.radians(
+                float(self.get_parameter("pose_jump_yaw_threshold_deg").value)
+            ),
+            refractory_sec=float(
+                self.get_parameter("pose_jump_refractory_sec").value
+            ),
+        )
+        self._fitness = FitnessTracker()
         self._active_asset: Optional[MapAsset] = None
         self._mapping_dirty = False
         self._mapping_session_id = ""
@@ -139,6 +164,13 @@ class SlamManagerNode(Node):
             10,
             callback_group=self._callbacks,
         )
+        self.create_subscription(
+            Float64,
+            str(self.get_parameter("icp_fitness_topic").value),
+            self._icp_fitness_callback,
+            10,
+            callback_group=self._callbacks,
+        )
         self._map_save_client = self.create_client(
             Trigger,
             str(self.get_parameter("map_save_service").value),
@@ -168,7 +200,7 @@ class SlamManagerNode(Node):
             "/omni/slam/save_map",
             execute_callback=self._execute_save_map,
             goal_callback=self._save_goal,
-            cancel_callback=lambda _: CancelResponse.REJECT,
+            cancel_callback=lambda _: CancelResponse.ACCEPT,
             callback_group=self._callbacks,
         )
         self._localization_action = ActionServer(
@@ -198,13 +230,33 @@ class SlamManagerNode(Node):
 
     def _odom_callback(self, message: Odometry) -> None:
         with self._lock:
-            self._last_odom = self._now_steady()
+            now = self._now_steady()
+            self._last_odom = now
             covariance = message.pose.covariance
             self._pose_covariance_norm = math.sqrt(sum(value * value for value in covariance))
+            pose = message.pose.pose
+            self._pose_jumps.observe(
+                PoseSample(
+                    x=pose.position.x,
+                    y=pose.position.y,
+                    z=pose.position.z,
+                    yaw=yaw_from_quaternion(
+                        pose.orientation.x,
+                        pose.orientation.y,
+                        pose.orientation.z,
+                        pose.orientation.w,
+                    ),
+                    stamp=now,
+                )
+            )
 
     def _initial_pose_callback(self, _: PoseWithCovarianceStamped) -> None:
         with self._lock:
             self._last_initial_pose = self._now_steady()
+
+    def _icp_fitness_callback(self, message: Float64) -> None:
+        with self._lock:
+            self._fitness.observe(float(message.data))
 
     def _start_mapping(self, request, response):
         with self._lock:
@@ -303,6 +355,8 @@ class SlamManagerNode(Node):
             if self._machine.snapshot.state not in (SlamState.MAPPING, SlamState.MAP_READY):
                 return self._abort_save(goal_handle, result, "mapping is not ready")
             self._machine.transition(SlamState.SAVING)
+        if goal_handle.is_cancel_requested:
+            return self._cancel_save(goal_handle, result)
         self._publish_save_feedback(
             goal_handle,
             SaveMap.Feedback.STAGE_REQUESTING_FAST_LIO_SAVE,
@@ -314,7 +368,11 @@ class SlamManagerNode(Node):
                 goal_handle, result, REASON_MAP_SAVE_UNAVAILABLE, "map_save service unavailable"
             )
         future = self._map_save_client.call_async(Trigger.Request())
-        if not self._wait_future(future, self._save_timeout):
+        if not wait_with_cancel(
+            future.done, goal_handle.is_cancel_requested, self._save_timeout
+        ):
+            if goal_handle.is_cancel_requested:
+                return self._cancel_save(goal_handle, result)
             return self._save_failed(
                 goal_handle, result, REASON_MAP_SAVE_FAILED, "map_save service timed out"
             )
@@ -329,6 +387,8 @@ class SlamManagerNode(Node):
             return self._save_failed(
                 goal_handle, result, REASON_MAP_SAVE_FAILED, message
             )
+        if goal_handle.is_cancel_requested:
+            return self._cancel_save(goal_handle, result)
 
         self._publish_save_feedback(
             goal_handle,
@@ -385,6 +445,24 @@ class SlamManagerNode(Node):
         result.reason_code = reason
         result.message = message
         goal_handle.abort()
+        return result
+
+    def _cancel_save(self, goal_handle, result: SaveMap.Result) -> SaveMap.Result:
+        # The atomic store either has no version yet or keeps the previous
+        # current version, so rolling the state back to MAPPING is all the
+        # rollback that is needed.
+        with self._lock:
+            if self._machine.snapshot.state == SlamState.SAVING:
+                self._machine.transition(
+                    SlamState.MAPPING,
+                    reason_code=REASON_SAVE_CANCELLED,
+                    reason_text="map save canceled before any version was published",
+                )
+        result.success = False
+        result.reason_code = REASON_SAVE_CANCELLED
+        result.message = "map save canceled; no map version was published"
+        goal_handle.canceled()
+        self._publish_status()
         return result
 
     @staticmethod
@@ -446,6 +524,7 @@ class SlamManagerNode(Node):
                 return result
             with self._lock:
                 snapshot = self._machine.snapshot
+                fitness = self._fitness.value
             if snapshot.state == SlamState.LOCALIZED:
                 result.success = True
                 result.final_state = int(snapshot.state)
@@ -474,7 +553,7 @@ class SlamManagerNode(Node):
             feedback = StartLocalization.Feedback()
             feedback.state = int(snapshot.state)
             feedback.elapsed_sec = float(elapsed)
-            feedback.fitness_score = math.nan
+            feedback.fitness_score = float(fitness)
             feedback.message = snapshot.reason_text
             goal_handle.publish_feedback(feedback)
             time.sleep(0.1)
@@ -509,12 +588,6 @@ class SlamManagerNode(Node):
         if goal_handle.status not in (GoalStatus.STATUS_CANCELED, GoalStatus.STATUS_ABORTED):
             goal_handle.abort()
         return result
-
-    @staticmethod
-    def _wait_future(future, timeout: float) -> bool:
-        completed = threading.Event()
-        future.add_done_callback(lambda _: completed.set())
-        return completed.wait(timeout=max(0.0, timeout))
 
     def _monitor(self) -> None:
         with self._lock:
@@ -566,6 +639,8 @@ class SlamManagerNode(Node):
         self._last_odom = None
         self._last_initial_pose = None
         self._pose_covariance_norm = math.nan
+        self._pose_jumps.reset()
+        self._fitness.reset()
 
     def _age_ms(self, stamp: Optional[float], now: float) -> float:
         return math.nan if stamp is None else max(0.0, (now - stamp) * 1000.0)
@@ -592,9 +667,9 @@ class SlamManagerNode(Node):
             message.lidar_age_ms = self._age_ms(self._last_cloud, now)
             message.imu_age_ms = self._age_ms(self._last_imu, now)
             message.odom_age_ms = self._age_ms(self._last_odom, now)
-            message.fitness_score = math.nan
+            message.fitness_score = float(self._fitness.value)
             message.pose_covariance_norm = self._pose_covariance_norm
-            message.pose_jump_count = 0
+            message.pose_jump_count = self._pose_jumps.count
             message.reason_code = snapshot.reason_code
             message.reason_text = snapshot.reason_text
             message.status_sequence = snapshot.sequence

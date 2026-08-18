@@ -1,6 +1,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <std_msgs/msg/float64.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -35,6 +36,7 @@ public:
         this->declare_parameter("map_path", "");
         this->declare_parameter("map_frame_id", "map");
         this->declare_parameter("fitness_score_thre", 0.0);
+        this->declare_parameter("icp_fitness_topic", "icp_fitness");
         this->declare_parameter("map_voxel_leaf_size", 0.1);
         this->declare_parameter("cloud_voxel_leaf_size", 0.1);
         this->declare_parameter("converged_count_thre", 20);
@@ -52,6 +54,7 @@ public:
         this->get_parameter("map_path", map_path);
         this->get_parameter("map_frame_id", map_frame);
         this->get_parameter("fitness_score_thre", fitness_score_thre);
+        this->get_parameter("icp_fitness_topic", icp_fitness_topic);
         this->get_parameter("map_voxel_leaf_size", map_voxel_leaf_size);
         this->get_parameter("cloud_voxel_leaf_size", cloud_voxel_leaf_size);
         this->get_parameter("converged_count_thre", converged_count_thre);
@@ -60,6 +63,7 @@ public:
         this->get_parameter("pointcloud_topic", pointcloud_topic);
 
         publisher_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("icp_result", 10);
+        fitness_pub_ = this->create_publisher<std_msgs::msg::Float64>(icp_fitness_topic, 10);
 #ifdef USE_LIVOX
         if(pcl_type == "livox")
         {
@@ -195,6 +199,9 @@ private:
         // Get fitness score
         double fitness_score = icp.getFitnessScore(max_correspondence_distance);
         RCLCPP_INFO(this->get_logger(), "ICP fitness score: %f", fitness_score);
+        std_msgs::msg::Float64 fitness_msg;
+        fitness_msg.data = fitness_score;
+        fitness_pub_->publish(fitness_msg);
 
         if (fitness_score < fitness_score_thre && icp.hasConverged())
         {
@@ -317,6 +324,9 @@ private:
         // Get fitness score
         double fitness_score = icp.getFitnessScore(max_correspondence_distance);
         RCLCPP_INFO(this->get_logger(), "ICP fitness score: %f", fitness_score);
+        std_msgs::msg::Float64 fitness_msg;
+        fitness_msg.data = fitness_score;
+        fitness_pub_->publish(fitness_msg);
 
         if (icp.hasConverged() && fitness_score < fitness_score_thre && converged_count > converged_count_thre)
         {
@@ -410,6 +420,8 @@ private:
     }
 
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr publisher_;
+    rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr fitness_pub_;
+    std::string icp_fitness_topic;
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_sub_;
 #ifdef USE_LIVOX
     rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr lvx_cloud_sub_;

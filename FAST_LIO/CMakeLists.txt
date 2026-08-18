@@ -141,6 +141,9 @@ if(BUILD_TESTING)
   ament_add_pytest_test(phase0_regressions
     test/test_phase0_regressions.py
   )
+  ament_add_pytest_test(phase2_regressions
+    test/test_phase2_regressions.py
+  )
 endif()
 
 install(DIRECTORY include/fast_lio/ DESTINATION include/fast_lio)

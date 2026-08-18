@@ -26,8 +26,14 @@ bool initialized
 float32 lidar_age_ms
 float32 imu_age_ms
 float32 odom_age_ms
+# Newest ICP alignment score (lower is better), published by icp_node on
+# /icp_fitness during relocalization. NaN while no source exists (mapping
+# mode, or before the first ICP iteration).
 float32 fitness_score
 float32 pose_covariance_norm
+# Discontinuities observed in the global odometry stream (position or
+# heading jumps above the manager thresholds) in the current session.
+# A rising count while LOCALIZED indicates a suspect relocalization.
 uint32 pose_jump_count
 uint32 reason_code
 string reason_text
