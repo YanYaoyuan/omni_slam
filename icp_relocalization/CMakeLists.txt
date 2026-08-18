@@ -20,7 +20,33 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(PCL REQUIRED COMPONENTS
+  common
+  io
+  filters
+  registration
+  features
+  search
+  kdtree
+  sample_consensus
+)
 find_package(pcl_ros REQUIRED)
+find_package(pcl_conversions REQUIRED)
+if(CMAKE_CROSSCOMPILING AND TARGET pcl_ros::pcl_ros_tf)
+  set_target_properties(pcl_ros::pcl_ros_tf PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES
+      "/opt/ros/humble/include/pcl_ros;/opt/ros/humble/include/pcl_conversions;${PCL_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES
+      "rclcpp::rclcpp;tf2::tf2;tf2_ros::tf2_ros;tf2_geometry_msgs::tf2_geometry_msgs;pcl_common"
+  )
+endif()
+if(CMAKE_CROSSCOMPILING AND TARGET pcl_ros::pcd_to_pointcloud_lib)
+  set_target_properties(pcl_ros::pcd_to_pointcloud_lib PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES
+      "/opt/ros/humble/include/pcl_ros;/opt/ros/humble/include/pcl_conversions;${PCL_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "rclcpp::rclcpp;pcl_common;pcl_io"
+  )
+endif()
 find_package(tf2_ros REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
@@ -34,7 +60,33 @@ include_directories(${OpenMP_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 add_executable(icp_node src/icp_node.cpp)
-ament_target_dependencies(icp_node rclcpp std_msgs  geometry_msgs  tf2 tf2_ros tf2_geometry_msgs pcl_ros )
+ament_target_dependencies(
+  icp_node
+  rclcpp
+  std_msgs
+  sensor_msgs
+  geometry_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  pcl_ros
+  pcl_conversions
+)
+target_link_libraries(
+  icp_node
+  pcl_common
+  pcl_io
+  pcl_filters
+  pcl_registration
+  pcl_search
+  pcl_kdtree
+  pcl_sample_consensus
+)
+if(CMAKE_CROSSCOMPILING)
+  target_link_options(icp_node PRIVATE
+    "-Wl,-rpath-link,${CMAKE_SYSROOT}/usr/lib/aarch64-linux-gnu"
+  )
+endif()
 if(USE_LIVOX)
   ament_target_dependencies(icp_node livox_ros_driver2)
 endif()
@@ -67,7 +119,32 @@ ament_target_dependencies(
 add_executable(sac_ia_gicp
   src/sac_ia_gicp.cpp
 )
-ament_target_dependencies(sac_ia_gicp  rclcpp  std_msgs  PCL  pcl_ros  Eigen3)
+ament_target_dependencies(
+  sac_ia_gicp
+  rclcpp
+  std_msgs
+  sensor_msgs
+  geometry_msgs
+  pcl_ros
+  pcl_conversions
+  Eigen3
+)
+target_link_libraries(
+  sac_ia_gicp
+  pcl_common
+  pcl_io
+  pcl_filters
+  pcl_registration
+  pcl_features
+  pcl_search
+  pcl_kdtree
+  pcl_sample_consensus
+)
+if(CMAKE_CROSSCOMPILING)
+  target_link_options(sac_ia_gicp PRIVATE
+    "-Wl,-rpath-link,${CMAKE_SYSROOT}/usr/lib/aarch64-linux-gnu"
+  )
+endif()
 
 # Install launch files
 install(

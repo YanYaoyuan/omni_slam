@@ -1,6 +1,6 @@
 # Omni SLAM GitHub Actions 跨平台流水线
 
-本流水线不调整现有 ROS 包与源码目录，只增加 GitHub Actions 和 CI 辅助文件。
+本项目使用 GitHub Actions 构建 x86、Orin NX 和 RDK S100 三个平台产物。
 
 ## 工作流
 
@@ -18,11 +18,7 @@ PR 只执行 x86 构建和测试，不会把不可信 PR 代码发送到 Orin �
 在 GitHub 仓库 `Settings -> Secrets and variables -> Actions -> Variables` 配置：
 
 - `OMNI_ENABLE_ORIN_RUNNER=true`：已有标签为 `self-hosted,linux,arm64,orin` 的可信 Orin Runner 后再打开。
-- `OMNI_ENABLE_S100_BUILD=true`：确认官方镜像包含匹配 RDK OS 4/TROS Humble 的 S100 sysroot 后再打开。
-
-在 `Actions -> Secrets` 配置：
-
-- `S100_SYSROOT_URL`：与 RDK OS 4.0.x / TROS Humble 匹配的官方 sysroot `tar.gz` 下载地址。建议使用短期签名 URL，不要把 SDK/sysroot 提交到 Git。
+- `OMNI_ENABLE_S100_BUILD=true`：启用 S100 交叉编译。
 
 未配置时对应平台明确显示为 skipped；正式 `v*` release 会在 preflight 失败，不会发布缺平台的假完整版本。
 
@@ -40,13 +36,37 @@ Orin 流水线在构建前后执行 Docker builder/image prune，并清除 colco
 
 流水线锁定：
 
-- CPU 工具链镜像：`registry.d-robotics.cc/deliver/ai_toolchain_ubuntu_22_s100_s600_cpu:v3.7.0`
+- TogetheROS 交叉编译镜像：`pc_tros_ubuntu22.04:v1.0.0`
+- 官方镜像包：`http://archive.d-robotics.cc/TogetheROS/cross_compile_docker/pc_tros_ubuntu22.04_v1.0.0.tar.gz`
+- 官方镜像包 SHA-256：`ec065c268782373311421f0bb7f2212bfec6584a7070a9737468055a6bce2c88`
 - `D-Robotics/robot_dev_config`：`f44b1ad2575b34c189fd470de1db9c5ad48b6886`
+- `D-Robotics/sysroot_docker`：`de9fa286f71a72d24c349477cd59f41cc2cc3d8f`
 - 官方入口：`bash robot_dev_config/build.sh -p S100`
 
-注意：OpenExplorer 算法工具链镜像与 TROS 交叉编译 sysroot 必须版本匹配。首次启用前应在手动 workflow_dispatch 中验证镜像内存在 `s100_build.sh`、`aarch64_toolchainfile.cmake` 以及构建需要的 sysroot。缺失时流水线会失败，不会退回本机编译。
+这与 OpenExplorer 的 `ai_toolchain_ubuntu_22_s100_s600_cpu:v3.7.0` 是两套不同的工具链。后者用于算法模型转换和 BPU 开发，不是 `robot_dev_config` 文档指定的 ROS C++ 交叉编译环境。官方 TROS 镜像包含 x86_64 主机侧的 ROS 2 Humble、colcon 和 AArch64 编译器，但不包含完整的 S100 目标库。
 
-`robot_dev_config` 要求 sysroot 位于工作区的 `cc_ws/sysroot_docker`。流水线通过 `S100_SYSROOT_URL` 下载并解压到该目录，然后才执行官方 `build.sh -p S100`。缺少 sysroot 或目录结构不正确时会直接失败，避免用错误宿主库生成不可运行产物。
+`robot_dev_config/build.sh -p S100` 会把 `cc_ws/sysroot_docker/usr_s100` 链接为目标 `/usr`，CMake 工具链也把 `cc_ws/sysroot_docker` 设为 `CMAKE_SYSROOT`，因此 sysroot 不能去掉。脚本从官方 `sysroot_docker` 仓库获取并锁定提交；本地模式支持断点续传。项目需要但基础环境缺少的 Jammy ARM64 Qt/VTK 运行库会补入 `usr_s100`，`pcl_ros` 和 `pcl_conversions` 的 ARM64 包会补入容器内的目标 TROS，且不会将 x86_64 宿主库混入目标环境。构建后还会检查 FAST-LIO/ICP 可执行文件及其 ARM64 架构。
+
+### S100 本地验证
+
+本地和 GitHub Actions 共用 `scripts/build_s100_cross.sh`。在当前工程中执行：
+
+```bash
+# 只检查 /data 空间、rootless Docker 和必要命令
+./scripts/test_s100_local.sh --check-only
+
+# 下载官方 TROS 镜像并执行完整交叉编译
+./scripts/test_s100_local.sh
+```
+
+官方 TROS 镜像包公开下载，不需要 registry 账号或 GitHub Secrets。首次运行后会缓存在 `/data/docker-s100/images`。本地入口启动独立的 rootless Docker，默认使用：
+
+- Docker 数据：`/data/docker-s100`
+- Docker 客户端配置：`/data/docker-s100/config`
+- 源码/sysroot/colcon 工作区：`/data/omni-s100-local`
+- 编译产物：`/data/omni-s100-local/workspace/cc_ws/tros_ws/install`
+
+该 Docker daemon 不读写系统 Docker 的 `/var/lib/docker`，也不会清理其他项目的镜像或容器。至少需要 50 GiB 可用空间。
 
 ## 缓存和存储策略
 
