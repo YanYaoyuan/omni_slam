@@ -22,6 +22,7 @@ setup(
     description="Process supervision and versioned map assets for omni_slam.",
     license="Apache-2.0",
     tests_require=["pytest"],
+    scripts=["scripts/omni_slam_ctl"],
     entry_points={
         "console_scripts": [
             "omni_slam_manager = omni_slam_manager.manager_node:main",

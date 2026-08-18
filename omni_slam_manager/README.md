@@ -55,6 +55,21 @@ odometry.
 
 ## Vbot control flow
 
+The S100 runtime installs `omni_slam_ctl`, which wraps all calls below and
+keeps the manager in the background. For normal board operation, prefer:
+
+```bash
+omni_slam_ctl manager-start
+omni_slam_ctl mapping-start vbot_001
+omni_slam_ctl map-save factory_a
+omni_slam_ctl mapping-stop
+omni_slam_ctl localization-start factory_a
+omni_slam_ctl logs-follow
+```
+
+Run `omni_slam_ctl help` for stop, status, initial-pose and log commands. The
+raw ROS 2 commands remain documented below for integration with other nodes.
+
 Start mapping:
 
 ```bash

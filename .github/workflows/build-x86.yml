@@ -83,7 +83,7 @@ jobs:
           rm -rf /var/lib/apt/lists/* /root/.cache/pip /root/.cache/colcon
 
       - name: Lint shell scripts
-        run: shellcheck scripts/*.sh
+        run: shellcheck scripts/*.sh omni_slam_manager/scripts/omni_slam_ctl
 
       - name: Build and test
         run: |
