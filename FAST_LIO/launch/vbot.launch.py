@@ -14,6 +14,7 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time')
     config_file = LaunchConfiguration('config_file')
+    map_path = LaunchConfiguration('map_path')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
@@ -23,19 +24,31 @@ def generate_launch_description():
         'config_file',
         default_value=default_config_file,
         description='Yaml config file path')
+    declare_map_path_cmd = DeclareLaunchArgument(
+        'map_path',
+        default_value='/tmp/omni_slam_work/map.pcd',
+        description='Absolute output PCD path used by the map_save service')
 
     fast_lio_node = Node(
         package='fast_lio',
         executable='fastlio_mapping',
         parameters=[
             config_file,
-            {'use_sim_time': use_sim_time},
+            {
+                'use_sim_time': use_sim_time,
+                'common.odom_frame_id': 'lio_map',
+                'map_file_path': map_path,
+            },
         ],
         output='screen',
-        remappings=[('/Odometry', '/state_estimation')])
+        remappings=[
+            ('/Odometry', '/state_estimation_global'),
+            ('/cloud_registered', '/cloud_registered_global'),
+        ])
 
     ld = LaunchDescription()
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_config_file_cmd)
+    ld.add_action(declare_map_path_cmd)
     ld.add_action(fast_lio_node)
     return ld
