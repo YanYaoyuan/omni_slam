@@ -60,6 +60,20 @@ find_package(visualization_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+
+# Ubuntu 22.04's Qhull config exports Qhull::qhull_r, while the ROS Humble
+# pcl_ros Debian export refers to PCL's compatibility target QHULL::QHULL.
+# Depending on CMake's config/module lookup order, PCL may not create that
+# compatibility target itself, which then breaks generation of every target
+# using pcl_ros.  Define the missing bridge before importing pcl_ros.
+find_package(Qhull CONFIG QUIET)
+if(TARGET Qhull::qhull_r AND NOT TARGET QHULL::QHULL)
+  add_library(QHULL::QHULL INTERFACE IMPORTED)
+  set_property(TARGET QHULL::QHULL PROPERTY
+    INTERFACE_LINK_LIBRARIES Qhull::qhull_r
+  )
+endif()
+
 find_package(PCL REQUIRED COMPONENTS common io filters kdtree)
 find_package(pcl_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
