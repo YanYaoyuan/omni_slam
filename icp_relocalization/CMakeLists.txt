@@ -20,6 +20,18 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+
+# Ubuntu 22.04 exports Qhull::qhull_r, but the ROS Humble pcl_ros package
+# refers to PCL's QHULL::QHULL compatibility target.  Imported CMake targets
+# are scoped per package, so define the bridge here as well as in fast_lio.
+find_package(Qhull CONFIG QUIET)
+if(TARGET Qhull::qhull_r AND NOT TARGET QHULL::QHULL)
+  add_library(QHULL::QHULL INTERFACE IMPORTED)
+  set_property(TARGET QHULL::QHULL PROPERTY
+    INTERFACE_LINK_LIBRARIES Qhull::qhull_r
+  )
+endif()
+
 find_package(PCL REQUIRED COMPONENTS
   common
   io
