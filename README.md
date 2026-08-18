@@ -26,6 +26,7 @@ source setup.bash
 ros2 pkg prefix fast_lio
 ros2 pkg prefix omni_slam_manager
 command -v omni_slam_ctl
+python3 -c "from omni_slam_interfaces.action import SaveMap, StartLocalization"
 ```
 
 ## VBot 快速使用

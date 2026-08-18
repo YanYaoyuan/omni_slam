@@ -42,6 +42,17 @@ mkdir -p \
 cp -a "${install_root}/lib/." "${output_root}/lib/"
 cp -a "${install_root}/share/." "${output_root}/share/"
 
+# ament_cmake Python generators install message/service/action modules below
+# local/lib/python3.10/dist-packages, while ament_python installs the manager
+# below lib/python3.10/site-packages. Merge both into the runtime's existing
+# site-packages directory so a single PYTHONPATH exposes the whole application.
+generated_python="${install_root}/local/lib/python3.10/dist-packages"
+runtime_python="${output_root}/lib/python3.10/site-packages"
+if [[ -d "${generated_python}" ]]; then
+  mkdir -p "${runtime_python}"
+  cp -a "${generated_python}/." "${runtime_python}/"
+fi
+
 for package_name in fast_lio icp_relocalization omni_slam_interfaces omni_slam_manager; do
   package_lib="${output_root}/lib/${package_name}"
   if [[ -d "${package_lib}" ]]; then
@@ -201,6 +212,10 @@ test -x "${output_root}/bin/icp_node"
 test -x "${output_root}/bin/omni_slam_ctl"
 test -d "${output_root}/config/fast_lio"
 test -d "${output_root}/share/ament_index"
+test -f \
+  "${output_root}/lib/python3.10/site-packages/omni_slam_interfaces/__init__.py"
+test -f \
+  "${output_root}/lib/python3.10/site-packages/omni_slam_interfaces/action/_save_map.py"
 
 elf_count=0
 while IFS= read -r -d '' bundled_file; do

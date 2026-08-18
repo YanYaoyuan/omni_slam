@@ -93,8 +93,11 @@ jobs:
           runtime_root="${S100_CROSS_ROOT}/runtime"
           test -x "${runtime_root}/bin/fastlio_mapping"
           test -x "${runtime_root}/bin/icp_node"
+          test -x "${runtime_root}/bin/omni_slam_ctl"
           test -d "${runtime_root}/config/fast_lio"
           test -s "${runtime_root}/lib/DEPENDENCIES.txt"
+          test -f \
+            "${runtime_root}/lib/python3.10/site-packages/omni_slam_interfaces/action/_save_map.py"
 
           version="${VERSION_INPUT:-}"
           if [[ -z "${version}" ]]; then
