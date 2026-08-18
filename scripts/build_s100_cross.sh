@@ -5,7 +5,14 @@
 
 set -euo pipefail
 
-trap 'status=$?; printf "[s100-cross] ERROR: line %s: %s (exit %s)\n" "${LINENO}" "${BASH_COMMAND}" "${status}" >&2; exit "${status}"' ERR
+report_error() {
+  local exit_code=$?
+  printf '[s100-cross] ERROR: line %s: %s (exit %s)\n' \
+    "$1" "$2" "${exit_code}" >&2
+  exit "${exit_code}"
+}
+
+trap 'report_error "${LINENO}" "${BASH_COMMAND}"' ERR
 
 SOURCE_ROOT=${S100_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
 WORK_ROOT=${S100_WORK_ROOT:-${RUNNER_TEMP:-/tmp}/s100-cross}
@@ -80,7 +87,14 @@ docker run --rm -i \
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
-trap 'status=$?; printf "[s100-container] ERROR: line %s: %s (exit %s)\n" "${LINENO}" "${BASH_COMMAND}" "${status}" >&2; exit "${status}"' ERR
+report_container_error() {
+  local exit_code=$?
+  printf '[s100-container] ERROR: line %s: %s (exit %s)\n' \
+    "$1" "$2" "${exit_code}" >&2
+  exit "${exit_code}"
+}
+
+trap 'report_container_error "${LINENO}" "${BASH_COMMAND}"' ERR
 
 echo "=== Check toolchain and workspace ==="
 for required_file in \
