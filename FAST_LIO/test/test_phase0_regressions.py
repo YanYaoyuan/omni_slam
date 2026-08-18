@@ -159,6 +159,31 @@ class Phase0RegressionTests(unittest.TestCase):
         self.assertLess(source.index("OpaqueFunction(function=_validate_relocalization_inputs)"),
                         source.index("ld.add_action(map_odom_trans)"))
 
+    def test_vbot_relocalization_uses_vanjee_topics_and_frames(self):
+        config = (PACKAGE_ROOT / "config" / "vbot_relocalization.yaml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("locate_in_prior_map: true", config)
+        self.assertIn('odom_frame_id: "lio_odom"', config)
+        self.assertIn('sensor_frame_id: "lidar_frame"', config)
+        self.assertIn('lid_topic: "/lidar_points"', config)
+        self.assertIn('imu_topic: "/lidar_imu"', config)
+        self.assertIn("lidar_type: 6", config)
+        self.assertIn("pcd_save_en: false", config)
+
+        wrapper = (
+            PACKAGE_ROOT / "launch" / "vbot_relocalization.launch.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("'vbot_relocalization.yaml'", wrapper)
+        self.assertIn("('pointcloud_topic', '/lidar_points'", wrapper)
+        self.assertIn("('sensor_frame', 'lidar_frame'", wrapper)
+
+        product_launch = (
+            PACKAGE_ROOT / "launch" / "omni_dog_relocalization.launch.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("sensor_frame = LaunchConfiguration('sensor_frame')", product_launch)
+        self.assertIn("{'child_frame': ParameterValue(sensor_frame, value_type=str)}", product_launch)
+
     def test_prior_map_failure_throws_before_ros_endpoints(self):
         source = (PACKAGE_ROOT / "src" / "laserMapping.cpp").read_text(
             encoding="utf-8"

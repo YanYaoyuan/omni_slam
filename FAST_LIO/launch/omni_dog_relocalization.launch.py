@@ -63,6 +63,7 @@ def generate_launch_description():
     map_voxel_leaf_size = LaunchConfiguration('map_voxel_leaf_size')
     cloud_voxel_leaf_size = LaunchConfiguration('cloud_voxel_leaf_size')
     pointcloud_topic = LaunchConfiguration('pointcloud_topic')
+    sensor_frame = LaunchConfiguration('sensor_frame')
 
     default_config_file = os.path.join(
         fast_lio_share, 'config', 'omni_dog_relocalization.yaml')
@@ -103,6 +104,10 @@ def generate_launch_description():
         'pointcloud_topic',
         default_value='/front_lidar',
         description='PointCloud2 topic used by ICP')
+    declare_sensor_frame = DeclareLaunchArgument(
+        'sensor_frame',
+        default_value='livox_frame',
+        description='LiDAR frame used as the odometry child frame')
 
     map_odom_trans = Node(
         package='icp_relocalization',
@@ -126,7 +131,7 @@ def generate_launch_description():
             {'output_topic': '/state_estimation_global'},
             {'target_frame': 'lio_map'},
             {'source_frame': 'lio_odom'},
-            {'child_frame': 'livox_frame'},
+            {'child_frame': ParameterValue(sensor_frame, value_type=str)},
             {'initial_translation_tolerance': 0.5},
             {'initial_rotation_tolerance': 0.35},
         ],
@@ -205,6 +210,7 @@ def generate_launch_description():
     ld.add_action(declare_map_voxel_leaf_size)
     ld.add_action(declare_cloud_voxel_leaf_size)
     ld.add_action(declare_pointcloud_topic)
+    ld.add_action(declare_sensor_frame)
     # This synchronous preflight runs before any localization node is started.
     ld.add_action(OpaqueFunction(function=_validate_relocalization_inputs))
     ld.add_action(map_odom_trans)
