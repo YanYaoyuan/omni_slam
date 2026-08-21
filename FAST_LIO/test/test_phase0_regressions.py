@@ -63,6 +63,18 @@ class Phase0RegressionTests(unittest.TestCase):
         )
         self.assertNotRegex(writer, r"writeBinary\(\s*path\s*,")
 
+    def test_fast_lio_is_pose_only_under_omni_tf_authority(self):
+        source = (PACKAGE_ROOT / "src" / "laserMapping.cpp").read_text(
+            encoding="utf-8"
+        )
+        publish_odometry = _function_body(
+            source, r"\bvoid\s+publish_odometry\s*\("
+        )
+        self.assertIn('Node("omni_fast_lio"', source)
+        self.assertIn('declare_parameter<bool>("publish.tf_en", false)', source)
+        self.assertIn("if (publish_tf)", publish_odometry)
+        self.assertIn("tf_broadcaster_->sendTransform", publish_odometry)
+
     def test_legacy_relocalization_launch_starts_icp_only_in_delay_group(self):
         launch_file = PACKAGE_ROOT / "launch" / "relocalization.launch.py"
         source = launch_file.read_text(encoding="utf-8")
@@ -111,8 +123,9 @@ class Phase0RegressionTests(unittest.TestCase):
         self.assertIn("OpaqueFunction(function=_validate_relocalization_inputs)", source)
         self.assertLess(
             source.index("OpaqueFunction(function=_validate_relocalization_inputs)"),
-            source.index("ld.add_action(map_odom_trans)"),
+            source.index("ld.add_action(start_rviz)"),
         )
+        self.assertNotIn("transform_publisher", source)
 
     def test_product_relocalization_validates_map_before_starting_nodes(self):
         launch_file = PACKAGE_ROOT / "launch" / "omni_dog_relocalization.launch.py"
@@ -157,17 +170,21 @@ class Phase0RegressionTests(unittest.TestCase):
         ]
         self.assertEqual(len(function_calls), 1)
         self.assertLess(source.index("OpaqueFunction(function=_validate_relocalization_inputs)"),
-                        source.index("ld.add_action(map_odom_trans)"))
+                        source.index("ld.add_action(global_pointcloud_node)"))
+        self.assertNotIn("map_odom_trans", source)
+        self.assertNotIn("global_odometry_node", source)
 
     def test_vbot_relocalization_uses_vanjee_topics_and_frames(self):
         config = (PACKAGE_ROOT / "config" / "vbot_relocalization.yaml").read_text(
             encoding="utf-8"
         )
         self.assertIn("locate_in_prior_map: true", config)
-        self.assertIn('odom_frame_id: "lio_odom"', config)
-        self.assertIn('sensor_frame_id: "lidar_frame"', config)
-        self.assertIn('lid_topic: "/lidar_points"', config)
-        self.assertIn('imu_topic: "/lidar_imu"', config)
+        self.assertIn('odom_frame_id: "omni_odom"', config)
+        self.assertIn('sensor_frame_id: "omni_imu_link"', config)
+        self.assertIn('base_frame_id: "omni_base_link"', config)
+        self.assertIn("tf_en: false", config)
+        self.assertIn('lid_topic: "/omni/sensors/lidar/points"', config)
+        self.assertIn('imu_topic: "/omni/sensors/imu/data"', config)
         self.assertIn("lidar_type: 6", config)
         self.assertIn("pcd_save_en: false", config)
 
@@ -175,14 +192,34 @@ class Phase0RegressionTests(unittest.TestCase):
             PACKAGE_ROOT / "launch" / "vbot_relocalization.launch.py"
         ).read_text(encoding="utf-8")
         self.assertIn("'vbot_relocalization.yaml'", wrapper)
-        self.assertIn("('pointcloud_topic', '/lidar_points'", wrapper)
-        self.assertIn("('sensor_frame', 'lidar_frame'", wrapper)
+        self.assertIn(
+            "('pointcloud_topic', '/omni/sensors/lidar/points'", wrapper
+        )
+        self.assertIn("('tracking_frame', 'omni_imu_link'", wrapper)
 
         product_launch = (
             PACKAGE_ROOT / "launch" / "omni_dog_relocalization.launch.py"
         ).read_text(encoding="utf-8")
-        self.assertIn("sensor_frame = LaunchConfiguration('sensor_frame')", product_launch)
-        self.assertIn("{'child_frame': ParameterValue(sensor_frame, value_type=str)}", product_launch)
+        self.assertIn("tracking_frame = LaunchConfiguration('tracking_frame')", product_launch)
+        self.assertIn("'publish.tf_en': False", product_launch)
+        self.assertNotIn("global_odometry_node", product_launch)
+        self.assertNotIn("map_odom_trans", product_launch)
+
+    def test_real_dog_profiles_consume_only_manager_normalized_sensors(self):
+        for name in (
+            "omni_dog.yaml",
+            "omni_dog_relocalization.yaml",
+            "vbot.yaml",
+            "vbot_relocalization.yaml",
+        ):
+            with self.subTest(name=name):
+                config = (PACKAGE_ROOT / "config" / name).read_text(encoding="utf-8")
+                self.assertIn(
+                    'lid_topic: "/omni/sensors/lidar/points"', config
+                )
+                self.assertIn('imu_topic: "/omni/sensors/imu/data"', config)
+                self.assertNotIn('lid_topic: "/front_lidar"', config)
+                self.assertNotIn('lid_topic: "/lidar_points"', config)
 
     def test_prior_map_failure_throws_before_ros_endpoints(self):
         source = (PACKAGE_ROOT / "src" / "laserMapping.cpp").read_text(
@@ -201,13 +238,10 @@ class Phase0RegressionTests(unittest.TestCase):
     def test_relocalization_launch_exit_contract_is_fail_closed(self):
         launch_contracts = {
             "omni_dog_relocalization.launch.py": (
-                "map_odom_trans",
-                "global_odometry_node",
                 "global_pointcloud_node",
                 "fast_lio_node",
             ),
             "relocalization.launch.py": (
-                "map_odom_trans",
                 "fast_lio_node",
             ),
         }
@@ -237,6 +271,9 @@ class Phase0RegressionTests(unittest.TestCase):
                     and isinstance(node.targets[0], ast.Name)
                     and isinstance(node.value, ast.Call)
                 }
+
+                self.assertNotIn("map_odom_trans", assignments)
+                self.assertNotIn("global_odometry_node", assignments)
 
                 for variable_name in critical_nodes:
                     node_call = assignments[variable_name]

@@ -56,19 +56,10 @@ def generate_launch_description():
       default_value='',
       description='Required absolute PCD path shared by ICP and Fast-LIO')
 
-  # icp relocalization
-  map_odom_trans = Node(
-      package='icp_relocalization',
-      executable='transform_publisher',
-      name='transform_publisher',
-      output='screen',
-      on_exit=Shutdown(reason='localization transform publisher exited')
-  )
-
   icp_node = Node(
       package='icp_relocalization',
       executable='icp_node',
-      name='icp_node',
+      name='omni_icp_relocalization',
       output='screen',
       parameters=[
           # --- Blue ---
@@ -85,7 +76,8 @@ def generate_launch_description():
 
           {'map_voxel_leaf_size':0.5},
           {'cloud_voxel_leaf_size':0.3},
-          {'map_frame_id':'map'},
+          {'map_frame_id':'omni_map'},
+          {'sensor_frame_id':'omni_lidar_link'},
           {'solver_max_iter':100},
           {'max_correspondence_distance':0.1},
           {'RANSAC_outlier_rejection_threshold':0.5},
@@ -106,6 +98,7 @@ def generate_launch_description():
   fast_lio_node = Node(
       package='fast_lio',
       executable='fastlio_mapping',
+      name='omni_fast_lio',
       parameters=[
           config,
           {'prior_map_path':map_path},
@@ -120,15 +113,16 @@ def generate_launch_description():
   start_rviz = Node(
     package='rviz2',
     executable='rviz2',
+    name='omni_slam_rviz',
     arguments=['-d', rviz_config_file,'--ros-args', '--log-level', 'warn'],
     output='screen'
   )
 
   delayed_start_lio = TimerAction(
     period=5.0,
-    actions=[
-      icp_node,
-      fast_lio_node
+      actions=[
+      fast_lio_node,
+      TimerAction(period=1.0, actions=[icp_node])
     ]
   )
 
@@ -136,7 +130,6 @@ def generate_launch_description():
 
   ld.add_action(declare_map_path)
   ld.add_action(OpaqueFunction(function=_validate_relocalization_inputs))
-  ld.add_action(map_odom_trans)
   ld.add_action(start_rviz)
   ld.add_action(delayed_start_lio)
 

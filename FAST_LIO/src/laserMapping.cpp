@@ -248,8 +248,9 @@ geometry_msgs::msg::PoseStamped msg_body_pose;
 shared_ptr<Preprocess> p_pre(new Preprocess());
 shared_ptr<ImuProcess> p_imu(new ImuProcess());
 
-string odom_frame, sensor_frame, base_frame;
+string map_frame, odom_frame, sensor_frame, lidar_frame, base_frame;
 bool send_odom_base_tf = false;
+bool publish_tf = false;
 bool locate_in_prior_map = false;
 string prior_map_path;
 FILE *fp;
@@ -387,7 +388,7 @@ void h_share_model(state_ikfom &s, esekfom::dyn_share_datastruct<double> &ekfom_
 class LaserMappingNode : public rclcpp::Node
 {
 public:
-    LaserMappingNode(const rclcpp::NodeOptions &options = rclcpp::NodeOptions()) : Node("laser_mapping_node", options)
+    LaserMappingNode(const rclcpp::NodeOptions &options = rclcpp::NodeOptions()) : Node("omni_fast_lio", options)
     {
         this->declare_parameter<bool>("publish.path_en", true);
         this->declare_parameter<bool>("publish.effect_map_en", false);
@@ -396,6 +397,7 @@ public:
         this->declare_parameter<bool>("publish.scan_publish_en", true);
         this->declare_parameter<bool>("publish.dense_publish_en", true);
         this->declare_parameter<bool>("publish.scan_bodyframe_pub_en", true);
+        this->declare_parameter<bool>("publish.tf_en", false);
         this->declare_parameter<int>("max_iteration", 4);
         this->declare_parameter<string>("map_file_path", "");
         this->declare_parameter<string>("common.lid_topic", "/livox/lidar");
@@ -403,7 +405,9 @@ public:
         this->declare_parameter<bool>("common.time_sync_en", false);
         this->declare_parameter<double>("common.time_offset_lidar_to_imu", 0.0);
         this->declare_parameter<string>("common.odom_frame_id", "odom");
+        this->declare_parameter<string>("common.map_frame_id", "map");
         this->declare_parameter<string>("common.sensor_frame_id", "sensor");
+        this->declare_parameter<string>("common.lidar_frame_id", "lidar");
         this->declare_parameter<string>("common.base_frame_id", "base_frame");
         this->declare_parameter<bool>("common.send_odom_base_tf", false);
         this->declare_parameter<double>("filter_size_corner", 0.5);
@@ -439,13 +443,16 @@ public:
         this->get_parameter_or<bool>("publish.scan_publish_en", scan_pub_en, true);
         this->get_parameter_or<bool>("publish.dense_publish_en", dense_pub_en, true);
         this->get_parameter_or<bool>("publish.scan_bodyframe_pub_en", scan_body_pub_en, true);
+        this->get_parameter_or<bool>("publish.tf_en", publish_tf, false);
         this->get_parameter_or<int>("max_iteration", NUM_MAX_ITERATIONS, 4);
         this->get_parameter_or<string>("map_file_path", map_file_path, "");
         this->get_parameter_or<string>("common.lid_topic", lid_topic, "/livox/lidar");
         this->get_parameter_or<string>("common.imu_topic", imu_topic, "/livox/imu");
         this->get_parameter_or<bool>("common.time_sync_en", time_sync_en, false);
         this->get_parameter_or<string>("common.odom_frame_id", odom_frame, "odom");
+        this->get_parameter_or<string>("common.map_frame_id", map_frame, "map");
         this->get_parameter_or<string>("common.sensor_frame_id", sensor_frame, "sensor");
+        this->get_parameter_or<string>("common.lidar_frame_id", lidar_frame, "lidar");
         this->get_parameter_or<string>("common.base_frame_id", base_frame, "base_frame");
         this->get_parameter_or<bool>("common.send_odom_base_tf", send_odom_base_tf, false);
         this->get_parameter_or<double>("common.time_offset_lidar_to_imu", time_diff_lidar_to_imu, 0.0);
@@ -577,7 +584,7 @@ public:
         }
         if (locate_in_prior_map)
         {
-            sub_init_pose_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/icp_result", 10, std::bind(&LaserMappingNode::initial_pose_cbk, this, std::placeholders::_1));
+            sub_init_pose_ = this->create_subscription<nav_msgs::msg::Odometry>("/icp_result", 10, std::bind(&LaserMappingNode::initial_pose_cbk, this, std::placeholders::_1));
         }
         sub_imu_ = this->create_subscription<sensor_msgs::msg::Imu>(imu_topic, 10, std::bind(&LaserMappingNode::imu_cbk, this, std::placeholders::_1));
         pubLaserCloudFull_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/cloud_registered", 20);
@@ -587,7 +594,13 @@ public:
         pubIkdTree_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/ikd_tree", 20);
         pubOdomAftMapped_ = this->create_publisher<nav_msgs::msg::Odometry>("/Odometry", 20);
         pubPath_ = this->create_publisher<nav_msgs::msg::Path>("/path", 20);
-        tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+        if (publish_tf)
+        {
+            tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+            RCLCPP_WARN(
+                this->get_logger(),
+                "publish.tf_en=true gives FAST_LIO dynamic TF ownership; disable omni_tf_manager authority to avoid duplicate TF edges");
+        }
         tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
         tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
@@ -614,7 +627,7 @@ private:
 #ifdef USE_LIVOX
     rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr sub_pcl_livox_;
 #endif
-    rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr sub_init_pose_;
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_init_pose_;
 
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -628,7 +641,7 @@ private:
     bool flg_EKF_converged, EKF_stop_flg = 0;
     double epsi[23] = {0.001};
     bool initial_pose_received = false;
-    geometry_msgs::msg::PoseWithCovarianceStamped initial_pose;
+    nav_msgs::msg::Odometry initial_pose;
 
     inline void dump_lio_state_to_log(FILE *fp)
     {
@@ -1172,7 +1185,10 @@ private:
         trans.transform.rotation.x = odomAftMapped.pose.pose.orientation.x;
         trans.transform.rotation.y = odomAftMapped.pose.pose.orientation.y;
         trans.transform.rotation.z = odomAftMapped.pose.pose.orientation.z;
-        tf_broadcaster_->sendTransform(trans);
+        if (publish_tf)
+        {
+            tf_broadcaster_->sendTransform(trans);
+        }
     }
 
     void publish_path(rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pubPath)
@@ -1406,10 +1422,42 @@ private:
         }
     }
 
-    void initial_pose_cbk(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
+    void initial_pose_cbk(const nav_msgs::msg::Odometry::SharedPtr msg)
     {
+        if (msg->header.frame_id != map_frame || msg->child_frame_id != lidar_frame)
+        {
+            RCLCPP_ERROR(
+                this->get_logger(),
+                "Rejecting ICP result %s -> %s; expected %s -> %s",
+                msg->header.frame_id.c_str(), msg->child_frame_id.c_str(),
+                map_frame.c_str(), lidar_frame.c_str());
+            return;
+        }
+
+        // ICP yields T_map_lidar. FAST-LIO state_point is the IMU/tracking
+        // pose, and mapping.extrinsic_{R,T} is T_tracking_lidar.
+        tf2::Transform map_to_lidar;
+        tf2::fromMsg(msg->pose.pose, map_to_lidar);
+        tf2::Matrix3x3 tracking_to_lidar_rotation(
+            extrinR[0], extrinR[1], extrinR[2],
+            extrinR[3], extrinR[4], extrinR[5],
+            extrinR[6], extrinR[7], extrinR[8]);
+        tf2::Transform tracking_to_lidar(
+            tracking_to_lidar_rotation,
+            tf2::Vector3(extrinT[0], extrinT[1], extrinT[2]));
+        const tf2::Transform map_to_tracking =
+            map_to_lidar * tracking_to_lidar.inverse();
+
         initial_pose = *msg;
+        initial_pose.child_frame_id = sensor_frame;
+        initial_pose.pose.pose.position.x = map_to_tracking.getOrigin().x();
+        initial_pose.pose.pose.position.y = map_to_tracking.getOrigin().y();
+        initial_pose.pose.pose.position.z = map_to_tracking.getOrigin().z();
+        initial_pose.pose.pose.orientation = tf2::toMsg(map_to_tracking.getRotation());
         initial_pose_received = true;
+        RCLCPP_INFO(
+            this->get_logger(), "Accepted ICP seed %s -> %s, normalized from %s",
+            map_frame.c_str(), sensor_frame.c_str(), lidar_frame.c_str());
     }
 };
 

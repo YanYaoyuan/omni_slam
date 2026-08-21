@@ -12,13 +12,15 @@
         map_file_path: "./maps/scans.pcd"
 
         common:
-            odom_frame_id: "odom"
-            sensor_frame_id: "lidar_frame"
-            base_frame_id: "base_link"
+            map_frame_id: "omni_map"
+            odom_frame_id: "omni_odom"
+            sensor_frame_id: "omni_imu_link"
+            lidar_frame_id: "omni_lidar_link"
+            base_frame_id: "omni_base_link"
             send_odom_base_tf: false
-            # vbot: Vanjee WLR-722 机械雷达及其配套 lidar_imu。
-            lid_topic: "/lidar_points"
-            imu_topic: "/lidar_imu"
+            # Raw Vanjee topics are normalized by omni_tf_manager.
+            lid_topic: "/omni/sensors/lidar/points"
+            imu_topic: "/omni/sensors/imu/data"
             time_sync_en: false
             time_offset_lidar_to_imu: 0.0
 
@@ -49,6 +51,7 @@
                           0.0027346740, -0.0129649238,  0.9999122123]
 
         publish:
+            tf_en: false
             path_en: true
             effect_map_en: true
             map_en: true

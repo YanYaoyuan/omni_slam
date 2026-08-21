@@ -28,7 +28,13 @@ class RosContractTests(unittest.TestCase):
             "vbot_relocalization.launch.py",
             ROBOT_PROFILES["vbot"]["localization_command"],
         )
-        self.assertEqual(ROBOT_PROFILES["vbot"]["imu_topic"], "/lidar_imu")
+        self.assertEqual(
+            ROBOT_PROFILES["vbot"]["imu_topic"], "/omni/sensors/imu/data"
+        )
+        self.assertEqual(
+            ROBOT_PROFILES["omni_dog"]["imu_topic"],
+            "/omni/sensors/imu/data",
+        )
         self.assertTrue(callable(main))
         self.assertTrue(issubclass(SlamManagerNode, object))
 

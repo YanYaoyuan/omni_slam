@@ -16,9 +16,9 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 
 # Ubuntu 22.04 exports Qhull::qhull_r, but the ROS Humble pcl_ros package
@@ -78,6 +78,7 @@ ament_target_dependencies(
   std_msgs
   sensor_msgs
   geometry_msgs
+  nav_msgs
   tf2
   tf2_ros
   tf2_geometry_msgs
@@ -102,20 +103,6 @@ endif()
 if(USE_LIVOX)
   ament_target_dependencies(icp_node livox_ros_driver2)
 endif()
-
-add_executable(transform_publisher src/transform_publisher.cpp)
-ament_target_dependencies(transform_publisher rclcpp std_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs pcl_ros)
-
-add_executable(global_odometry_publisher src/global_odometry_publisher.cpp)
-ament_target_dependencies(
-  global_odometry_publisher
-  rclcpp
-  nav_msgs
-  geometry_msgs
-  tf2
-  tf2_ros
-  tf2_geometry_msgs
-)
 
 add_executable(global_pointcloud_publisher src/global_pointcloud_publisher.cpp)
 ament_target_dependencies(
@@ -168,8 +155,6 @@ install(
 install(
   TARGETS
     icp_node
-    transform_publisher
-    global_odometry_publisher
     global_pointcloud_publisher
     sac_ia_gicp
   DESTINATION lib/${PROJECT_NAME}

@@ -18,16 +18,16 @@ class GlobalPointcloudPublisher : public rclcpp::Node
 {
 public:
     GlobalPointcloudPublisher()
-        : Node("global_pointcloud_publisher")
+        : Node("omni_global_pointcloud_publisher")
     {
         input_topic_ = declare_parameter<std::string>(
             "input_topic", "/cloud_registered");
         output_topic_ = declare_parameter<std::string>(
             "output_topic", "/cloud_registered_global");
         target_frame_ = declare_parameter<std::string>(
-            "target_frame", "lio_map");
+            "target_frame", "omni_map");
         source_frame_ = declare_parameter<std::string>(
-            "source_frame", "lio_odom");
+            "source_frame", "omni_odom");
 
         if (input_topic_.empty() || output_topic_.empty() ||
             target_frame_.empty() || source_frame_.empty())

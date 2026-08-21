@@ -1,6 +1,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
@@ -24,7 +25,7 @@ class ICPNode : public rclcpp::Node
 {
 public:
     ICPNode()
-        : Node("icp_node")
+        : Node("omni_icp_relocalization")
     {
         this->declare_parameter("initial_x", 0.0);
         this->declare_parameter("initial_y", 0.0);
@@ -35,6 +36,7 @@ public:
         this->declare_parameter("RANSAC_outlier_rejection_threshold", 1.0);
         this->declare_parameter("map_path", "");
         this->declare_parameter("map_frame_id", "map");
+        this->declare_parameter("sensor_frame_id", "lidar");
         this->declare_parameter("fitness_score_thre", 0.0);
         this->declare_parameter("icp_fitness_topic", "icp_fitness");
         this->declare_parameter("map_voxel_leaf_size", 0.1);
@@ -53,6 +55,7 @@ public:
         this->get_parameter("RANSAC_outlier_rejection_threshold", RANSAC_outlier_rejection_threshold);
         this->get_parameter("map_path", map_path);
         this->get_parameter("map_frame_id", map_frame);
+        this->get_parameter("sensor_frame_id", sensor_frame);
         this->get_parameter("fitness_score_thre", fitness_score_thre);
         this->get_parameter("icp_fitness_topic", icp_fitness_topic);
         this->get_parameter("map_voxel_leaf_size", map_voxel_leaf_size);
@@ -62,7 +65,7 @@ public:
         this->get_parameter("livox_topic", livox_topic);
         this->get_parameter("pointcloud_topic", pointcloud_topic);
 
-        publisher_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("icp_result", 10);
+        publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("icp_result", 10);
         fitness_pub_ = this->create_publisher<std_msgs::msg::Float64>(icp_fitness_topic, 10);
 #ifdef USE_LIVOX
         if(pcl_type == "livox")
@@ -220,8 +223,9 @@ private:
                 RCLCPP_INFO(this->get_logger(), "ICP converged, but not enough count, no pose is published");
                 return;
             }
-            // Convert the transformation_result result to a PoseWithCovarianceStamped message and publish it
-            geometry_msgs::msg::PoseWithCovarianceStamped pose_msg;
+            // ICP aligns sensor-frame points into the map.  Therefore this
+            // result is T_map_sensor, not T_map_odom.
+            nav_msgs::msg::Odometry pose_msg;
             pose_msg.header.stamp = msg->header.stamp;
             if (pose_msg.header.stamp.sec == 0 &&
                 pose_msg.header.stamp.nanosec == 0)
@@ -229,6 +233,7 @@ private:
                 pose_msg.header.stamp = this->now();
             }
             pose_msg.header.frame_id = map_frame;
+            pose_msg.child_frame_id = sensor_frame;
             pose_msg.pose.pose.position.x = transformation_result(0, 3);
             pose_msg.pose.pose.position.y = transformation_result(1, 3);
             pose_msg.pose.pose.position.z = transformation_result(2, 3);
@@ -332,8 +337,9 @@ private:
         {
             RCLCPP_INFO(this->get_logger(), "ICP converged!!!");
             Eigen::Matrix4f transformation_result = icp.getFinalTransformation();
-            // Convert the transformation_result result to a PoseWithCovarianceStamped message and publish it
-            geometry_msgs::msg::PoseWithCovarianceStamped pose_msg;
+            // ICP aligns sensor-frame points into the map.  Therefore this
+            // result is T_map_sensor, not T_map_odom.
+            nav_msgs::msg::Odometry pose_msg;
             pose_msg.header.stamp = msg->header.stamp;
             if (pose_msg.header.stamp.sec == 0 &&
                 pose_msg.header.stamp.nanosec == 0)
@@ -341,6 +347,7 @@ private:
                 pose_msg.header.stamp = this->now();
             }
             pose_msg.header.frame_id = map_frame;
+            pose_msg.child_frame_id = sensor_frame;
             pose_msg.pose.pose.position.x = transformation_result(0, 3);
             pose_msg.pose.pose.position.y = transformation_result(1, 3);
             pose_msg.pose.pose.position.z = transformation_result(2, 3);
@@ -419,7 +426,7 @@ private:
         RCLCPP_INFO(this->get_logger(), "Initial guess: \n x: %f, y: %f, z: %f, a: %f", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, yaw);
     }
 
-    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr publisher_;
+    rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr publisher_;
     rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr fitness_pub_;
     std::string icp_fitness_topic;
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_sub_;
@@ -435,7 +442,7 @@ private:
     double initial_x, initial_y, initial_z, initial_a;
     int solver_max_iter;
     double max_correspondence_distance, RANSAC_outlier_rejection_threshold;
-    std::string map_path, map_frame;
+    std::string map_path, map_frame, sensor_frame;
     double fitness_score_thre;
     double map_voxel_leaf_size, cloud_voxel_leaf_size;
     sensor_msgs::msg::PointCloud2 target_cloud_msg;

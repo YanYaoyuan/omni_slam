@@ -1,7 +1,8 @@
 # omni_slam_manager
 
-This package is the engineering control plane for FAST-LIO.  The first
-implemented component is `MapStore`, an immutable, crash-safe map asset store.
+This package is the engineering control plane for FAST-LIO and publishes the
+typed state consumed by `omni_tf_manager`. `MapStore` is its immutable,
+crash-safe map asset store.
 
 Layout:
 
@@ -35,8 +36,15 @@ ros2 launch omni_slam_manager manager.launch.py \
 ```
 
 The manager selects `vbot.launch.py`, `vbot_relocalization.launch.py` and
-`/lidar_imu` for this profile. The default `omni_dog` profile retains the
-Livox commands and topic.
+the matching `omni_vbot_dog.yaml` TF profile. The default `omni_dog` robot
+selects `omni_dog.yaml`. An explicit `tf_profile_path` still overrides this
+selection.
+
+`tf_profile_path` is the single source of truth for map, odom, base and IMU
+tracking frame names. The launch also starts `omni_tf_manager`; the SLAM child
+processes only publish pose data and never publish managed TF edges.
+FAST-LIO consumes only `/omni/sensors/lidar/points` and
+`/omni/sensors/imu/data`; the TF profile owns each vendor-topic alias.
 
 Stable control-plane endpoints:
 

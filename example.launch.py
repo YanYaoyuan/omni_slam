@@ -2,28 +2,19 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
-from launch.launch_description_sources import PythonLaunchDescriptionSource, FrontendLaunchDescriptionSource
+from launch.actions import TimerAction
 from launch_ros.actions import Node
-from launch.substitutions import LaunchConfiguration 
 
 def generate_launch_description():
 
   config_path = os.path.join(
       get_package_share_directory('fast_lio'), 'config') 
 
-  # icp relocalization
-  map_odom_trans = Node(
-      package='icp_relocalization',
-      executable='transform_publisher',
-      name='transform_publisher',
-      output='screen'
-  )
-
+  # TF is owned by omni_tf_manager. This example only starts pose producers.
   icp_node = Node(
       package='icp_relocalization',
       executable='icp_node',
-      name='icp_node',
+      name='omni_icp_relocalization',
       output='screen',
       parameters=[
           {'initial_x':0.0},
@@ -33,7 +24,7 @@ def generate_launch_description():
 
           {'map_voxel_leaf_size':0.5},
           {'cloud_voxel_leaf_size':0.3},
-          {'map_frame_id':'map'},
+          {'map_frame_id':'omni_map'},
           {'solver_max_iter':100},
           {'max_correspondence_distance':0.1},
           {'RANSAC_outlier_rejection_threshold':0.5},
@@ -51,8 +42,16 @@ def generate_launch_description():
   fast_lio_node = Node(
       package='fast_lio',
       executable='fastlio_mapping',
+      name='omni_fast_lio',
       parameters=[
-          fast_lio_param
+          fast_lio_param,
+          {
+              'common.odom_frame_id': 'omni_odom',
+              'common.sensor_frame_id': 'omni_imu_link',
+              'common.base_frame_id': 'omni_base_link',
+              'common.send_odom_base_tf': False,
+              'publish.tf_en': False,
+          },
       ],
       output='screen',
       remappings=[('/Odometry','/state_estimation')]
@@ -63,6 +62,7 @@ def generate_launch_description():
   start_rviz = Node(
     package='rviz2',
     executable='rviz2',
+    name='omni_slam_rviz',
     arguments=['-d', rviz_config_file,'--ros-args', '--log-level', 'warn'],
     output='screen'
   )
@@ -77,7 +77,6 @@ def generate_launch_description():
 
   ld = LaunchDescription()
 
-  ld.add_action(map_odom_trans)
   ld.add_action(start_rviz)
   ld.add_action(delayed_start_lio)
 

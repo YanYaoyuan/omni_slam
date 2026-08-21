@@ -63,7 +63,11 @@ def generate_launch_description():
     map_voxel_leaf_size = LaunchConfiguration('map_voxel_leaf_size')
     cloud_voxel_leaf_size = LaunchConfiguration('cloud_voxel_leaf_size')
     pointcloud_topic = LaunchConfiguration('pointcloud_topic')
-    sensor_frame = LaunchConfiguration('sensor_frame')
+    map_frame = LaunchConfiguration('map_frame')
+    odom_frame = LaunchConfiguration('odom_frame')
+    base_frame = LaunchConfiguration('base_frame')
+    tracking_frame = LaunchConfiguration('tracking_frame')
+    lidar_frame = LaunchConfiguration('lidar_frame')
 
     default_config_file = os.path.join(
         fast_lio_share, 'config', 'omni_dog_relocalization.yaml')
@@ -102,58 +106,40 @@ def generate_launch_description():
         description='Voxel leaf size for the live scan')
     declare_pointcloud_topic = DeclareLaunchArgument(
         'pointcloud_topic',
-        default_value='/front_lidar',
-        description='PointCloud2 topic used by ICP')
-    declare_sensor_frame = DeclareLaunchArgument(
-        'sensor_frame',
-        default_value='livox_frame',
-        description='LiDAR frame used as the odometry child frame')
-
-    map_odom_trans = Node(
-        package='icp_relocalization',
-        executable='transform_publisher',
-        name='transform_publisher',
-        output='screen',
-        parameters=[
-            {'map_frame_id': 'lio_map'},
-            {'odom_frame_id': 'lio_odom'},
-            {'icp_result_topic': '/icp_result'},
-        ],
-        on_exit=Shutdown(reason='localization transform publisher exited'))
-
-    global_odometry_node = Node(
-        package='icp_relocalization',
-        executable='global_odometry_publisher',
-        name='global_odometry_publisher',
-        output='screen',
-        parameters=[
-            {'input_topic': '/state_estimation'},
-            {'output_topic': '/state_estimation_global'},
-            {'target_frame': 'lio_map'},
-            {'source_frame': 'lio_odom'},
-            {'child_frame': ParameterValue(sensor_frame, value_type=str)},
-            {'initial_translation_tolerance': 0.5},
-            {'initial_rotation_tolerance': 0.35},
-        ],
-        on_exit=Shutdown(reason='global odometry publisher exited'))
+        default_value='/omni/sensors/lidar/points',
+        description='Manager-normalized PointCloud2 topic used by ICP')
+    declare_map_frame = DeclareLaunchArgument(
+        'map_frame', default_value='omni_map')
+    declare_odom_frame = DeclareLaunchArgument(
+        'odom_frame', default_value='omni_odom')
+    declare_base_frame = DeclareLaunchArgument(
+        'base_frame', default_value='omni_base_link')
+    declare_tracking_frame = DeclareLaunchArgument(
+        'tracking_frame',
+        default_value='omni_imu_link',
+        description='IMU body frame represented by the FAST_LIO state pose')
+    declare_lidar_frame = DeclareLaunchArgument(
+        'lidar_frame',
+        default_value='omni_lidar_link',
+        description='LiDAR frame represented by the ICP registration result')
 
     global_pointcloud_node = Node(
         package='icp_relocalization',
         executable='global_pointcloud_publisher',
-        name='global_pointcloud_publisher',
+        name='omni_global_pointcloud_publisher',
         output='screen',
         parameters=[
             {'input_topic': '/cloud_registered'},
             {'output_topic': '/cloud_registered_global'},
-            {'target_frame': 'lio_map'},
-            {'source_frame': 'lio_odom'},
+            {'target_frame': map_frame},
+            {'source_frame': odom_frame},
         ],
         on_exit=Shutdown(reason='global pointcloud publisher exited'))
 
     icp_node = Node(
         package='icp_relocalization',
         executable='icp_node',
-        name='icp_node',
+        name='omni_icp_relocalization',
         output='screen',
         parameters=[
             {'initial_x': ParameterValue(initial_x, value_type=float)},
@@ -162,7 +148,8 @@ def generate_launch_description():
             {'initial_a': ParameterValue(initial_yaw, value_type=float)},
             {'map_voxel_leaf_size': ParameterValue(map_voxel_leaf_size, value_type=float)},
             {'cloud_voxel_leaf_size': ParameterValue(cloud_voxel_leaf_size, value_type=float)},
-            {'map_frame_id': 'lio_map'},
+            {'map_frame_id': map_frame},
+            {'sensor_frame_id': lidar_frame},
             {'solver_max_iter': 100},
             {'max_correspondence_distance': ParameterValue(max_correspondence_distance, value_type=float)},
             {'RANSAC_outlier_rejection_threshold': 0.5},
@@ -179,11 +166,18 @@ def generate_launch_description():
     fast_lio_node = Node(
         package='fast_lio',
         executable='fastlio_mapping',
+        name='omni_fast_lio',
         parameters=[
             config_file,
             {
                 'prior_map_path': map_path,
-                'common.odom_frame_id': 'lio_odom',
+                'common.map_frame_id': map_frame,
+                'common.odom_frame_id': odom_frame,
+                'common.sensor_frame_id': tracking_frame,
+                'common.lidar_frame_id': lidar_frame,
+                'common.base_frame_id': base_frame,
+                'common.send_odom_base_tf': False,
+                'publish.tf_en': False,
             },
         ],
         output='screen',
@@ -193,8 +187,8 @@ def generate_launch_description():
     delayed_start_lio = TimerAction(
         period=5.0,
         actions=[
-            icp_node,
             fast_lio_node,
+            TimerAction(period=1.0, actions=[icp_node]),
         ])
 
     ld = LaunchDescription()
@@ -210,11 +204,13 @@ def generate_launch_description():
     ld.add_action(declare_map_voxel_leaf_size)
     ld.add_action(declare_cloud_voxel_leaf_size)
     ld.add_action(declare_pointcloud_topic)
-    ld.add_action(declare_sensor_frame)
+    ld.add_action(declare_map_frame)
+    ld.add_action(declare_odom_frame)
+    ld.add_action(declare_base_frame)
+    ld.add_action(declare_tracking_frame)
+    ld.add_action(declare_lidar_frame)
     # This synchronous preflight runs before any localization node is started.
     ld.add_action(OpaqueFunction(function=_validate_relocalization_inputs))
-    ld.add_action(map_odom_trans)
-    ld.add_action(global_odometry_node)
     ld.add_action(global_pointcloud_node)
     ld.add_action(delayed_start_lio)
     return ld

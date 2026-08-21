@@ -31,10 +31,10 @@ def world_to_body(rot, vec):
 
 class MatrixOdomToImu(Node):
     def __init__(self):
-        super().__init__("matrix_odom_to_imu")
+        super().__init__("omni_matrix_odom_to_imu")
         self.declare_parameter("odom_topic", "/odom/mujoco_odom")
         self.declare_parameter("imu_topic", "/livox/imu")
-        self.declare_parameter("imu_frame_id", "livox_frame")
+        self.declare_parameter("imu_frame_id", "omni_imu_link")
 
         odom_topic = self.get_parameter("odom_topic").value
         imu_topic = self.get_parameter("imu_topic").value
