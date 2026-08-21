@@ -54,6 +54,7 @@ jobs:
           repository: YanYaoyuan/omni_tf_manager
           ref: ${{ env.TF_MANAGER_REF }}
           path: omni_tf_manager_source
+          token: ${{ secrets.OMNI_CI_REPO_TOKEN || github.token }}
 
       - name: Record Omni TF Manager revision
         run: echo "OMNI_TF_MANAGER_SHA=$(git -C omni_tf_manager_source rev-parse HEAD)" >> "${GITHUB_ENV}"
