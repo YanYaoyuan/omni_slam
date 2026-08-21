@@ -6,11 +6,22 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      tf_manager_ref:
+        description: Omni TF Manager tag, branch, or commit
+        required: false
+        default: main
+        type: string
   workflow_call:
     inputs:
       version:
         description: Artifact version (tag or commit)
         required: false
+        type: string
+      tf_manager_ref:
+        description: Omni TF Manager tag, branch, or commit
+        required: false
+        default: main
         type: string
 
 concurrency:
@@ -32,9 +43,20 @@ jobs:
       ROS_WS: /tmp/omni_slam_x86_ws
       DEBIAN_FRONTEND: noninteractive
       VERSION_INPUT: ${{ inputs.version }}
+      TF_MANAGER_REF: ${{ inputs.tf_manager_ref || vars.OMNI_TF_MANAGER_REF || 'main' }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Checkout Omni TF Manager
+        uses: actions/checkout@v4
+        with:
+          repository: YanYaoyuan/omni_tf_manager
+          ref: ${{ env.TF_MANAGER_REF }}
+          path: omni_tf_manager_source
+
+      - name: Record Omni TF Manager revision
+        run: echo "OMNI_TF_MANAGER_SHA=$(git -C omni_tf_manager_source rev-parse HEAD)" >> "${GITHUB_ENV}"
 
       - name: Clean workspace and caches before build
         run: |
@@ -67,7 +89,12 @@ jobs:
             --exclude='/build/' --exclude='/build_orin/' \
             --exclude='/install/' --exclude='/install_orin/' \
             --exclude='/dist/' --exclude='/log/' --exclude='/ros_logs/' \
+            --exclude='/omni_tf_manager_source/' \
             "${GITHUB_WORKSPACE}/" "${ROS_WS}/src/omni_slam/"
+          rsync -a --delete \
+            --exclude='/.git/' --exclude='/build/' --exclude='/install/' --exclude='/log/' \
+            "${GITHUB_WORKSPACE}/omni_tf_manager_source/" \
+            "${ROS_WS}/src/omni_tf_manager/"
           cp .github/ci/livox_stub/package.xml "${ROS_WS}/src/livox_ros_driver2/"
           cp .github/ci/livox_stub/CMakeLists.txt "${ROS_WS}/src/livox_ros_driver2/"
           cp .github/ci/livox_stub/msg/*.msg "${ROS_WS}/src/livox_ros_driver2/msg/"
@@ -92,13 +119,18 @@ jobs:
           colcon build --merge-install \
             --packages-select livox_ros_driver2 fast_lio icp_relocalization \
               omni_slam_interfaces omni_slam_manager \
+              omni_tf_manager \
             --event-handlers console_direct+ \
             --cmake-args -DCMAKE_BUILD_TYPE=Release
           source install/setup.bash
           colcon test --merge-install \
-            --packages-select fast_lio icp_relocalization omni_slam_manager \
+            --packages-select fast_lio icp_relocalization omni_slam_manager omni_tf_manager \
             --event-handlers console_direct+
           colcon test-result --verbose
+          test -f install/share/omni_tf_manager/config/omni_dog.yaml
+          test -f install/share/omni_tf_manager/config/omni_vbot_dog.yaml
+          test -f install/share/fast_lio/config/omni_dog.yaml
+          test -f install/share/fast_lio/config/vbot.yaml
 
       - name: Package runtime artifact
         if: github.event_name != 'pull_request'

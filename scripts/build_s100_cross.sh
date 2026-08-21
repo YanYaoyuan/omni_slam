@@ -15,6 +15,7 @@ report_error() {
 trap 'report_error "${LINENO}" "${BASH_COMMAND}"' ERR
 
 SOURCE_ROOT=${S100_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
+TF_MANAGER_SOURCE=${OMNI_TF_MANAGER_SOURCE:-${SOURCE_ROOT}/../omni_tf_manager}
 WORK_ROOT=${S100_WORK_ROOT:-${RUNNER_TEMP:-/tmp}/s100-cross}
 S100_IMAGE=${S100_IMAGE:-pc_tros_ubuntu22.04:v1.0.0}
 ROBOT_DEV_CONFIG_REF=${ROBOT_DEV_CONFIG_REF:-f44b1ad2575b34c189fd470de1db9c5ad48b6886}
@@ -35,7 +36,11 @@ for command_name in docker git python3 rsync; do
 done
 
 SOURCE_ROOT=$(realpath -m "${SOURCE_ROOT}")
+TF_MANAGER_SOURCE=$(realpath -m "${TF_MANAGER_SOURCE}")
 WORK_ROOT=$(realpath -m "${WORK_ROOT}")
+
+[[ -f "${TF_MANAGER_SOURCE}/package.xml" ]] || \
+  die "invalid OMNI_TF_MANAGER_SOURCE: ${TF_MANAGER_SOURCE}"
 
 case "${WORK_ROOT}" in
   /|/data|/home|"${SOURCE_ROOT}")
@@ -51,7 +56,7 @@ if [[ "${S100_CLEAN}" == "1" ]]; then
   rm -rf "${WORK_ROOT}/cc_ws"
 fi
 
-mkdir -p "${TROS_ROOT}/src/omni_slam"
+mkdir -p "${TROS_ROOT}/src/omni_slam" "${TROS_ROOT}/src/omni_tf_manager"
 
 log "cloning robot_dev_config at ${ROBOT_DEV_CONFIG_REF}"
 git clone --filter=blob:none \
@@ -68,8 +73,18 @@ rsync -a --delete \
   --exclude='/install_orin/' \
   --exclude='/log/' \
   --exclude='/dist/' \
+  --exclude='/omni_tf_manager_source/' \
   "${SOURCE_ROOT}/" \
   "${TROS_ROOT}/src/omni_slam/"
+
+log "copying Omni TF Manager source into the cross workspace"
+rsync -a --delete \
+  --exclude='/.git/' \
+  --exclude='/build/' \
+  --exclude='/install/' \
+  --exclude='/log/' \
+  "${TF_MANAGER_SOURCE}/" \
+  "${TROS_ROOT}/src/omni_tf_manager/"
 
 test -f "${TROS_ROOT}/src/omni_slam/FAST_LIO/include/IKFoM_toolkit/mtk/build_manifold.hpp"
 
@@ -451,15 +466,18 @@ echo "=== Build S100 ==="
 bash robot_dev_config/build.sh \
   -p S100 \
   -c '-DUSE_LIVOX_CUSTOM_MSG=OFF' \
-  -r '--packages-up-to fast_lio icp_relocalization omni_slam_interfaces omni_slam_manager'
+  -r '--packages-up-to fast_lio icp_relocalization omni_slam_interfaces omni_slam_manager omni_tf_manager'
 
 # robot_dev_config/build.sh swallows the colcon exit status. These checks make
 # the shared script fail if the real target outputs were not produced.
 test -x install/lib/fast_lio/fastlio_mapping
 test -x install/lib/icp_relocalization/icp_node
-test -x install/lib/icp_relocalization/transform_publisher
 test -f install/share/omni_slam_interfaces/package.xml
 test -f install/share/omni_slam_manager/package.xml
+test -x install/lib/omni_tf_manager/omni_tf_manager_node
+test -f install/share/omni_tf_manager/config/generic_four_sensor.yaml
+test -f install/share/omni_tf_manager/config/omni_dog.yaml
+test -f install/share/omni_tf_manager/config/omni_vbot_dog.yaml
 
 echo "=== Verify output architecture ==="
 elf_count=0

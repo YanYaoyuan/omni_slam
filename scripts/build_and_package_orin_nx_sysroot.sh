@@ -92,9 +92,5 @@ fi
 log "verify target binaries:"
 file "$INSTALL_BASE/lib/fast_lio/fastlio_mapping"
 file "$INSTALL_BASE/lib/icp_relocalization/icp_node"
-file "$INSTALL_BASE/lib/icp_relocalization/transform_publisher"
-if [[ -f "$INSTALL_BASE/lib/icp_relocalization/global_odometry_publisher" ]]; then
-  file "$INSTALL_BASE/lib/icp_relocalization/global_odometry_publisher"
-fi
 
 log "done"

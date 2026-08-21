@@ -17,6 +17,7 @@ cat > "${output_dir}/manifest.json" <<EOF
   "project": "omni_slam",
   "version": "${version}",
   "git_sha": "${GITHUB_SHA:-unknown}",
+  "omni_tf_manager_git_sha": "${OMNI_TF_MANAGER_SHA:-unknown}",
   "platform": "${platform}",
   "architecture": "${arch}",
   "ros_distribution": "humble",
