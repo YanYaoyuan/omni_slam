@@ -39,12 +39,12 @@ jobs:
       JETSON_CONTAINERS_REF: 70c149aea6126594153ef7690ec4890f8f396518
       TF_MANAGER_REF: ${{ inputs.tf_manager_ref || vars.OMNI_TF_MANAGER_REF || 'main' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
         with:
           clean: true
 
       - name: Checkout Omni TF Manager
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
         with:
           repository: YanYaoyuan/omni_tf_manager
           ref: ${{ env.TF_MANAGER_REF }}
@@ -101,7 +101,7 @@ jobs:
           tar -C dist -czf "dist/${name}.tar.gz" "${name}"
           sha256sum "dist/${name}.tar.gz" > "dist/${name}.tar.gz.sha256"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: omni-slam-orin-nx-aarch64
           path: |
