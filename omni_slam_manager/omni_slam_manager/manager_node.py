@@ -21,8 +21,8 @@ from std_msgs.msg import Float64
 from std_srvs.srv import Trigger
 
 from omni_slam_interfaces.action import SaveMap, StartLocalization
-from omni_slam_interfaces.msg import SlamStatus
 from omni_slam_interfaces.srv import StartMapping, StopLocalization, StopMapping
+from omni_tf_manager.msg import SlamStatus
 
 from .cancel_wait import wait_with_cancel
 from .map_store import MapAsset, MapStore, MapStoreError

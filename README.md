@@ -158,7 +158,7 @@ ros2 topic echo /lidar_imu --once --field header
 - `/omni/slam/save_map`：`SaveMap.action`
 - `/omni/slam/start_localization`：`StartLocalization.action`
 - `/omni/slam/stop_localization`：`StopLocalization.srv`
-- `/omni/slam/status`：`SlamStatus.msg`
+- `/omni/slam/status`：`omni_tf_manager/msg/SlamStatus`
 
 原始 `ros2 service/action` 调用示例见
 [omni_slam_manager/README.md](omni_slam_manager/README.md)。
