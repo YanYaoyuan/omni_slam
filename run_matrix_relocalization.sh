@@ -6,6 +6,8 @@ CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/FAST_LIO/config/matrix_sim_relocalizatio
 MAP_PATH="${MAP_PATH:-$SCRIPT_DIR/maps/matrix_sim_scans.pcd}"
 LIDAR_TOPIC="${LIDAR_TOPIC:-/livox/lidar}"
 IMU_TOPIC="${IMU_TOPIC:-/livox/imu}"
+FAST_LIO_LIDAR_TOPIC="${FAST_LIO_LIDAR_TOPIC:-/omni/sensors/lidar/points}"
+FAST_LIO_IMU_TOPIC="${FAST_LIO_IMU_TOPIC:-/omni/sensors/imu/data}"
 ODOM_TOPIC="${ODOM_TOPIC:-/odom/mujoco_odom}"
 SYNTH_IMU=0
 START_ZENOH=1
@@ -16,6 +18,8 @@ INITIAL_YAW="${INITIAL_YAW:-0.0}"
 MAX_CORRESPONDENCE_DISTANCE="${MAX_CORRESPONDENCE_DISTANCE:-1.0}"
 FITNESS_SCORE_THRE="${FITNESS_SCORE_THRE:-0.2}"
 CONVERGED_COUNT_THRE="${CONVERGED_COUNT_THRE:-10}"
+TF_PROFILE_FILE="${TF_PROFILE_FILE:-$SCRIPT_DIR/../omni_tf_manager/config/matrix_xgw.yaml}"
+START_TF_MANAGER=1
 
 usage() {
     cat <<EOF
@@ -26,6 +30,7 @@ Options:
   --map PATH           Prior PCD map. Default: ${MAP_PATH}
   --synth-imu          Publish ${IMU_TOPIC} from ${ODOM_TOPIC} if MATRiX has no IMU topic.
   --no-zenoh           Do not auto-start rmw_zenohd.
+  --no-tf-manager      Do not start omni_tf_manager (only for externally managed runs).
   --lidar-topic TOPIC  Override LiDAR topic. Default: ${LIDAR_TOPIC}
   --imu-topic TOPIC    Override IMU topic. Default: ${IMU_TOPIC}
   --odom-topic TOPIC   Override odometry topic for --synth-imu. Default: ${ODOM_TOPIC}
@@ -54,6 +59,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-zenoh)
             START_ZENOH=0
+            shift
+            ;;
+        --no-tf-manager)
+            START_TF_MANAGER=0
             shift
             ;;
         --lidar-topic)
@@ -101,6 +110,9 @@ export RMW_IMPLEMENTATION="${RMW_IMPLEMENTATION:-rmw_zenoh_cpp}"
 set +u
 source /opt/ros/humble/setup.bash
 source "$SCRIPT_DIR/install/setup.bash"
+if [[ -f "$SCRIPT_DIR/../omni_tf_manager/install/setup.bash" ]]; then
+    source "$SCRIPT_DIR/../omni_tf_manager/install/setup.bash"
+fi
 set -u
 
 cleanup_pids=()
@@ -152,6 +164,19 @@ fi
 echo "[INFO] ROS_DOMAIN_ID=$ROS_DOMAIN_ID"
 echo "[INFO] RMW_IMPLEMENTATION=$RMW_IMPLEMENTATION"
 echo "[INFO] map: $MAP_PATH"
+if [[ "$START_TF_MANAGER" == "1" ]]; then
+    if [[ ! -f "$TF_PROFILE_FILE" ]]; then
+        echo "[ERROR] omni_tf_manager profile not found: $TF_PROFILE_FILE" >&2
+        exit 1
+    fi
+    echo "[INFO] starting omni_tf_manager in standalone localization mode"
+    ros2 launch omni_tf_manager omni_tf_manager.launch.py \
+        config_file:="$TF_PROFILE_FILE" \
+        mode:=profile \
+        slam_state_required:=false \
+        fallback_slam_mode:=localization &
+    cleanup_pids+=("$!")
+fi
 echo "[INFO] waiting for LiDAR: $LIDAR_TOPIC"
 wait_for_topic "$LIDAR_TOPIC" 45
 
@@ -161,26 +186,30 @@ if [[ "$SYNTH_IMU" == "1" ]]; then
         --ros-args \
         -p odom_topic:="$ODOM_TOPIC" \
         -p imu_topic:="$IMU_TOPIC" \
-        -p imu_frame_id:="livox_frame" &
+        -p imu_frame_id:="livox_imu_link" &
     cleanup_pids+=("$!")
 fi
 
 echo "[INFO] waiting for IMU: $IMU_TOPIC"
 wait_for_topic "$IMU_TOPIC" 45
+echo "[INFO] waiting for normalized LiDAR: $FAST_LIO_LIDAR_TOPIC"
+wait_for_topic "$FAST_LIO_LIDAR_TOPIC" 15
+echo "[INFO] waiting for normalized IMU: $FAST_LIO_IMU_TOPIC"
+wait_for_topic "$FAST_LIO_IMU_TOPIC" 15
 
 RUNTIME_CONFIG_FILE=$(mktemp /tmp/matrix_fastlio_relocalization_XXXXXX.yaml)
 python3 "$SCRIPT_DIR/tools/matrix_configure_fastlio.py" \
     --input "$CONFIG_FILE" \
     --output "$RUNTIME_CONFIG_FILE" \
-    --lidar-topic "$LIDAR_TOPIC" \
-    --imu-topic "$IMU_TOPIC" \
+    --lidar-topic "$FAST_LIO_LIDAR_TOPIC" \
+    --imu-topic "$FAST_LIO_IMU_TOPIC" \
     --prior-map-path "$MAP_PATH" \
     --map-file-path "$MAP_PATH"
 
-exec ros2 launch fast_lio omni_dog_relocalization.launch.py \
+ros2 launch fast_lio omni_dog_relocalization.launch.py \
     config_file:="$RUNTIME_CONFIG_FILE" \
     map_path:="$MAP_PATH" \
-    pointcloud_topic:="$LIDAR_TOPIC" \
+    pointcloud_topic:="$FAST_LIO_LIDAR_TOPIC" \
     initial_x:="$INITIAL_X" \
     initial_y:="$INITIAL_Y" \
     initial_z:="$INITIAL_Z" \

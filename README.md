@@ -1,9 +1,10 @@
 # Omni SLAM
 
 Omni SLAM 是基于 FAST-LIO2 的 ROS 2 建图与先验地图重定位工程，支持 x86_64、
-NVIDIA Orin 和 D-Robotics RDK S100。当前 S100/VBot 配置使用
-`/lidar_points` 点云与 `/lidar_imu` IMU 数据，并通过常驻管理器统一控制建图、
-地图保存和定位。
+NVIDIA Orin 和 D-Robotics RDK S100。VBot 驱动发布 `/lidar_points` 点云和
+`/lidar_imu` IMU；`omni_tf_manager` 校验并规范为
+`/omni/sensors/lidar/points` 与 `/omni/sensors/imu/data` 后交给 FAST-LIO，
+常驻管理器统一控制建图、地图保存和定位。
 
 ![Relocalization](./reloc.gif)
 
@@ -140,9 +141,13 @@ omni_slam_ctl manager-start
 ```bash
 ros2 topic hz /lidar_points
 ros2 topic hz /lidar_imu
+ros2 topic echo /lidar_points --once --field header
+ros2 topic echo /lidar_imu --once --field header
 ```
 
 标定文件必须以实际 VBot 的雷达—IMU 外参为准，示例值不能替代实机标定。
+原始 header 和坐标语义通过审核前，`omni_vbot_dog.yaml` 保持 shadow 且不输出
+规范化消息；不得仅凭 topic 或标定标签推断 `header.frame_id`。
 
 ## 管理接口
 
@@ -153,7 +158,7 @@ ros2 topic hz /lidar_imu
 - `/omni/slam/save_map`：`SaveMap.action`
 - `/omni/slam/start_localization`：`StartLocalization.action`
 - `/omni/slam/stop_localization`：`StopLocalization.srv`
-- `/omni/slam/status`：`SlamStatus.msg`
+- `/omni/slam/status`：`omni_tf_manager/msg/SlamStatus`
 
 原始 `ros2 service/action` 调用示例见
 [omni_slam_manager/README.md](omni_slam_manager/README.md)。

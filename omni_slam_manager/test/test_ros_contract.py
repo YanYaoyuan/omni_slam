@@ -9,9 +9,9 @@ ROS_AVAILABLE = importlib.util.find_spec("rclpy") is not None
 class RosContractTests(unittest.TestCase):
     def test_generated_interfaces_and_manager_entrypoint_import(self):
         from omni_slam_interfaces.action import SaveMap, StartLocalization
-        from omni_slam_interfaces.msg import SlamStatus
         from omni_slam_interfaces.srv import StartMapping, StopLocalization, StopMapping
         from omni_slam_manager.manager_node import ROBOT_PROFILES, SlamManagerNode, main
+        from omni_tf_manager.msg import SlamStatus
 
         self.assertEqual(SlamStatus.STATE_LOCALIZED, 7)
         self.assertEqual(SaveMap.Feedback.STAGE_VERIFYING_CHECKSUM, 3)
@@ -28,7 +28,13 @@ class RosContractTests(unittest.TestCase):
             "vbot_relocalization.launch.py",
             ROBOT_PROFILES["vbot"]["localization_command"],
         )
-        self.assertEqual(ROBOT_PROFILES["vbot"]["imu_topic"], "/lidar_imu")
+        self.assertEqual(
+            ROBOT_PROFILES["vbot"]["imu_topic"], "/omni/sensors/imu/data"
+        )
+        self.assertEqual(
+            ROBOT_PROFILES["omni_dog"]["imu_topic"],
+            "/omni/sensors/imu/data",
+        )
         self.assertTrue(callable(main))
         self.assertTrue(issubclass(SlamManagerNode, object))
 

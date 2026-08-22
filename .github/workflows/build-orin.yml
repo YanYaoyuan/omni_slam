@@ -4,10 +4,21 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      tf_manager_ref:
+        description: Omni TF Manager tag, branch, or commit
+        required: false
+        default: main
+        type: string
   workflow_call:
     inputs:
       version:
         required: false
+        type: string
+      tf_manager_ref:
+        description: Omni TF Manager tag, branch, or commit
+        required: false
+        default: main
         type: string
 
 concurrency:
@@ -26,10 +37,22 @@ jobs:
       ROS_DISTRO: humble
       VERSION_INPUT: ${{ inputs.version }}
       JETSON_CONTAINERS_REF: 70c149aea6126594153ef7690ec4890f8f396518
+      TF_MANAGER_REF: ${{ inputs.tf_manager_ref || vars.OMNI_TF_MANAGER_REF || 'main' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
         with:
           clean: true
+
+      - name: Checkout Omni TF Manager
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: YanYaoyuan/omni_tf_manager
+          ref: ${{ env.TF_MANAGER_REF }}
+          path: omni_tf_manager_source
+          token: ${{ secrets.OMNI_CI_REPO_TOKEN || github.token }}
+
+      - name: Record Omni TF Manager revision
+        run: echo "OMNI_TF_MANAGER_SHA=$(git -C omni_tf_manager_source rev-parse HEAD)" >> "${GITHUB_ENV}"
 
       - name: Verify trusted Orin runner
         run: |
@@ -78,7 +101,7 @@ jobs:
           tar -C dist -czf "dist/${name}.tar.gz" "${name}"
           sha256sum "dist/${name}.tar.gz" > "dist/${name}.tar.gz.sha256"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: omni-slam-orin-nx-aarch64
           path: |

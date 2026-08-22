@@ -158,10 +158,17 @@ source /opt/ros/humble/setup.bash
 source ~/ws_livox/install/setup.bash
 source ~/robot_ws/install/setup.bash
 
+# Run this only after live header review has set both alias_verified values to
+# true. Keep this terminal running.
+ros2 launch omni_tf_manager omni_tf_manager.launch.py \
+  config_file:=$(ros2 pkg prefix omni_tf_manager)/share/omni_tf_manager/config/omni_dog.yaml \
+  mode:=authority
+
+# In a second terminal with the same environment:
 ros2 launch fast_lio omni_dog.launch.py
 ```
 
-Expected input topics:
+Expected raw driver topics:
 
 ```text
 /front_lidar      sensor_msgs/msg/PointCloud2
@@ -177,15 +184,22 @@ x y z intensity tag line timestamp
 Important config values:
 
 ```yaml
-common.lid_topic: "/front_lidar"
-common.imu_topic: "/front_lidar/imu"
-common.sensor_frame_id: "livox_frame"
+common.lid_topic: "/omni/sensors/lidar/points"
+common.imu_topic: "/omni/sensors/imu/data"
+common.odom_frame_id: "omni_odom"
+common.sensor_frame_id: "omni_imu_link"
+common.base_frame_id: "omni_base_link"
+publish.tf_en: false
 preprocess.lidar_type: 5
 preprocess.scan_line: 4
 preprocess.timestamp_unit: 3
-mapping.extrinsic_T: [0.0, 0.0, 0.0]
+mapping.extrinsic_T: [-0.011, -0.02329, 0.04412]
 mapping.extrinsic_R: identity
 ```
+
+`omni_tf_manager/config/omni_dog.yaml` owns the raw-topic aliases. It ships
+fail-closed in shadow mode; capture both live headers and review the payload
+coordinate semantics before changing `alias_verified` and enabling authority.
 
 Map saving is enabled in:
 
@@ -283,7 +297,7 @@ Expected behavior:
 ```text
 icp_node loads the map
 icp_node publishes /icp_result after stable convergence
-transform_publisher publishes map -> odom
+omni_tf_manager accepts /icp_result and publishes omni_map -> omni_odom
 fastlio_mapping receives /icp_result
 fastlio_mapping initializes prior map localization
 ```
@@ -483,12 +497,14 @@ ros2 topic echo /front_lidar/imu --once --field header
 Mapping:
 
 ```bash
+# Requires the approved omni_dog TF manager above to be running.
 ros2 launch fast_lio omni_dog.launch.py
 ```
 
 Relocalization:
 
 ```bash
+# Requires the same TF manager instance; do not start another TF authority.
 ros2 launch fast_lio omni_dog_relocalization.launch.py map_path:=$HOME/maps/omni_dog_map.pcd
 ```
 

@@ -14,7 +14,7 @@ def generate_launch_description():
     sac_ia_gicp_node = Node(
         package='sac_ia_gicp',
         executable='sac_ia_gicp',
-        name='sac_ia_gicp_node',
+        name='omni_sac_ia_gicp',
         parameters=[
             {'target_pcd_file': "/home/sentry_ws/src/FAST_LIO_SAM/PCD/GlobalMap.pcd"},
             {'num_threads': 8},

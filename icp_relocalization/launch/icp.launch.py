@@ -5,14 +5,8 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='icp_relocalization',
-            executable='transform_publisher',
-            name='transform_publisher',
-            output='screen'
-        ),
-        Node(
-            package='icp_relocalization',
             executable='icp_node',
-            name='icp_node',
+            name='omni_icp_relocalization',
             output='screen',
             parameters=[
                 {'initial_x':0.0},
@@ -24,7 +18,8 @@ def generate_launch_description():
                 # {'initial_yaw':0.0},
                 {'map_voxel_leaf_size':0.5},
                 {'cloud_voxel_leaf_size':0.3},
-                {'map_frame_id':'map'},
+                {'map_frame_id':'omni_map'},
+                {'sensor_frame_id':'omni_lidar_link'},
                 {'solver_max_iter':75},
                 {'max_correspondence_distance':0.1},
                 {'RANSAC_outlier_rejection_threshold':1.0},

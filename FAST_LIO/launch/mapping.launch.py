@@ -41,6 +41,7 @@ def generate_launch_description():
     fast_lio_node = Node(
         package='fast_lio',
         executable='fastlio_mapping',
+        name='omni_fast_lio',
         parameters=[
             config_file,
             {'use_sim_time': use_sim_time}
@@ -51,6 +52,7 @@ def generate_launch_description():
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
+        name='omni_slam_rviz',
         arguments=['-d', rviz_cfg],
         condition=IfCondition(rviz_use)
     )

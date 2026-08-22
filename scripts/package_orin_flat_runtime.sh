@@ -18,7 +18,6 @@ need_dir "$INSTALL_BASE"
 need_file "$INSTALL_BASE/setup.bash"
 need_file "$INSTALL_BASE/lib/fast_lio/fastlio_mapping"
 need_file "$INSTALL_BASE/lib/icp_relocalization/icp_node"
-need_file "$INSTALL_BASE/lib/icp_relocalization/transform_publisher"
 
 rm -rf "$PKG_DIR"
 mkdir -p "$PKG_DIR" "$OUT_DIR"
@@ -37,7 +36,6 @@ done
 mkdir -p "$PKG_DIR/bin" "$PKG_DIR/config" "$PKG_DIR/launch" "$PKG_DIR/rviz" "$PKG_DIR/maps" "$PKG_DIR/scripts"
 cp -a "$INSTALL_BASE/lib/fast_lio/fastlio_mapping" "$PKG_DIR/bin/"
 cp -a "$INSTALL_BASE/lib/icp_relocalization/icp_node" "$PKG_DIR/bin/"
-cp -a "$INSTALL_BASE/lib/icp_relocalization/transform_publisher" "$PKG_DIR/bin/"
 if [[ -f "$INSTALL_BASE/lib/icp_relocalization/sac_ia_gicp" ]]; then
   cp -a "$INSTALL_BASE/lib/icp_relocalization/sac_ia_gicp" "$PKG_DIR/bin/"
 fi

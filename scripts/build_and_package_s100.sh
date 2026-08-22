@@ -5,7 +5,7 @@
 #   ./scripts/build_and_package_s100.sh
 #
 # 产物目录结构 (dist/omni_slam_s100_<版本>/)：
-#   bin/     可执行文件 (fastlio_mapping / icp_node / transform_publisher)
+#   bin/     SLAM 位姿可执行文件 (fastlio_mapping / icp_node)
 #   lib/     包自身的 .so + 通过 ldd 解析出的第三方依赖动态库
 #   config/  yaml 参数文件
 #   launch/  launch 启动文件
@@ -87,7 +87,6 @@ fi
 [[ -d "$INSTALL_DIR" ]] || die "缺少 install 目录: $INSTALL_DIR (请先编译)"
 FASTLIO_BIN="$INSTALL_DIR/lib/fast_lio/fastlio_mapping"
 ICP_BIN="$INSTALL_DIR/lib/icp_relocalization/icp_node"
-TF_BIN="$INSTALL_DIR/lib/icp_relocalization/transform_publisher"
 [[ -f "$FASTLIO_BIN" ]] || die "缺少可执行文件: $FASTLIO_BIN"
 [[ -f "$ICP_BIN" ]]     || die "缺少可执行文件: $ICP_BIN"
 
@@ -117,7 +116,7 @@ else
 fi
 
 # 可执行文件 -> bin/
-for b in "$FASTLIO_BIN" "$ICP_BIN" "$TF_BIN"; do
+for b in "$FASTLIO_BIN" "$ICP_BIN"; do
   [[ -f "$b" ]] && cp -a "$b" "$PKG_DIR/bin/"
 done
 

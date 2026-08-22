@@ -24,8 +24,13 @@ def generate_launch_description():
         ('map_voxel_leaf_size', '0.5', 'Prior-map voxel size'),
         ('cloud_voxel_leaf_size', '0.2', 'Live-scan voxel size'),
         ('config_file', vbot_config, 'Vbot Fast-LIO relocalization parameters'),
-        ('pointcloud_topic', '/lidar_points', 'Vbot PointCloud2 topic used by ICP'),
-        ('sensor_frame', 'lidar_frame', 'Vbot LiDAR frame'),
+        ('pointcloud_topic', '/omni/sensors/lidar/points',
+         'Manager-normalized Vbot PointCloud2 topic used by ICP'),
+        ('map_frame', 'omni_map', 'Global map frame owned by omni_tf_manager'),
+        ('odom_frame', 'omni_odom', 'Local odometry frame owned by omni_tf_manager'),
+        ('base_frame', 'omni_base_link', 'Robot body frame owned by omni_tf_manager'),
+        ('tracking_frame', 'omni_imu_link', 'FAST_LIO IMU pose frame'),
+        ('lidar_frame', 'omni_lidar_link', 'ICP LiDAR result frame'),
     )
 
     forwarded_arguments = {

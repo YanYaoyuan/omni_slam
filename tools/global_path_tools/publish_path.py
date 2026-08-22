@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate, simplify and publish a recorded lio_map body path once."""
+"""Validate, simplify and publish a recorded omni_map body path once."""
 
 import argparse
 import math
@@ -23,8 +23,8 @@ from rclpy.utilities import remove_ros_args
 
 
 Point = Tuple[float, float, float]
-EXPECTED_FRAME_ID = "lio_map"
-EXPECTED_BODY_FRAME_ID = "scan_base_link"
+EXPECTED_FRAME_ID = "omni_map"
+EXPECTED_BODY_FRAME_ID = "omni_base_link"
 
 
 def script_dir() -> str:
@@ -221,7 +221,7 @@ class GlobalPathFilePublisher(Node):
     def __init__(
         self, points: List[Point], path_file: str, arguments: argparse.Namespace
     ) -> None:
-        super().__init__("global_path_file_publisher")
+        super().__init__("omni_global_path_file_publisher")
         self.points = points
         self.path_file = path_file
         self.arguments = arguments
@@ -342,7 +342,7 @@ class GlobalPathFilePublisher(Node):
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="校验、简化并单次发布录制的 lio_map 机体路径"
+        description="校验、简化并单次发布录制的 omni_map 机体路径"
     )
     parser.add_argument(
         "--input",
@@ -350,7 +350,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--topic", default="/planning/global_path")
     parser.add_argument(
-        "--body-topic", default="/body_state_estimation_global"
+        "--body-topic", default="/omni/tf_manager/body_odom_global"
     )
     parser.add_argument("--simplify-tolerance", type=float, default=0.15)
     parser.add_argument("--max-spacing", type=float, default=2.0)
@@ -370,7 +370,7 @@ def parse_args() -> argparse.Namespace:
         "--z",
         type=float,
         default=0.0,
-        help="--z-mode constant 时使用的 lio_map 机体中心高度",
+        help="--z-mode constant 时使用的 omni_map 机体中心高度",
     )
     parser.add_argument("--check", action="store_true")
     arguments = parser.parse_args(remove_ros_args(args=sys.argv)[1:])

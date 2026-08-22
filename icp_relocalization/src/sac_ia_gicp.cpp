@@ -26,7 +26,7 @@ using FPFHFeature = pcl::PointCloud<Feature>;
 class SACIAGICPNode : public rclcpp::Node
 {
 public:
-    SACIAGICPNode() : Node("sac_ia_gicp_node")
+    SACIAGICPNode() : Node("omni_sac_ia_gicp")
     {
         // parameters
         std::string target_pcd_file;

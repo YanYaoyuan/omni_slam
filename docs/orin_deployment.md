@@ -96,23 +96,29 @@ ros2 topic echo --once /front_lidar/imu --field header
 ros2 run tf2_tools view_frames
 ```
 
-当前 `omni_dog.yaml` 按验证过的 rosbag 设置：
+当前 `omni_dog.yaml` 使用 manager 规范化接口：
 
 ```yaml
-sensor_frame_id: "livox_frame"
-base_frame_id: "livox_frame"
+sensor_frame_id: "omni_imu_link"
+lidar_frame_id: "omni_lidar_link"
+base_frame_id: "omni_base_link"
 send_odom_base_tf: false
-lid_topic: "/front_lidar"
-imu_topic: "/front_lidar/imu"
+lid_topic: "/omni/sensors/lidar/points"
+imu_topic: "/omni/sensors/imu/data"
 lidar_type: 5
 timestamp_unit: 3
-extrinsic_T: [0.0, 0.0, 0.0]
+extrinsic_T: [-0.011, -0.02329, 0.04412]
 extrinsic_R: [1.0, 0.0, 0.0,
               0.0, 1.0, 0.0,
               0.0, 0.0, 1.0]
 ```
 
-如果实机 TF/外参和 bag 不同，需要改 `FAST_LIO/config/omni_dog.yaml`。例如实机如果确认 LiDAR 在 IMU 坐标系下的标定是：
+原始 `/front_lidar` 与 `/front_lidar/imu` 由
+`omni_tf_manager/config/omni_dog.yaml` 接入。必须在实机记录两个 header，并确认
+payload 坐标语义后才可把 alias 标记为已审核并切换 authority。
+
+如果实机 TF/外参和当前标定不同，需要同时修改 TF profile 与
+`FAST_LIO/config/omni_dog.yaml`。当前 LiDAR 在 IMU 坐标系下的标定是：
 
 ```yaml
 extrinsic_T: [-0.011, -0.02329, 0.04412]
@@ -121,7 +127,7 @@ extrinsic_R: [1.0, 0.0, 0.0,
               0.0, 0.0, 1.0]
 ```
 
-则不要继续使用 bag 的 identity 外参。
+两处外参必须保持一致，不能继续使用 bag 的 identity 外参。
 
 ### 2.5 启动建图
 
@@ -129,6 +135,13 @@ extrinsic_R: [1.0, 0.0, 0.0,
 cd /opt/omni_slam
 source /opt/ros/humble/setup.bash
 source install/setup.bash
+
+# 先在另一个终端启动已经完成实机 header 审核的 TF profile。
+ros2 launch omni_tf_manager omni_tf_manager.launch.py \
+  config_file:=$(ros2 pkg prefix omni_tf_manager)/share/omni_tf_manager/config/omni_dog.yaml \
+  mode:=authority
+
+# 再启动 FAST-LIO；同一 ROS domain 只能有一个 TF authority。
 ros2 launch fast_lio omni_dog.launch.py
 ```
 
@@ -572,7 +585,9 @@ timestamp_unit: 3
 - `extrinsic_T`
 - `extrinsic_R`
 
-如果 LiDAR 和 IMU 都在同一个 `livox_frame`，使用 identity 外参。如果实机发布的是独立 IMU frame，就要使用真实 LiDAR-IMU 标定。
+即使 LiDAR 和 IMU 消息都写 `livox_frame`，也不能据此推断 identity 外参；
+`header.frame_id` 可能只是驱动复用的旧标签。应以数据坐标语义和真实
+LiDAR—IMU 标定为准，metadata alias 不会旋转或平移 payload。
 
 ### 6.4 systemd 启动失败但手动启动正常
 

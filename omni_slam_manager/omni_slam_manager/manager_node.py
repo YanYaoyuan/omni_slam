@@ -10,7 +10,6 @@ from typing import Optional
 
 import rclpy
 from action_msgs.msg import GoalStatus
-from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
@@ -22,8 +21,8 @@ from std_msgs.msg import Float64
 from std_srvs.srv import Trigger
 
 from omni_slam_interfaces.action import SaveMap, StartLocalization
-from omni_slam_interfaces.msg import SlamStatus
 from omni_slam_interfaces.srv import StartMapping, StopLocalization, StopMapping
+from omni_tf_manager.msg import SlamStatus
 
 from .cancel_wait import wait_with_cancel
 from .map_store import MapAsset, MapStore, MapStoreError
@@ -35,6 +34,7 @@ from .telemetry_monitor import (
     PoseSample,
     yaw_from_quaternion,
 )
+from .tf_profile import load_tf_frames
 
 
 REASON_NONE = 0
@@ -54,26 +54,36 @@ ROBOT_PROFILES = {
     "omni_dog": {
         "mapping_command": (
             "ros2 launch fast_lio omni_dog.launch.py "
-            "map_path:={map_source_path}"
+            "map_path:={map_source_path} map_frame:={map_frame} odom_frame:={odom_frame} "
+            "base_frame:={base_frame} tracking_frame:={tracking_frame} "
+            "lidar_frame:={icp_sensor_frame}"
         ),
         "localization_command": (
             "ros2 launch fast_lio omni_dog_relocalization.launch.py "
             "map_path:={map_path} initial_x:={initial_x} initial_y:={initial_y} "
-            "initial_z:={initial_z} initial_yaw:={initial_yaw}"
+            "initial_z:={initial_z} initial_yaw:={initial_yaw} "
+            "map_frame:={map_frame} odom_frame:={odom_frame} "
+            "base_frame:={base_frame} tracking_frame:={tracking_frame} "
+            "lidar_frame:={icp_sensor_frame}"
         ),
-        "imu_topic": "/front_lidar/imu",
+        "imu_topic": "/omni/sensors/imu/data",
     },
     "vbot": {
         "mapping_command": (
             "ros2 launch fast_lio vbot.launch.py "
-            "map_path:={map_source_path}"
+            "map_path:={map_source_path} map_frame:={map_frame} odom_frame:={odom_frame} "
+            "base_frame:={base_frame} tracking_frame:={tracking_frame} "
+            "lidar_frame:={icp_sensor_frame}"
         ),
         "localization_command": (
             "ros2 launch fast_lio vbot_relocalization.launch.py "
             "map_path:={map_path} initial_x:={initial_x} initial_y:={initial_y} "
-            "initial_z:={initial_z} initial_yaw:={initial_yaw}"
+            "initial_z:={initial_z} initial_yaw:={initial_yaw} "
+            "map_frame:={map_frame} odom_frame:={odom_frame} "
+            "base_frame:={base_frame} tracking_frame:={tracking_frame} "
+            "lidar_frame:={icp_sensor_frame}"
         ),
-        "imu_topic": "/lidar_imu",
+        "imu_topic": "/omni/sensors/imu/data",
     },
 }
 
@@ -95,6 +105,24 @@ class SlamManagerNode(Node):
             )
         profile = ROBOT_PROFILES[robot_profile]
 
+        self.declare_parameter("tf_profile_path", "")
+        tf_profile_path = str(self.get_parameter("tf_profile_path").value)
+        tf_frames = load_tf_frames(tf_profile_path)
+        self.declare_parameter("frames.map", tf_frames["map"])
+        self.declare_parameter("frames.odom", tf_frames["odom"])
+        self.declare_parameter("frames.base", tf_frames["base"])
+        self.declare_parameter("frames.tracking", tf_frames["tracking"])
+        self.declare_parameter("frames.icp_sensor", tf_frames["icp_sensor"])
+        self._tf_frames = {
+            role: str(self.get_parameter(f"frames.{role}").value)
+            for role in tf_frames
+        }
+        invalid_frames = [
+            frame for frame in self._tf_frames.values() if not frame.startswith("omni_")
+        ]
+        if invalid_frames or len(set(self._tf_frames.values())) != len(self._tf_frames):
+            raise ValueError("core TF frames must be unique and begin with 'omni_'")
+
         self.declare_parameter("map_root", "/var/lib/omni/maps")
         self.declare_parameter("map_source_path", "/tmp/omni_slam_work/map.pcd")
         self.declare_parameter(
@@ -108,7 +136,7 @@ class SlamManagerNode(Node):
         self.declare_parameter("map_save_service", "/map_save")
         self.declare_parameter("cloud_topic", "/cloud_registered_global")
         self.declare_parameter("imu_topic", profile["imu_topic"])
-        self.declare_parameter("odom_topic", "/state_estimation_global")
+        self.declare_parameter("odom_topic", "/omni/tf_manager/body_odom_global")
         self.declare_parameter("initial_pose_topic", "/icp_result")
         self.declare_parameter("status_period_ms", 500)
         self.declare_parameter("sensor_fresh_timeout_ms", 1000)
@@ -165,6 +193,10 @@ class SlamManagerNode(Node):
         self._mapping_session_id = ""
 
         self.get_logger().info(f"Using SLAM robot profile: {robot_profile}")
+        self.get_logger().info(
+            "Using omni_tf_manager frame contract: "
+            + ", ".join(f"{role}={frame}" for role, frame in self._tf_frames.items())
+        )
 
         status_qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
@@ -197,7 +229,7 @@ class SlamManagerNode(Node):
             callback_group=self._callbacks,
         )
         self.create_subscription(
-            PoseWithCovarianceStamped,
+            Odometry,
             str(self.get_parameter("initial_pose_topic").value),
             self._initial_pose_callback,
             10,
@@ -289,7 +321,7 @@ class SlamManagerNode(Node):
                 )
             )
 
-    def _initial_pose_callback(self, _: PoseWithCovarianceStamped) -> None:
+    def _initial_pose_callback(self, _: Odometry) -> None:
         with self._lock:
             self._last_initial_pose = self._now_steady()
 
@@ -311,7 +343,14 @@ class SlamManagerNode(Node):
             try:
                 self._process.start(
                     self._mapping_command,
-                    {"map_source_path": str(self._map_source_path)},
+                    {
+                        "map_source_path": str(self._map_source_path),
+                        "map_frame": self._tf_frames["map"],
+                        "odom_frame": self._tf_frames["odom"],
+                        "base_frame": self._tf_frames["base"],
+                        "tracking_frame": self._tf_frames["tracking"],
+                        "icp_sensor_frame": self._tf_frames["icp_sensor"],
+                    },
                 )
             except ProcessSupervisorError as error:
                 self._machine.fail(REASON_PROCESS_START_FAILED, str(error))
@@ -563,6 +602,11 @@ class SlamManagerNode(Node):
                         "initial_y": str(float(goal_handle.request.initial_y)),
                         "initial_z": str(float(goal_handle.request.initial_z)),
                         "initial_yaw": str(float(goal_handle.request.initial_yaw)),
+                        "map_frame": self._tf_frames["map"],
+                        "odom_frame": self._tf_frames["odom"],
+                        "base_frame": self._tf_frames["base"],
+                        "tracking_frame": self._tf_frames["tracking"],
+                        "icp_sensor_frame": self._tf_frames["icp_sensor"],
                     },
                 )
                 self._machine.transition(SlamState.RELOCALIZING)

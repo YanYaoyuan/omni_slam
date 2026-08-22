@@ -10,10 +10,20 @@ on:
         description: "Release version (optional)"
         required: false
         type: string
+      tf_manager_ref:
+        description: Omni TF Manager tag, branch, or commit
+        required: false
+        default: main
+        type: string
   workflow_call:
     inputs:
       version:
         required: false
+        type: string
+      tf_manager_ref:
+        description: Omni TF Manager tag, branch, or commit
+        required: false
+        default: main
         type: string
 
 concurrency:
@@ -36,10 +46,22 @@ jobs:
       S100_IMAGE_SHA256: ec065c268782373311421f0bb7f2212bfec6584a7070a9737468055a6bce2c88
       ROBOT_DEV_CONFIG_REF: f44b1ad2575b34c189fd470de1db9c5ad48b6886
       S100_SYSROOT_REF: de9fa286f71a72d24c349477cd59f41cc2cc3d8f
+      TF_MANAGER_REF: ${{ inputs.tf_manager_ref || vars.OMNI_TF_MANAGER_REF || 'main' }}
 
     steps:
       - name: Checkout Omni SLAM
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
+
+      - name: Checkout Omni TF Manager
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: YanYaoyuan/omni_tf_manager
+          ref: ${{ env.TF_MANAGER_REF }}
+          path: omni_tf_manager_source
+          token: ${{ secrets.OMNI_CI_REPO_TOKEN || github.token }}
+
+      - name: Record Omni TF Manager revision
+        run: echo "OMNI_TF_MANAGER_SHA=$(git -C omni_tf_manager_source rev-parse HEAD)" >> "${GITHUB_ENV}"
 
       - name: Free runner disk space
         shell: bash
@@ -77,6 +99,7 @@ jobs:
           set -euo pipefail
 
           export S100_SOURCE_ROOT="${GITHUB_WORKSPACE}"
+          export OMNI_TF_MANAGER_SOURCE="${GITHUB_WORKSPACE}/omni_tf_manager_source"
           export S100_WORK_ROOT="${RUNNER_TEMP}/s100-cross"
           export S100_CLEAN=1
 
@@ -93,6 +116,10 @@ jobs:
           runtime_root="${S100_CROSS_ROOT}/runtime"
           test -x "${runtime_root}/bin/fastlio_mapping"
           test -x "${runtime_root}/bin/icp_node"
+          test -x "${runtime_root}/bin/omni_tf_manager_node"
+          test -f "${runtime_root}/config/omni_tf_manager/generic_four_sensor.yaml"
+          test -f "${runtime_root}/config/omni_tf_manager/omni_dog.yaml"
+          test -f "${runtime_root}/config/omni_tf_manager/omni_vbot_dog.yaml"
           test -d "${runtime_root}/config/fast_lio"
           test -s "${runtime_root}/lib/DEPENDENCIES.txt"
 
@@ -121,7 +148,7 @@ jobs:
           ls -lh "dist/${name}.tar.gz"
 
       - name: Upload S100 artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: omni-slam-rdk-s100-aarch64
           path: dist/*.tar.gz

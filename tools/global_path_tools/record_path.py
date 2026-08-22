@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Record a lio_map route from global lidar odometry as body-center points."""
+"""Record an omni_map route from manager-provided global body odometry."""
 
 import argparse
 import math
@@ -21,84 +21,13 @@ from rclpy.utilities import remove_ros_args
 
 
 Point = Tuple[float, float, float]
-Quaternion = Tuple[float, float, float, float]
-
-DEFAULT_ODOMETRY_TOPIC = "/state_estimation_global"
-DEFAULT_FRAME_ID = "lio_map"
-DEFAULT_CHILD_FRAME_ID = "livox_frame"
+DEFAULT_ODOMETRY_TOPIC = "/omni/tf_manager/body_odom_global"
+DEFAULT_FRAME_ID = "omni_map"
+DEFAULT_CHILD_FRAME_ID = "omni_base_link"
 
 
 def script_dir() -> str:
     return os.path.dirname(os.path.realpath(__file__))
-
-
-def quaternion_multiply(first: Quaternion, second: Quaternion) -> Quaternion:
-    x1, y1, z1, w1 = first
-    x2, y2, z2, w2 = second
-    return (
-        w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
-        w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
-        w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
-        w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
-    )
-
-
-def normalize_quaternion(quaternion: Quaternion) -> Quaternion:
-    norm = math.sqrt(sum(value * value for value in quaternion))
-    if not math.isfinite(norm) or norm < 1.0e-9:
-        raise ValueError("invalid quaternion")
-    return tuple(value / norm for value in quaternion)  # type: ignore[return-value]
-
-
-def inverse_quaternion(quaternion: Quaternion) -> Quaternion:
-    x, y, z, w = normalize_quaternion(quaternion)
-    return (-x, -y, -z, w)
-
-
-def quaternion_from_rpy(roll: float, pitch: float, yaw: float) -> Quaternion:
-    cr = math.cos(roll * 0.5)
-    sr = math.sin(roll * 0.5)
-    cp = math.cos(pitch * 0.5)
-    sp = math.sin(pitch * 0.5)
-    cy = math.cos(yaw * 0.5)
-    sy = math.sin(yaw * 0.5)
-    return normalize_quaternion(
-        (
-            sr * cp * cy - cr * sp * sy,
-            cr * sp * cy + sr * cp * sy,
-            cr * cp * sy - sr * sp * cy,
-            cr * cp * cy + sr * sp * sy,
-        )
-    )
-
-
-def rotate_vector(quaternion: Quaternion, vector: Point) -> Point:
-    q = normalize_quaternion(quaternion)
-    vector_quaternion: Quaternion = (vector[0], vector[1], vector[2], 0.0)
-    rotated = quaternion_multiply(
-        quaternion_multiply(q, vector_quaternion), inverse_quaternion(q)
-    )
-    return (rotated[0], rotated[1], rotated[2])
-
-
-def sensor_pose_to_body_position(
-    sensor_position: Point,
-    world_from_sensor: Quaternion,
-    body_to_sensor_translation: Point,
-    body_to_sensor_rotation: Quaternion,
-) -> Point:
-    world_from_body = normalize_quaternion(
-        quaternion_multiply(
-            normalize_quaternion(world_from_sensor),
-            inverse_quaternion(body_to_sensor_rotation),
-        )
-    )
-    world_offset = rotate_vector(world_from_body, body_to_sensor_translation)
-    return (
-        sensor_position[0] - world_offset[0],
-        sensor_position[1] - world_offset[1],
-        sensor_position[2] - world_offset[2],
-    )
 
 
 def distance_xy(first: Point, second: Point) -> float:
@@ -132,7 +61,7 @@ class EnterWatcher(threading.Thread):
 
 class PathRecorder(Node):
     def __init__(self, arguments: argparse.Namespace) -> None:
-        super().__init__("record_global_body_path")
+        super().__init__("omni_record_global_body_path")
         self.arguments = arguments
         self.topic = arguments.topic
         self.output = os.path.abspath(arguments.output)
@@ -150,17 +79,6 @@ class PathRecorder(Node):
         self.last_message_time: Optional[float] = None
         self.last_frame_error_time = 0.0
         self.wait_state = ""
-        self.body_to_sensor_translation: Point = (
-            arguments.body_to_sensor_x,
-            arguments.body_to_sensor_y,
-            arguments.body_to_sensor_z,
-        )
-        self.body_to_sensor_rotation = quaternion_from_rpy(
-            arguments.body_to_sensor_roll,
-            arguments.body_to_sensor_pitch,
-            arguments.body_to_sensor_yaw,
-        )
-
         self.prepare_outputs()
         reliability = (
             ReliabilityPolicy.RELIABLE
@@ -186,7 +104,7 @@ class PathRecorder(Node):
         print(
             f"输入坐标：{arguments.frame} -> {arguments.child_frame}"
         )
-        print("输出坐标：lio_map -> scan_base_link")
+        print("输出坐标：omni_map -> omni_base_link")
         print(f"全局路径：{self.output}")
         print(f"分段路径：{self.paths_dir}/pathN.txt")
         print(f"XY 最小记录间隔：{arguments.distance:.3f} m")
@@ -194,23 +112,10 @@ class PathRecorder(Node):
         self.report_topic_state(force=True)
 
     def write_header(self, output_file) -> None:
-        args = self.arguments
         output_file.write("# omni_slam global body path v1\n")
-        output_file.write("# frame_id: lio_map\n")
-        output_file.write("# child_frame_id: scan_base_link\n")
+        output_file.write("# frame_id: omni_map\n")
+        output_file.write("# child_frame_id: omni_base_link\n")
         output_file.write(f"# source_topic: {self.topic}\n")
-        output_file.write(
-            "# body_to_sensor_xyz: "
-            f"{args.body_to_sensor_x:.6f} "
-            f"{args.body_to_sensor_y:.6f} "
-            f"{args.body_to_sensor_z:.6f}\n"
-        )
-        output_file.write(
-            "# body_to_sensor_rpy: "
-            f"{args.body_to_sensor_roll:.6f} "
-            f"{args.body_to_sensor_pitch:.6f} "
-            f"{args.body_to_sensor_yaw:.6f}\n"
-        )
         output_file.write("# columns: x y z\n")
 
     def prepare_outputs(self) -> None:
@@ -267,27 +172,14 @@ class PathRecorder(Node):
 
     def body_position(self, message: Odometry) -> Point:
         position = message.pose.pose.position
-        orientation = message.pose.pose.orientation
-        sensor_position: Point = (
+        body_position: Point = (
             float(position.x),
             float(position.y),
             float(position.z),
         )
-        world_from_sensor: Quaternion = (
-            float(orientation.x),
-            float(orientation.y),
-            float(orientation.z),
-            float(orientation.w),
-        )
-        values = sensor_position + world_from_sensor
-        if not all(math.isfinite(value) for value in values):
+        if not all(math.isfinite(value) for value in body_position):
             raise ValueError("pose contains a non-finite value")
-        return sensor_pose_to_body_position(
-            sensor_position,
-            world_from_sensor,
-            self.body_to_sensor_translation,
-            self.body_to_sensor_rotation,
-        )
+        return body_position
 
     def is_outlier(self, point: Point, receive_time: float) -> bool:
         if self.last_observed is None or self.last_observed_time is None:
@@ -399,8 +291,7 @@ def default_output_paths(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "记录 /state_estimation_global，并用标定外参转换为 "
-            "lio_map 下的 scan_base_link 路径。"
+            "记录 omni_tf_manager 输出的 omni_map 下机身中心路径。"
         )
     )
     parser.add_argument("--topic", default=DEFAULT_ODOMETRY_TOPIC)
@@ -421,12 +312,6 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--max-speed", type=float, default=3.0)
     parser.add_argument("--jump-margin", type=float, default=0.50)
-    parser.add_argument("--body-to-sensor-x", type=float, default=0.13011)
-    parser.add_argument("--body-to-sensor-y", type=float, default=-0.02329)
-    parser.add_argument("--body-to-sensor-z", type=float, default=0.17598)
-    parser.add_argument("--body-to-sensor-roll", type=float, default=0.0)
-    parser.add_argument("--body-to-sensor-pitch", type=float, default=0.0)
-    parser.add_argument("--body-to-sensor-yaw", type=float, default=0.0)
     arguments = parser.parse_args(remove_ros_args(args=sys.argv)[1:])
     for name in ("distance", "max_speed", "jump_margin"):
         value = getattr(arguments, name)

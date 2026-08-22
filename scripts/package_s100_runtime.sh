@@ -42,7 +42,7 @@ mkdir -p \
 cp -a "${install_root}/lib/." "${output_root}/lib/"
 cp -a "${install_root}/share/." "${output_root}/share/"
 
-for package_name in fast_lio icp_relocalization omni_slam_interfaces omni_slam_manager; do
+for package_name in fast_lio icp_relocalization omni_slam_interfaces omni_slam_manager omni_tf_manager; do
   package_lib="${output_root}/lib/${package_name}"
   if [[ -d "${package_lib}" ]]; then
     while IFS= read -r -d '' executable; do
@@ -199,7 +199,11 @@ sort -u -o "${dependency_manifest}" "${dependency_manifest}"
 test -x "${output_root}/bin/fastlio_mapping"
 test -x "${output_root}/bin/icp_node"
 test -x "${output_root}/bin/omni_slam_ctl"
+test -x "${output_root}/bin/omni_tf_manager_node"
 test -d "${output_root}/config/fast_lio"
+test -f "${output_root}/config/omni_tf_manager/generic_four_sensor.yaml"
+test -f "${output_root}/config/omni_tf_manager/omni_dog.yaml"
+test -f "${output_root}/config/omni_tf_manager/omni_vbot_dog.yaml"
 test -d "${output_root}/share/ament_index"
 
 elf_count=0

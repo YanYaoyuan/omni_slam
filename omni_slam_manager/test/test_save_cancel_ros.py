@@ -1,6 +1,8 @@
 """ROS-backed tests for SaveMap cancellation (needs the ROS 2 runtime)."""
 
 import importlib.util
+from pathlib import Path
+import tempfile
 import threading
 import time
 import unittest
@@ -118,8 +120,18 @@ class SaveMapCancelTests(unittest.TestCase):
     def setUpClass(cls):
         import rclpy
 
+        cls._temporary_directory = tempfile.TemporaryDirectory()
+        root = Path(cls._temporary_directory.name)
         if not rclpy.ok():
-            rclpy.init()
+            rclpy.init(
+                args=[
+                    "--ros-args",
+                    "-p",
+                    f"map_root:={root / 'maps'}",
+                    "-p",
+                    f"map_source_path:={root / 'work' / 'map.pcd'}",
+                ]
+            )
 
     @classmethod
     def tearDownClass(cls):
@@ -127,6 +139,7 @@ class SaveMapCancelTests(unittest.TestCase):
 
         if rclpy.ok():
             rclpy.shutdown()
+        cls._temporary_directory.cleanup()
 
     def _make_node(self):
         from omni_slam_manager.manager_node import SlamManagerNode
