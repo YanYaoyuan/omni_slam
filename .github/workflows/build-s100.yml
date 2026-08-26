@@ -46,7 +46,9 @@ jobs:
       S100_IMAGE_SHA256: ec065c268782373311421f0bb7f2212bfec6584a7070a9737468055a6bce2c88
       ROBOT_DEV_CONFIG_REF: f44b1ad2575b34c189fd470de1db9c5ad48b6886
       S100_SYSROOT_REF: de9fa286f71a72d24c349477cd59f41cc2cc3d8f
-      TF_MANAGER_REF: ${{ inputs.tf_manager_ref || vars.OMNI_TF_MANAGER_REF || 'main' }}
+      # Push builds must not be redirected by a stale repository variable.
+      # workflow_dispatch/workflow_call can still pin an explicit ref.
+      TF_MANAGER_REF: ${{ inputs.tf_manager_ref || 'main' }}
 
     steps:
       - name: Checkout Omni SLAM

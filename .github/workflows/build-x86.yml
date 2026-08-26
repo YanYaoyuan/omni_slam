@@ -43,7 +43,9 @@ jobs:
       ROS_WS: /tmp/omni_slam_x86_ws
       DEBIAN_FRONTEND: noninteractive
       VERSION_INPUT: ${{ inputs.version }}
-      TF_MANAGER_REF: ${{ inputs.tf_manager_ref || vars.OMNI_TF_MANAGER_REF || 'main' }}
+      # Push builds must not be redirected by a stale repository variable.
+      # workflow_dispatch/workflow_call can still pin an explicit ref.
+      TF_MANAGER_REF: ${{ inputs.tf_manager_ref || 'main' }}
 
     steps:
       - uses: actions/checkout@v7.0.1
