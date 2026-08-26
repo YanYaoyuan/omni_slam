@@ -2,8 +2,26 @@
 
 set -euo pipefail
 
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-APP_ROOT=$(cd "${SCRIPT_DIR}/../.." && pwd)
+# The S100 runtime exposes this controller through
+# bin/omni_slam_ctl -> ../lib/omni_slam_manager/omni_slam_ctl.  Resolve the
+# symlink before deriving APP_ROOT; using the invocation path would otherwise
+# select the directory above the runtime prefix.
+INVOCATION_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
+SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}")
+SCRIPT_DIR=$(cd "$(dirname "${SCRIPT_PATH}")" && pwd -P)
+REAL_APP_ROOT=$(cd "${SCRIPT_DIR}/../.." && pwd -P)
+BIN_APP_ROOT=$(cd "${INVOCATION_DIR}/.." && pwd -P)
+
+if [[ -f "${REAL_APP_ROOT}/setup.bash" || -d "${REAL_APP_ROOT}/share/ament_index" ]]; then
+  APP_ROOT=${REAL_APP_ROOT}
+elif [[ -f "${BIN_APP_ROOT}/setup.bash" || -d "${BIN_APP_ROOT}/share/ament_index" ]]; then
+  # Some copy tools dereference bin/omni_slam_ctl instead of preserving the
+  # runtime symlink.  In that layout the application root is one level up.
+  APP_ROOT=${BIN_APP_ROOT}
+else
+  # Source-tree and explicit OMNI_SETUP usage retain the historical layout.
+  APP_ROOT=${REAL_APP_ROOT}
+fi
 
 OMNI_DATA_ROOT=${OMNI_DATA_ROOT:-/userdata/omni}
 OMNI_MAP_ROOT=${OMNI_MAP_ROOT:-${OMNI_DATA_ROOT}/maps}
