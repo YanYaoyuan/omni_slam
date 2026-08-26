@@ -59,6 +59,11 @@ jobs:
       - name: Record Omni TF Manager revision
         run: echo "OMNI_TF_MANAGER_SHA=$(git -C omni_tf_manager_source rev-parse HEAD)" >> "${GITHUB_ENV}"
 
+      - name: Validate Vbot live sensor profile
+        run: >-
+          scripts/validate_vbot_tf_profile.sh
+          omni_tf_manager_source/config/omni_vbot_dog.yaml
+
       - name: Clean workspace and caches before build
         run: |
           rm -rf "${ROS_WS}" \
@@ -130,6 +135,8 @@ jobs:
           colcon test-result --verbose
           test -f install/share/omni_tf_manager/config/omni_dog.yaml
           test -f install/share/omni_tf_manager/config/omni_vbot_dog.yaml
+          "${GITHUB_WORKSPACE}/scripts/validate_vbot_tf_profile.sh" \
+            install/share/omni_tf_manager/config/omni_vbot_dog.yaml
           test -f install/share/fast_lio/config/omni_dog.yaml
           test -f install/share/fast_lio/config/vbot.yaml
 

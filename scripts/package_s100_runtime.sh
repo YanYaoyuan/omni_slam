@@ -6,6 +6,8 @@
 
 set -euo pipefail
 
+script_root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
 if [[ $# -ne 3 ]]; then
   echo "usage: $0 <install-root> <sysroot> <output-root>" >&2
   exit 2
@@ -220,6 +222,8 @@ test -d "${output_root}/config/fast_lio"
 test -f "${output_root}/config/omni_tf_manager/generic_four_sensor.yaml"
 test -f "${output_root}/config/omni_tf_manager/omni_dog.yaml"
 test -f "${output_root}/config/omni_tf_manager/omni_vbot_dog.yaml"
+bash "${script_root}/validate_vbot_tf_profile.sh" \
+  "${output_root}/config/omni_tf_manager/omni_vbot_dog.yaml"
 test -d "${output_root}/share/ament_index"
 test -f "${output_root}/local/lib/python3.10/dist-packages/omni_slam_interfaces/__init__.py"
 if ! find "${output_root}/local/lib/python3.10/dist-packages/omni_slam_interfaces" \

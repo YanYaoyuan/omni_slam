@@ -146,8 +146,11 @@ ros2 topic echo /lidar_imu --once --field header
 ```
 
 标定文件必须以实际 VBot 的雷达—IMU 外参为准，示例值不能替代实机标定。
-原始 header 和坐标语义通过审核前，`omni_vbot_dog.yaml` 保持 shadow 且不输出
-规范化消息；不得仅凭 topic 或标定标签推断 `header.frame_id`。
+2026-08-26 的 S100/VBot 实机记录确认 `/lidar_points` 与 `/lidar_imu` 的
+`header.frame_id` 均为 `vita_lidar`。结合原先已直接消费这两个 payload 的
+FAST-LIO 配置与 `vbot_calib.yaml` 外参，`omni_vbot_dog.yaml` 已审核并启用两个
+规范化消息别名。该 profile 仍保持 `shadow`，只恢复规范化传感器消息，不接管
+已有 `/tf`；完成现场 TF 发布器审计后再切换 `authority`。
 
 ## 管理接口
 

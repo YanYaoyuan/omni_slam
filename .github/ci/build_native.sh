@@ -14,5 +14,7 @@ colcon test --merge-install \
 colcon test-result --verbose
 test -f install/share/omni_tf_manager/config/omni_dog.yaml
 test -f install/share/omni_tf_manager/config/omni_vbot_dog.yaml
+scripts/validate_vbot_tf_profile.sh \
+  install/share/omni_tf_manager/config/omni_vbot_dog.yaml
 test -f install/share/fast_lio/config/omni_dog.yaml
 test -f install/share/fast_lio/config/vbot.yaml

@@ -478,6 +478,8 @@ test -x install/lib/omni_tf_manager/omni_tf_manager_node
 test -f install/share/omni_tf_manager/config/generic_four_sensor.yaml
 test -f install/share/omni_tf_manager/config/omni_dog.yaml
 test -f install/share/omni_tf_manager/config/omni_vbot_dog.yaml
+bash src/omni_slam/scripts/validate_vbot_tf_profile.sh \
+  install/share/omni_tf_manager/config/omni_vbot_dog.yaml
 
 echo "=== Verify output architecture ==="
 elf_count=0
@@ -505,6 +507,8 @@ test -x runtime/bin/fastlio_mapping
 test -x runtime/bin/icp_node
 test -d runtime/config/fast_lio
 test -s runtime/lib/DEPENDENCIES.txt
+bash src/omni_slam/scripts/validate_vbot_tf_profile.sh \
+  runtime/config/omni_tf_manager/omni_vbot_dog.yaml
 test -f runtime/local/lib/python3.10/dist-packages/omni_slam_interfaces/__init__.py
 find runtime/local/lib/python3.10/dist-packages/omni_slam_interfaces \
   -maxdepth 1 -type f -name '*rosidl_typesupport_c*.so' -print -quit \
