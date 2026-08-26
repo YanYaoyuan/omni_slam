@@ -505,6 +505,10 @@ test -x runtime/bin/fastlio_mapping
 test -x runtime/bin/icp_node
 test -d runtime/config/fast_lio
 test -s runtime/lib/DEPENDENCIES.txt
+test -f runtime/local/lib/python3.10/dist-packages/omni_slam_interfaces/__init__.py
+find runtime/local/lib/python3.10/dist-packages/omni_slam_interfaces \
+  -maxdepth 1 -type f -name '*rosidl_typesupport_c*.so' -print -quit \
+  | grep -q .
 
 du -sh install
 echo "S100 cross build completed"

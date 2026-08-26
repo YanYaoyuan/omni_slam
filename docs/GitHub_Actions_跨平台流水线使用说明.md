@@ -69,7 +69,7 @@ Orin 流水线在构建前后执行 Docker builder/image prune，并清除 colco
 
 该 Docker daemon 不读写系统 Docker 的 `/var/lib/docker`，也不会清理其他项目的镜像或容器。至少需要 50 GiB 可用空间。
 
-S100 的 tar.gz 解压后直接得到应用前缀：`bin/` 是执行入口，`config/` 是运行配置，`lib/` 包含应用库以及递归解析得到的 ARM64 ROS/PCL/VTK 等动态依赖，`share/` 保留 ROS ament 索引、launch、rviz 和消息接口。部署到板端后先执行 `source setup.bash`。glibc 等 RDK OS 基础库不会打进包内，以免覆盖板端系统 ABI。S100 Artifact 暂不生成单独的 `.sha256` 文件。
+S100 的 tar.gz 解压后直接得到应用前缀：`bin/` 是执行入口，`config/` 是运行配置，`lib/` 包含应用库以及递归解析得到的 ARM64 ROS/PCL/VTK 等动态依赖，`local/` 保存 ROSIDL 生成的 Python 接口模块，`share/` 保留 ROS ament 索引、launch、rviz 和消息接口。部署到板端后先执行 `source setup.bash`。glibc 等 RDK OS 基础库不会打进包内，以免覆盖板端系统 ABI。S100 Artifact 暂不生成单独的 `.sha256` 文件。
 
 ## 缓存和存储策略
 

@@ -122,6 +122,10 @@ jobs:
           test -f "${runtime_root}/config/omni_tf_manager/omni_vbot_dog.yaml"
           test -d "${runtime_root}/config/fast_lio"
           test -s "${runtime_root}/lib/DEPENDENCIES.txt"
+          test -f "${runtime_root}/local/lib/python3.10/dist-packages/omni_slam_interfaces/__init__.py"
+          find "${runtime_root}/local/lib/python3.10/dist-packages/omni_slam_interfaces" \
+            -maxdepth 1 -type f -name '*rosidl_typesupport_c*.so' -print -quit \
+            | grep -q .
 
           version="${VERSION_INPUT:-}"
           if [[ -z "${version}" ]]; then

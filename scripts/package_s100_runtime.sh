@@ -19,6 +19,11 @@ if [[ ! -d "${install_root}/lib" || ! -d "${install_root}/share" ]]; then
   echo "ERROR: invalid colcon install tree: ${install_root}" >&2
   exit 1
 fi
+rosidl_python_root="${install_root}/local/lib/python3.10/dist-packages"
+if [[ ! -f "${rosidl_python_root}/omni_slam_interfaces/__init__.py" ]]; then
+  echo "ERROR: missing generated omni_slam_interfaces Python package: ${rosidl_python_root}" >&2
+  exit 1
+fi
 if [[ ! -d "${sysroot}/usr" ]]; then
   echo "ERROR: invalid S100 sysroot: ${sysroot}" >&2
   exit 1
@@ -35,11 +40,13 @@ mkdir -p \
   "${output_root}/bin" \
   "${output_root}/config" \
   "${output_root}/lib" \
+  "${output_root}/local" \
   "${output_root}/share"
 
 # Preserve the ROS prefix layout used by ament and ros2 launch. Application
 # executables remain below lib/<package>; bin contains convenient symlinks.
 cp -a "${install_root}/lib/." "${output_root}/lib/"
+cp -a "${install_root}/local/." "${output_root}/local/"
 cp -a "${install_root}/share/." "${output_root}/share/"
 
 for package_name in fast_lio icp_relocalization omni_slam_interfaces omni_slam_manager omni_tf_manager; do
@@ -79,11 +86,18 @@ export PATH="${_omni_s100_root}/bin:${PATH}"
 export LD_LIBRARY_PATH="${_omni_s100_root}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 export AMENT_PREFIX_PATH="${_omni_s100_root}${AMENT_PREFIX_PATH:+:${AMENT_PREFIX_PATH}}"
 
-if [[ -d "${_omni_s100_root}/lib/python3.10/site-packages" ]]; then
-  export PYTHONPATH="${_omni_s100_root}/lib/python3.10/site-packages${PYTHONPATH:+:${PYTHONPATH}}"
-fi
+for _omni_s100_python_dir in \
+  "${_omni_s100_root}/lib/python3.10/dist-packages" \
+  "${_omni_s100_root}/lib/python3.10/site-packages" \
+  "${_omni_s100_root}/local/lib/python3.10/site-packages" \
+  "${_omni_s100_root}/local/lib/python3.10/dist-packages"
+do
+  if [[ -d "${_omni_s100_python_dir}" ]]; then
+    export PYTHONPATH="${_omni_s100_python_dir}${PYTHONPATH:+:${PYTHONPATH}}"
+  fi
+done
 
-unset _omni_s100_root
+unset _omni_s100_python_dir _omni_s100_root
 SETUP
 chmod 755 "${output_root}/setup.bash"
 
@@ -99,6 +113,8 @@ Logs from the manager and its mapping/localization child processes are under
 /userdata/omni/log. Use `omni_slam_ctl logs-follow` to follow the current log.
 
 The bundle includes application-specific ARM64 shared-library dependencies.
+Generated ROSIDL Python modules are under local/lib/python3.10/dist-packages
+and are added to PYTHONPATH by setup.bash.
 The board must provide RDK OS and ROS 2 Humble/TogetheROS under /opt/tros/humble
 or /opt/ros/humble.
 README
@@ -152,7 +168,7 @@ while IFS= read -r -d '' candidate; do
     elf_queue+=("${candidate}")
     queued["${candidate}"]=1
   fi
-done < <(find "${output_root}/lib" -type f -print0)
+done < <(find "${output_root}/lib" "${output_root}/local/lib" -type f -print0)
 
 dependency_manifest="${output_root}/lib/DEPENDENCIES.txt"
 : > "${dependency_manifest}"
@@ -205,6 +221,13 @@ test -f "${output_root}/config/omni_tf_manager/generic_four_sensor.yaml"
 test -f "${output_root}/config/omni_tf_manager/omni_dog.yaml"
 test -f "${output_root}/config/omni_tf_manager/omni_vbot_dog.yaml"
 test -d "${output_root}/share/ament_index"
+test -f "${output_root}/local/lib/python3.10/dist-packages/omni_slam_interfaces/__init__.py"
+if ! find "${output_root}/local/lib/python3.10/dist-packages/omni_slam_interfaces" \
+  -maxdepth 1 -type f -name '*rosidl_typesupport_c*.so' -print -quit \
+  | grep -q .; then
+  echo 'ERROR: missing generated omni_slam_interfaces Python type support' >&2
+  exit 1
+fi
 
 elf_count=0
 while IFS= read -r -d '' bundled_file; do
