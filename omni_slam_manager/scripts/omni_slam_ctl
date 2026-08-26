@@ -76,6 +76,20 @@ log() {
   printf '[omni-slam] %s\n' "$*"
 }
 
+process_is_running() {
+  local pid=$1 state
+  kill -0 "${pid}" 2>/dev/null || return 1
+
+  # kill -0 also succeeds for a zombie.  Treat it as stopped so an orphaned
+  # launch process cannot leave manager-stop and future starts wedged behind
+  # a stale PID file (notably in containers whose PID 1 reaps slowly).
+  if [[ -r "/proc/${pid}/status" ]]; then
+    state=$(awk '/^State:/ {print $2; exit}' "/proc/${pid}/status")
+    [[ "${state}" != "Z" ]] || return 1
+  fi
+  return 0
+}
+
 load_ros_environment() {
   mkdir -p "${OMNI_RUN_DIR}/ros" "${OMNI_LOG_DIR}/ros"
   export ROS_HOME=${ROS_HOME:-${OMNI_RUN_DIR}/ros}
@@ -104,7 +118,7 @@ manager_pid() {
   [[ -r "${PID_FILE}" ]] || return 1
   read -r pid < "${PID_FILE}"
   [[ "${pid}" =~ ^[1-9][0-9]*$ ]] || return 1
-  kill -0 "${pid}" 2>/dev/null || return 1
+  process_is_running "${pid}" || return 1
   if [[ -r "/proc/${pid}/cmdline" ]] && \
     ! tr '\0' ' ' < "/proc/${pid}/cmdline" | grep -q 'omni_slam_manager'; then
     return 1
@@ -148,7 +162,7 @@ start_manager() {
       ready=1
       break
     fi
-    if ! kill -0 "${pid}" 2>/dev/null; then
+    if ! process_is_running "${pid}"; then
       break
     fi
     sleep 0.25
