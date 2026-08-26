@@ -188,7 +188,7 @@ stop_manager() {
 
   kill -TERM "${pid}"
   for _ in $(seq 1 50); do
-    if ! kill -0 "${pid}" 2>/dev/null; then
+    if ! process_is_running "${pid}"; then
       rm -f "${PID_FILE}"
       log "manager stopped"
       return 0
