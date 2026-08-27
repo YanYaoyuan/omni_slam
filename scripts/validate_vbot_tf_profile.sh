@@ -28,7 +28,7 @@ require_setting() {
   fi
 }
 
-require_setting mode shadow
+require_setting mode authority
 require_setting profile_name omni_vbot_dog
 require_setting sensor_relay.lidar.operation identity_frame_alias
 require_setting sensor_relay.lidar.alias_verified true

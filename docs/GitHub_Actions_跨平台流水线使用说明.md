@@ -59,15 +59,24 @@ Orin 流水线在构建前后执行 Docker builder/image prune，并清除 colco
 ./scripts/test_s100_local.sh
 ```
 
-官方 TROS 镜像包公开下载，不需要 registry 账号或 GitHub Secrets。首次运行后会缓存在 `/data/docker-s100/images`。本地入口启动独立的 rootless Docker，默认使用：
+官方 TROS 镜像包公开下载，不需要 registry 账号或 GitHub Secrets。首次运行后会缓存在 `/data/omni-s100-cache/images`。本地入口启动独立的 rootless Docker，默认使用：
 
+- 镜像归档：`/data/omni-s100-cache/images`
 - Docker 数据：`/data/docker-s100`
 - Docker 客户端配置：`/data/docker-s100/config`
 - 源码/sysroot/colcon 工作区：`/data/omni-s100-local`
 - colcon 安装树：`/data/omni-s100-local/workspace/cc_ws/tros_ws/install`
 - 可部署应用包：`/data/omni-s100-local/workspace/cc_ws/tros_ws/runtime`
 
-该 Docker daemon 不读写系统 Docker 的 `/var/lib/docker`，也不会清理其他项目的镜像或容器。至少需要 50 GiB 可用空间。
+该 Docker daemon 不读写系统 Docker 的 `/var/lib/docker`，也不会清理其他项目的镜像或容器。脚本退出（包括构建失败）时会停止该专用 daemon、停止残留的本次构建容器并释放锁。omni_slam 与 SCAN-Planner 共用同一 `S100_DOCKER_BASE` 时会通过共享锁串行执行。至少需要 50 GiB 可用空间。
+
+可通过 `S100_IMAGE_CACHE_DIR`、`S100_DOCKER_BASE` 和 `S100_LOCAL_BASE` 分别覆盖镜像缓存、Docker 数据及构建工作区；也可用 `S100_IMAGE_ARCHIVE` 指定完整镜像归档路径。例如：
+
+```bash
+S100_IMAGE_CACHE_DIR=/mnt/build-cache/s100-images \
+S100_DOCKER_BASE=/mnt/build-cache/s100-docker \
+  ./scripts/test_s100_local.sh
+```
 
 S100 的 tar.gz 解压后直接得到应用前缀：`bin/` 是执行入口，`config/` 是运行配置，`lib/` 包含应用库以及递归解析得到的 ARM64 ROS/PCL/VTK 等动态依赖，`local/` 保存 ROSIDL 生成的 Python 接口模块，`share/` 保留 ROS ament 索引、launch、rviz 和消息接口。部署到板端后先执行 `source setup.bash`。glibc 等 RDK OS 基础库不会打进包内，以免覆盖板端系统 ABI。S100 Artifact 暂不生成单独的 `.sha256` 文件。
 

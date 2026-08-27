@@ -58,10 +58,19 @@ fi
 
 mkdir -p "${TROS_ROOT}/src/omni_slam" "${TROS_ROOT}/src/omni_tf_manager"
 
-log "cloning robot_dev_config at ${ROBOT_DEV_CONFIG_REF}"
-git clone --filter=blob:none \
-  https://github.com/D-Robotics/robot_dev_config.git \
-  "${ROBOT_DEV_CONFIG_DIR}"
+if [[ ! -d "${ROBOT_DEV_CONFIG_DIR}/.git" ]]; then
+  log "cloning robot_dev_config at ${ROBOT_DEV_CONFIG_REF}"
+  git clone --filter=blob:none \
+    https://github.com/D-Robotics/robot_dev_config.git \
+    "${ROBOT_DEV_CONFIG_DIR}"
+else
+  log "reusing robot_dev_config checkout at ${ROBOT_DEV_CONFIG_REF}"
+  if ! git -C "${ROBOT_DEV_CONFIG_DIR}" cat-file -e \
+      "${ROBOT_DEV_CONFIG_REF}^{commit}" 2>/dev/null; then
+    git -C "${ROBOT_DEV_CONFIG_DIR}" fetch --no-tags origin \
+      "${ROBOT_DEV_CONFIG_REF}"
+  fi
+fi
 git -C "${ROBOT_DEV_CONFIG_DIR}" checkout --detach "${ROBOT_DEV_CONFIG_REF}"
 
 log "copying Omni SLAM source into the cross workspace"
@@ -129,9 +138,13 @@ shallow_checkout() {
   local target=$3
   local attempt
 
-  mkdir -p "${target}"
-  git -C "${target}" init --quiet
-  git -C "${target}" remote add origin "${url}"
+  if [[ ! -d "${target}/.git" ]]; then
+    mkdir -p "${target}"
+    git -C "${target}" init --quiet
+    git -C "${target}" remote add origin "${url}"
+  else
+    git -C "${target}" remote set-url origin "${url}"
+  fi
 
   # Force HTTP/1.1 because the local proxy corrupted a long HTTP/2 TLS stream.
   # Low-speed detection prevents an otherwise healthy process from hanging
