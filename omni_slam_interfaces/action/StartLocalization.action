@@ -1,0 +1,17 @@
+string map_id
+uint32 map_version
+float32 timeout_sec
+float32 initial_x
+float32 initial_y
+float32 initial_z
+float32 initial_yaw
+---
+bool success
+uint8 final_state
+uint32 reason_code
+string message
+---
+uint8 state
+float32 elapsed_sec
+float32 fitness_score
+string message

@@ -1,0 +1,60 @@
+/**:
+    ros__parameters:
+        locate_in_prior_map: false
+        prior_map_path: ""
+        feature_extract_enable: false
+        point_filter_num: 3
+        max_iteration: 3
+        filter_size_surf: 0.5
+        filter_size_map: 0.5
+        cube_side_length: 1000.0
+        runtime_pos_log_enable: false
+        map_file_path: "./maps/matrix_sim_scans.pcd"
+
+        common:
+            map_frame_id: "omni_map"
+            odom_frame_id: "omni_odom"
+            sensor_frame_id: "omni_imu_link"
+            lidar_frame_id: "omni_lidar_link"
+            base_frame_id: "omni_base_link"
+            send_odom_base_tf: false
+            lid_topic: "/omni/sensors/lidar/points"
+            imu_topic: "/omni/sensors/imu/data"
+            time_sync_en: false
+            time_offset_lidar_to_imu: 0.0
+
+        preprocess:
+            # MATRiX publishes the Mid360 cloud as sensor_msgs/PointCloud2 with
+            # Livox-style fields: x, y, z, intensity, tag, line, timestamp.
+            lidar_type: 5
+            scan_line: 4
+            blind: 0.5
+            timestamp_unit: 3
+            scan_rate: 10
+
+        mapping:
+            acc_cov: 0.1
+            gyr_cov: 0.1
+            b_acc_cov: 0.0001
+            b_gyr_cov: 0.0001
+            fov_degree: 360.0
+            det_range: 100.0
+            extrinsic_est_en: false
+            # Matrix xgw.xml livox_imu site and config.json LiDAR are co-located.
+            extrinsic_T: [0.0, 0.0, 0.0]
+            extrinsic_R: [1.0, 0.0, 0.0,
+                          0.0, 1.0, 0.0,
+                          0.0, 0.0, 1.0]
+
+        publish:
+            tf_en: false
+            path_en: true
+            effect_map_en: true
+            map_en: true
+            scan_publish_en: true
+            dense_publish_en: true
+            scan_bodyframe_pub_en: true
+
+        pcd_save:
+            pcd_save_en: true
+            interval: -1

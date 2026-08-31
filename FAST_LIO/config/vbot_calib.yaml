@@ -1,0 +1,296 @@
+label: vita-evt
+id: -1
+cameras:
+  - camera:
+      id: 0
+      label: stereo_left
+      line-delay-nanoseconds: 0
+      image_height: 1080
+      image_width: 1920
+      type: pinhole
+      intrinsics:
+        rows: 1
+        cols: 4
+        data: [788.591675, 788.573975, 957.115356, 538.865723]
+      distortion:
+        type: radial_tangential
+        parameters:
+          rows: 1
+          cols: 8
+          data: [1.53461444, 0.465252936, -5.53809004e-05, -2.12237992e-05, 0.0152124995, 1.91310358, 0.93015027, 0.0928561613]
+      Extr_B_C:
+        orientation: [-0.50336600571474499, 0.49956883549978492, -0.49391839818504574, 0.50308871863965587]
+        translation: [0.27087685482543061, 0.036383642406122962, 0.14234097976219948]
+        time_delay: 0
+  - camera:
+      id: 1
+      label: stereo_right
+      line-delay-nanoseconds: 0
+      image_height: 1080
+      image_width: 1920
+      type: pinhole
+      intrinsics:
+        rows: 1
+        cols: 4
+        data: [789.167358, 789.448303, 960.164612, 539.311462]
+      distortion:
+        type: radial_tangential
+        parameters:
+          rows: 1
+          cols: 8
+          data: [1.73637986, 0.517691851, 4.58229006e-05, -0.000140205098, 0.0137737859, 2.11596346, 1.05469298, 0.0952806175]
+      Extr_B_C:
+        orientation: [-0.50342172892562254, 0.50065588750188927, -0.49432519539184566, 0.50155044248414971]
+        translation: [0.2712095501759984, -0.033668613798199479, 0.14219952720973933]
+        time_delay: 0
+  - camera:
+      id: 2
+      label: infrared
+      line-delay-nanoseconds: 0
+      image_height: 1160
+      image_width: 1536
+      type: pinhole
+      intrinsics:
+        rows: 1
+        cols: 4
+        data: [800, 800, 768, 580]
+      distortion:
+        type: radial_tangential
+        parameters:
+          rows: 1
+          cols: 4
+          data: [0, 0, 0, 0]
+      Extr_B_C:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+imus:
+  - imu:
+      id: 0
+      label: body_imu
+      params:
+        max_imu_dt: 0.01
+        acc_max: 176
+        gyr_max: 17
+        gyr_n: 0.0040000000000000001
+        acc_n: 0.080000000000000002
+        gyr_w: 1.9999999999999999e-06
+        acc_w: 4.0000000000000003e-05
+        g: 9.8100699999999996
+        imu_rate: 100
+      initialization:
+        velocity: [0, 0, 0]
+        gyr_bias: [-1.1368447542190552, -0.70338159799575806, -0.3299427330493927]
+        acc_bias: [0.086081273853778839, 0.070114634931087494, -8.7983675003051758]
+        velocity_sigma: 2
+        gyr_bias_sigma: 0.01
+        acc_bias_sigma: 0.10000000000000001
+      Extr_B_I:
+        orientation: [0.70709270881977593, 0.00064156483129175588, 0.0062761980840718001, -0.70709270881977593]
+        translation: [-0.071919999999999998, 0, 0.04999]
+        time_delay: 0
+  - imu:
+      id: 1
+      label: lidar_imu
+      params:
+        max_imu_dt: 0.01
+        acc_max: 176
+        gyr_max: 17
+        gyr_n: 0.29999999999999999
+        acc_n: 0.29999999999999999
+        gyr_w: 0.0001
+        acc_w: 0.0001
+        g: 9.8100699999999996
+        imu_rate: 200
+      initialization:
+        velocity: [0, 0, 0]
+        gyr_bias: [0, 0, 0]
+        acc_bias: [0, 0, 0]
+        velocity_sigma: 2
+        gyr_bias_sigma: 0.01
+        acc_bias_sigma: 0.10000000000000001
+      Extr_B_I:
+        orientation: [0, 0, 0, 1]
+        translation: [0.18543999999999999, 0.016990000000000002, 0.18129000000000001]
+        time_delay: 0
+      associated_sensor: lidar0
+  - imu:
+      id: 2
+      label: head_imu
+      params:
+        max_imu_dt: 0.01
+        acc_max: 176
+        gyr_max: 17
+        gyr_n: 0.0040000000000000001
+        acc_n: 0.080000000000000002
+        gyr_w: 1.9999999999999999e-06
+        acc_w: 4.0000000000000003e-05
+        g: 9.8100699999999996
+        imu_rate: 100
+      initialization:
+        velocity: [0, 0, 0]
+        gyr_bias: [0, 0, 0]
+        acc_bias: [0, 0, 0]
+        velocity_sigma: 2
+        gyr_bias_sigma: 0.01
+        acc_bias_sigma: 0.10000000000000001
+      Extr_B_I:
+        orientation: [0, -0.70710678118654757, 0, 0.70710678118654757]
+        translation: [0.1552, 0.040129999999999999, 0.23238]
+        time_delay: 0
+lidars:
+  - lidar:
+      id: 0
+      label: lidar
+      Extr_B_L:
+        orientation: [-0.0064851846511260374, -0.0013550755305729927, -0.0018956524846259488, 0.99997625604411466]
+        translation: [0.19850080090237204, 0.00012328171718694673, 0.22683563661550177]
+        time_delay: 0
+      associated_sensor: imu1
+uwbs:
+  - uwb:
+      id: 0
+      label: anchor
+      Extr_B_U:
+        orientation: [1, 0, 0, 0]
+        translation: [0.23463999999999999, 0, 0.20801]
+        time_delay: 0
+joints:
+  - joint:
+      id: 0
+      label: rf_hip
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 1
+      label: rf_thigh
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 2
+      label: rf_calf
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 3
+      label: lf_hip
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 4
+      label: lf_thigh
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 5
+      label: lf_calf
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 6
+      label: rr_hip
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 7
+      label: rr_thigh
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 8
+      label: rr_calf
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 9
+      label: lr_hip
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 10
+      label: lr_thigh
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 11
+      label: lr_calf
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0]
+        time_delay: 0
+  - joint:
+      id: 12
+      label: head_pitch
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0, 0, 0.15551999999999999]
+        time_delay: 0
+  - joint:
+      id: 13
+      label: head_yaw
+      zero_offset: 0
+      backlash: 0
+      Extr_B_J:
+        orientation: [1, 0, 0, 0]
+        translation: [0.17288000000000001, 0, 0]
+        time_delay: 0
+calib_metadata:
+  version: 1.0
+  multi_sensor_calibrated: true
+  uwb_calibrated: true
+  joint_calibrated: false
+  infrared_verified: true
+  infrared_verify:
+    cam_id: 2
+    tag_id: 2
+    measured: [754.101746, 786.616882, -0.0153157711]
+  last_calib_timestamp: 1780142527
+  source_config_path: /app_param/vita_calib.yaml

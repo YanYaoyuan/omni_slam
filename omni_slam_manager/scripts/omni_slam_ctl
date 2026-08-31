@@ -1,0 +1,337 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# The S100 runtime exposes this controller through
+# bin/omni_slam_ctl -> ../lib/omni_slam_manager/omni_slam_ctl.  Resolve the
+# symlink before deriving APP_ROOT; using the invocation path would otherwise
+# select the directory above the runtime prefix.
+INVOCATION_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
+SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}")
+SCRIPT_DIR=$(cd "$(dirname "${SCRIPT_PATH}")" && pwd -P)
+REAL_APP_ROOT=$(cd "${SCRIPT_DIR}/../.." && pwd -P)
+BIN_APP_ROOT=$(cd "${INVOCATION_DIR}/.." && pwd -P)
+
+if [[ -f "${REAL_APP_ROOT}/setup.bash" || -d "${REAL_APP_ROOT}/share/ament_index" ]]; then
+  APP_ROOT=${REAL_APP_ROOT}
+elif [[ -f "${BIN_APP_ROOT}/setup.bash" || -d "${BIN_APP_ROOT}/share/ament_index" ]]; then
+  # Some copy tools dereference bin/omni_slam_ctl instead of preserving the
+  # runtime symlink.  In that layout the application root is one level up.
+  APP_ROOT=${BIN_APP_ROOT}
+else
+  # Source-tree and explicit OMNI_SETUP usage retain the historical layout.
+  APP_ROOT=${REAL_APP_ROOT}
+fi
+
+OMNI_DATA_ROOT=${OMNI_DATA_ROOT:-/userdata/omni}
+OMNI_MAP_ROOT=${OMNI_MAP_ROOT:-${OMNI_DATA_ROOT}/maps}
+OMNI_WORK_DIR=${OMNI_WORK_DIR:-${OMNI_DATA_ROOT}/work}
+OMNI_RUN_DIR=${OMNI_RUN_DIR:-${OMNI_DATA_ROOT}/run}
+OMNI_LOG_DIR=${OMNI_LOG_DIR:-${OMNI_DATA_ROOT}/log}
+OMNI_ROBOT_PROFILE=${OMNI_ROBOT_PROFILE:-vbot}
+OMNI_BOARD_ENV=${OMNI_BOARD_ENV:-/app/script/env.sh}
+OMNI_SETUP=${OMNI_SETUP:-${APP_ROOT}/setup.bash}
+
+PID_FILE="${OMNI_RUN_DIR}/manager.pid"
+CURRENT_LOG="${OMNI_LOG_DIR}/manager-current.log"
+
+usage() {
+  cat <<'USAGE'
+Usage: omni_slam_ctl <command> [arguments]
+
+Manager:
+  manager-start                         Start the manager in the background
+  manager-stop                          Stop the manager and its SLAM child
+  manager-restart                       Restart the manager
+  manager-status                        Show the manager process status
+  logs [lines]                          Show the latest manager/SLAM log
+  logs-follow                           Follow the manager/SLAM log
+
+Mapping:
+  mapping-start [session_id]            Start mapping
+  map-save <map_id>                     Save and select a versioned map
+  mapping-stop                          Stop after a successful save
+  mapping-discard                       Stop and discard unsaved data
+
+Localization:
+  localization-start <map_id> [x y yaw [z [version [timeout]]]]
+  localization-stop
+  status                                Show the current SLAM state once
+
+Defaults:
+  profile=vbot, data=/userdata/omni, version=0 (current), timeout=60 seconds
+
+Optional environment variables:
+  OMNI_DATA_ROOT, OMNI_MAP_ROOT, OMNI_WORK_DIR, OMNI_RUN_DIR, OMNI_LOG_DIR,
+  OMNI_ROBOT_PROFILE, OMNI_BOARD_ENV, OMNI_SETUP
+USAGE
+}
+
+die() {
+  printf '[omni-slam] ERROR: %s\n' "$*" >&2
+  exit 1
+}
+
+log() {
+  printf '[omni-slam] %s\n' "$*"
+}
+
+process_is_running() {
+  local pid=$1 state
+  kill -0 "${pid}" 2>/dev/null || return 1
+
+  # kill -0 also succeeds for a zombie.  Treat it as stopped so an orphaned
+  # launch process cannot leave manager-stop and future starts wedged behind
+  # a stale PID file (notably in containers whose PID 1 reaps slowly).
+  if [[ -r "/proc/${pid}/status" ]]; then
+    state=$(awk '/^State:/ {print $2; exit}' "/proc/${pid}/status")
+    [[ "${state}" != "Z" ]] || return 1
+  fi
+  return 0
+}
+
+load_ros_environment() {
+  mkdir -p "${OMNI_RUN_DIR}/ros" "${OMNI_LOG_DIR}/ros"
+  export ROS_HOME=${ROS_HOME:-${OMNI_RUN_DIR}/ros}
+  export ROS_LOG_DIR=${ROS_LOG_DIR:-${OMNI_LOG_DIR}/ros}
+
+  # ROS/colcon setup files commonly probe optional variables such as
+  # COLCON_TRACE without a default, so nounset must be disabled while sourcing.
+  set +u
+  if [[ -f "${OMNI_BOARD_ENV}" ]]; then
+    # shellcheck disable=SC1090
+    source "${OMNI_BOARD_ENV}"
+  fi
+
+  if [[ ! -f "${OMNI_SETUP}" && -f "${APP_ROOT}/install/setup.bash" ]]; then
+    OMNI_SETUP="${APP_ROOT}/install/setup.bash"
+  fi
+  [[ -f "${OMNI_SETUP}" ]] || die "setup file not found: ${OMNI_SETUP}"
+  # shellcheck disable=SC1090
+  source "${OMNI_SETUP}"
+  set -euo pipefail
+  command -v ros2 >/dev/null 2>&1 || die "ros2 is unavailable after sourcing ${OMNI_SETUP}"
+}
+
+manager_pid() {
+  local pid
+  [[ -r "${PID_FILE}" ]] || return 1
+  read -r pid < "${PID_FILE}"
+  [[ "${pid}" =~ ^[1-9][0-9]*$ ]] || return 1
+  process_is_running "${pid}" || return 1
+  if [[ -r "/proc/${pid}/cmdline" ]] && \
+    ! tr '\0' ' ' < "/proc/${pid}/cmdline" | grep -q 'omni_slam_manager'; then
+    return 1
+  fi
+  printf '%s\n' "${pid}"
+}
+
+require_manager() {
+  manager_pid >/dev/null || die "manager is not running; run: omni_slam_ctl manager-start"
+}
+
+start_manager() {
+  local pid log_file ready=0
+  mkdir -p "${OMNI_MAP_ROOT}" "${OMNI_WORK_DIR}" "${OMNI_RUN_DIR}" "${OMNI_LOG_DIR}"
+  if pid=$(manager_pid); then
+    log "manager already running (PID ${pid})"
+    return 0
+  fi
+  rm -f "${PID_FILE}"
+  load_ros_environment
+
+  log_file="${OMNI_LOG_DIR}/manager-$(date +%Y%m%d-%H%M%S).log"
+  ln -sfn "$(basename "${log_file}")" "${CURRENT_LOG}"
+  nohup ros2 launch omni_slam_manager manager.launch.py \
+    "robot_profile:=${OMNI_ROBOT_PROFILE}" \
+    "map_root:=${OMNI_MAP_ROOT}" \
+    "map_source_path:=${OMNI_WORK_DIR}/map.pcd" \
+    > "${log_file}" 2>&1 < /dev/null &
+  pid=$!
+  printf '%s\n' "${pid}" > "${PID_FILE}"
+
+  sleep 1
+  if ! kill -0 "${pid}" 2>/dev/null; then
+    rm -f "${PID_FILE}"
+    tail -n 80 "${log_file}" >&2 || true
+    die "manager failed to start"
+  fi
+
+  for _ in $(seq 1 20); do
+    if ros2 service list 2>/dev/null | grep -qx '/omni/slam/start_mapping'; then
+      ready=1
+      break
+    fi
+    if ! process_is_running "${pid}"; then
+      break
+    fi
+    sleep 0.25
+  done
+  if [[ "${ready}" -ne 1 ]]; then
+    tail -n 80 "${log_file}" >&2 || true
+    kill -TERM "${pid}" 2>/dev/null || true
+    wait "${pid}" 2>/dev/null || true
+    rm -f "${PID_FILE}"
+    die "manager process started but ROS services were not ready within 5 seconds"
+  fi
+  log "manager started in background (PID ${pid})"
+  log "log: ${CURRENT_LOG}"
+}
+
+stop_manager() {
+  local pid
+  if ! pid=$(manager_pid); then
+    rm -f "${PID_FILE}"
+    log "manager is not running"
+    return 0
+  fi
+
+  kill -TERM "${pid}"
+  for _ in $(seq 1 50); do
+    if ! process_is_running "${pid}"; then
+      rm -f "${PID_FILE}"
+      log "manager stopped"
+      return 0
+    fi
+    sleep 0.1
+  done
+  die "manager did not stop within 5 seconds (PID ${pid})"
+}
+
+show_manager_status() {
+  local pid
+  if pid=$(manager_pid); then
+    log "manager is running (PID ${pid})"
+    log "log: ${CURRENT_LOG}"
+  else
+    rm -f "${PID_FILE}"
+    log "manager is not running"
+    return 1
+  fi
+}
+
+show_logs() {
+  local lines=${1:-100}
+  [[ "${lines}" =~ ^[1-9][0-9]*$ ]] || die "log line count must be a positive integer"
+  [[ -e "${CURRENT_LOG}" ]] || die "no manager log found under ${OMNI_LOG_DIR}"
+  tail -n "${lines}" "${CURRENT_LOG}"
+}
+
+follow_logs() {
+  [[ -e "${CURRENT_LOG}" ]] || die "no manager log found under ${OMNI_LOG_DIR}"
+  exec tail -n 100 -F "${CURRENT_LOG}"
+}
+
+validate_name() {
+  local kind=$1 value=$2
+  [[ "${value}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || \
+    die "invalid ${kind}: use letters, numbers, dot, underscore or hyphen"
+}
+
+validate_number() {
+  local name=$1 value=$2
+  [[ "${value}" =~ ^[-+]?([0-9]+([.][0-9]*)?|[.][0-9]+)$ ]] || \
+    die "${name} must be a finite decimal number"
+}
+
+run_ros_command() {
+  require_manager
+  load_ros_environment
+  "$@"
+}
+
+command=${1:-help}
+shift || true
+
+case "${command}" in
+  manager-start)
+    [[ $# -eq 0 ]] || die "manager-start takes no arguments"
+    start_manager
+    ;;
+  manager-stop)
+    [[ $# -eq 0 ]] || die "manager-stop takes no arguments"
+    stop_manager
+    ;;
+  manager-restart)
+    [[ $# -eq 0 ]] || die "manager-restart takes no arguments"
+    stop_manager
+    start_manager
+    ;;
+  manager-status)
+    [[ $# -eq 0 ]] || die "manager-status takes no arguments"
+    show_manager_status
+    ;;
+  logs)
+    [[ $# -le 1 ]] || die "usage: omni_slam_ctl logs [lines]"
+    show_logs "${1:-100}"
+    ;;
+  logs-follow)
+    [[ $# -eq 0 ]] || die "logs-follow takes no arguments"
+    follow_logs
+    ;;
+  mapping-start)
+    [[ $# -le 1 ]] || die "usage: omni_slam_ctl mapping-start [session_id]"
+    session_id=${1:-mapping_$(date +%Y%m%d_%H%M%S)}
+    validate_name session_id "${session_id}"
+    run_ros_command ros2 service call /omni/slam/start_mapping \
+      omni_slam_interfaces/srv/StartMapping \
+      "{session_id: '${session_id}'}"
+    ;;
+  map-save)
+    [[ $# -eq 1 ]] || die "usage: omni_slam_ctl map-save <map_id>"
+    validate_name map_id "$1"
+    run_ros_command ros2 action send_goal --feedback /omni/slam/save_map \
+      omni_slam_interfaces/action/SaveMap \
+      "{map_id: '$1', calibration_hash: '', make_current: true}"
+    ;;
+  mapping-stop)
+    [[ $# -eq 0 ]] || die "mapping-stop takes no arguments"
+    run_ros_command ros2 service call /omni/slam/stop_mapping \
+      omni_slam_interfaces/srv/StopMapping "{discard_unsaved: false}"
+    ;;
+  mapping-discard)
+    [[ $# -eq 0 ]] || die "mapping-discard takes no arguments"
+    run_ros_command ros2 service call /omni/slam/stop_mapping \
+      omni_slam_interfaces/srv/StopMapping "{discard_unsaved: true}"
+    ;;
+  localization-start)
+    [[ $# -ge 1 && $# -le 7 ]] || \
+      die "usage: omni_slam_ctl localization-start <map_id> [x y yaw [z [version [timeout]]]]"
+    map_id=$1
+    initial_x=${2:-0.0}
+    initial_y=${3:-0.0}
+    initial_yaw=${4:-0.0}
+    initial_z=${5:-0.0}
+    map_version=${6:-0}
+    timeout_sec=${7:-60.0}
+    validate_name map_id "${map_id}"
+    validate_number initial_x "${initial_x}"
+    validate_number initial_y "${initial_y}"
+    validate_number initial_yaw "${initial_yaw}"
+    validate_number initial_z "${initial_z}"
+    [[ "${map_version}" =~ ^[0-9]+$ ]] || die "version must be a non-negative integer"
+    validate_number timeout "${timeout_sec}"
+    run_ros_command ros2 action send_goal --feedback /omni/slam/start_localization \
+      omni_slam_interfaces/action/StartLocalization \
+      "{map_id: '${map_id}', map_version: ${map_version}, timeout_sec: ${timeout_sec}, initial_x: ${initial_x}, initial_y: ${initial_y}, initial_z: ${initial_z}, initial_yaw: ${initial_yaw}}"
+    ;;
+  localization-stop)
+    [[ $# -eq 0 ]] || die "localization-stop takes no arguments"
+    run_ros_command ros2 service call /omni/slam/stop_localization \
+      omni_slam_interfaces/srv/StopLocalization "{}"
+    ;;
+  status)
+    [[ $# -eq 0 ]] || die "status takes no arguments"
+    require_manager
+    load_ros_environment
+    timeout 5 ros2 topic echo --once /omni/slam/status || \
+      die "no SLAM status received within 5 seconds"
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    usage >&2
+    die "unknown command: ${command}"
+    ;;
+esac
