@@ -1,0 +1,171 @@
+# 云效 Flow：RDK S100 交叉编译流水线
+#
+# 使用前请：
+# 1. 将下方 <CODEUP_SERVICE_CONNECTION_ID> 替换为云效 Codeup 服务连接 ID；
+# 2. 在构建任务的高级设置中开启 Docker Daemon；
+# 3. 如不希望提交即触发，可删除 triggerEvents。
+
+name: Omni SLAM - Build RDK S100
+
+sources:
+  omni_slam:
+    type: codeup
+    name: Omni SLAM
+    endpoint: https://codeup.aliyun.com/bgyfw/AI-Platform/robotics/omni_slam.git
+    branch: main
+    branchesFilter: ^main$
+    triggerEvents:
+      - push
+    cloneDepth: 0
+    certificate:
+      type: serviceConnection
+      serviceConnection: <CODEUP_SERVICE_CONNECTION_ID>
+
+defaultWorkspace: omni_slam
+
+# VERSION_INPUT 为空时使用当前提交的前 12 位 SHA。
+# 手工运行流水线时可在“变量和缓存”中覆盖 VERSION_INPUT 和
+# TF_MANAGER_REF；私密变量不要写入本文件。
+variables:
+  - key: VERSION_INPUT
+    type: String
+    value: ""
+  - key: TF_MANAGER_REF
+    type: String
+    value: main
+  - key: S100_IMAGE
+    type: String
+    value: pc_tros_ubuntu22.04:v1.0.0
+  - key: S100_IMAGE_URL
+    type: String
+    value: http://archive.d-robotics.cc/TogetheROS/cross_compile_docker/pc_tros_ubuntu22.04_v1.0.0.tar.gz
+  - key: S100_IMAGE_SHA256
+    type: String
+    value: ec065c268782373311421f0bb7f2212bfec6584a7070a9737468055a6bce2c88
+  - key: ROBOT_DEV_CONFIG_REF
+    type: String
+    value: f44b1ad2575b34c189fd470de1db9c5ad48b6886
+  - key: S100_SYSROOT_REF
+    type: String
+    value: de9fa286f71a72d24c349477cd59f41cc2cc3d8f
+
+stages:
+  build_stage:
+    name: S100 构建
+    jobs:
+      build_s100:
+        name: 交叉编译并打包
+        runsOn:
+          group: public/cn-beijing
+          container: build-steps-public-registry.cn-beijing.cr.aliyuncs.com/build-steps/alinux3:latest
+          instanceType: XXLARGE_16C32G
+        timeoutMinutes: 180
+        sourceOption:
+          - omni_slam
+        steps:
+          build_step:
+            name: 构建 RDK S100
+            step: Command
+            with:
+              run: |
+                set -euo pipefail
+
+                # alinux3 构建容器通常已有这些工具；缺少时再安装。
+                missing_tools=0
+                for tool in curl docker git rsync sha256sum tar; do
+                  if ! command -v "$tool" >/dev/null 2>&1; then
+                    missing_tools=1
+                  fi
+                done
+                if [ "$missing_tools" -ne 0 ]; then
+                  dnf install -y curl docker git rsync tar gzip coreutils findutils
+                fi
+
+                docker info
+
+                source_root=$(pwd)
+                work_root="/tmp/omni-slam-s100-$BUILD_NUMBER"
+                tf_root="$work_root/omni_tf_manager_source"
+                image_archive="$work_root/pc_tros_ubuntu22.04_v1.0.0.tar.gz"
+
+                mkdir -p "$work_root"
+                rm -rf "$tf_root"
+                git clone --filter=blob:none --no-checkout \
+                  https://github.com/YanYaoyuan/omni_tf_manager.git \
+                  "$tf_root"
+                git -C "$tf_root" fetch --no-tags --depth=1 origin "$TF_MANAGER_REF"
+                git -C "$tf_root" checkout --detach FETCH_HEAD
+                tf_manager_sha=$(git -C "$tf_root" rev-parse HEAD)
+                echo "Omni TF Manager revision: $tf_manager_sha"
+
+                scripts/validate_vbot_tf_profile.sh \
+                  "$tf_root/config/omni_vbot_dog.yaml"
+
+                curl --fail --location \
+                  --retry 5 --retry-all-errors --continue-at - \
+                  --output "$image_archive" \
+                  "$S100_IMAGE_URL"
+                echo "$S100_IMAGE_SHA256  $image_archive" | sha256sum --check
+                docker load --input "$image_archive"
+                docker image inspect "$S100_IMAGE" \
+                  --format='ID={{.Id}} ARCH={{.Architecture}} OS={{.Os}}'
+
+                export S100_SOURCE_ROOT="$source_root"
+                export OMNI_TF_MANAGER_SOURCE="$tf_root"
+                export S100_WORK_ROOT="$work_root/s100-cross"
+                export S100_CLEAN=1
+                export ROBOT_DEV_CONFIG_REF
+                export S100_SYSROOT_REF
+                export S100_IMAGE
+
+                ./scripts/build_s100_cross.sh
+
+                runtime_root="$S100_WORK_ROOT/cc_ws/tros_ws/runtime"
+                test -x "$runtime_root/bin/fastlio_mapping"
+                test -x "$runtime_root/bin/icp_node"
+                test -x "$runtime_root/bin/omni_tf_manager_node"
+                test -f "$runtime_root/config/omni_tf_manager/generic_four_sensor.yaml"
+                test -f "$runtime_root/config/omni_tf_manager/omni_dog.yaml"
+                test -f "$runtime_root/config/omni_tf_manager/omni_vbot_dog.yaml"
+                scripts/validate_vbot_tf_profile.sh \
+                  "$runtime_root/config/omni_tf_manager/omni_vbot_dog.yaml"
+                test -d "$runtime_root/config/fast_lio"
+                test -s "$runtime_root/lib/DEPENDENCIES.txt"
+                test -f "$runtime_root/local/lib/python3.10/dist-packages/omni_slam_interfaces/__init__.py"
+                find "$runtime_root/local/lib/python3.10/dist-packages/omni_slam_interfaces" \
+                  -maxdepth 1 -type f -name '*rosidl_typesupport_c*.so' \
+                  -print -quit | grep -q .
+
+                commit_sha=$(git rev-parse HEAD)
+                short_sha=$(printf '%s' "$commit_sha" | cut -c1-12)
+                # 复用现有 manifest 脚本使用的变量名。
+                export GITHUB_SHA="$commit_sha"
+                export OMNI_TF_MANAGER_SHA="$tf_manager_sha"
+                version="$VERSION_INPUT"
+                if [ -z "$version" ]; then
+                  version="$short_sha"
+                fi
+                version=$(printf '%s' "$version" | tr '/' '-')
+                artifact_name="omni-slam-rdk-s100-aarch64-$version-$short_sha"
+
+                rm -rf dist
+                mkdir -p "dist/$artifact_name"
+                cp -a "$runtime_root/." "dist/$artifact_name/"
+
+                .github/ci/write_manifest.sh \
+                  aarch64 \
+                  rdk-s100-rdkos-4 \
+                  "$version" \
+                  "dist/$artifact_name"
+
+                tar -C dist -czf "dist/$artifact_name.tar.gz" "$artifact_name"
+                ls -lh "dist/$artifact_name.tar.gz"
+
+          upload_step:
+            name: 上传 S100 构建物
+            step: ArtifactUpload
+            with:
+              uploadType: flowPublic
+              artifact: omni_slam_rdk_s100_aarch64
+              filePath:
+                - dist/*.tar.gz
