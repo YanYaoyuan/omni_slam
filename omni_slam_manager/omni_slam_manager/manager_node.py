@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import math
+import os
 from pathlib import Path
 import threading
 import time
 from typing import Optional
 
+from ament_index_python.packages import get_package_share_directory
 import rclpy
 from action_msgs.msg import GoalStatus
 from nav_msgs.msg import Odometry
@@ -26,6 +28,7 @@ from omni_slam_interfaces.srv import StartMapping, StopLocalization, StopMapping
 from omni_tf_manager.msg import SlamStatus
 
 from .cancel_wait import wait_with_cancel
+from .instance_lock import InstanceLock
 from .map_store import MapAsset, MapStore, MapStoreError
 from .process_supervisor import ProcessSupervisor, ProcessSupervisorError
 from .state_machine import InvalidTransition, SlamState, SlamStateMachine
@@ -86,6 +89,31 @@ ROBOT_PROFILES = {
         ),
         "imu_topic": "/omni/sensors/imu/data",
     },
+    "matrix": {
+        # MATRiX 与真机复用同一套 FAST-LIO launch，只替换受版本管理的传感器
+        # 参数。进程仍由本 Manager 的 ProcessSupervisor 创建和回收，不能再由
+        # Bridge 或 APP 调用 run_matrix_*.sh 形成第二个运行时 owner。
+        "mapping_command": (
+            "ros2 launch fast_lio omni_dog.launch.py "
+            "config_file:={mapping_config_file} map_path:={map_source_path} "
+            "map_frame:={map_frame} odom_frame:={odom_frame} "
+            "base_frame:={base_frame} tracking_frame:={tracking_frame} "
+            "lidar_frame:={icp_sensor_frame} use_sim_time:=false"
+        ),
+        "localization_command": (
+            "ros2 launch fast_lio omni_dog_relocalization.launch.py "
+            "config_file:={localization_config_file} map_path:={map_path} "
+            "pointcloud_topic:=/omni/sensors/lidar/points "
+            "initial_x:={initial_x} initial_y:={initial_y} "
+            "initial_z:={initial_z} initial_yaw:={initial_yaw} "
+            "map_frame:={map_frame} odom_frame:={odom_frame} "
+            "base_frame:={base_frame} tracking_frame:={tracking_frame} "
+            "lidar_frame:={icp_sensor_frame}"
+        ),
+        "mapping_config": "matrix_sim.yaml",
+        "localization_config": "matrix_sim_relocalization.yaml",
+        "imu_topic": "/omni/sensors/imu/data",
+    },
 }
 
 
@@ -105,6 +133,19 @@ class SlamManagerNode(Node):
                 f"expected one of {sorted(ROBOT_PROFILES)}"
             )
         profile = ROBOT_PROFILES[robot_profile]
+
+        mapping_config_default = ""
+        localization_config_default = ""
+        if robot_profile == "matrix":
+            # 仅 Matrix profile 需要额外配置文件。其他机器人不能因未安装可选的
+            # Matrix FAST-LIO 资源而在 Manager 构造阶段失败。
+            fast_lio_share = Path(get_package_share_directory("fast_lio"))
+            mapping_config_default = str(
+                fast_lio_share / "config" / profile["mapping_config"]
+            )
+            localization_config_default = str(
+                fast_lio_share / "config" / profile["localization_config"]
+            )
 
         self.declare_parameter("tf_profile_path", "")
         tf_profile_path = str(self.get_parameter("tf_profile_path").value)
@@ -133,6 +174,10 @@ class SlamManagerNode(Node):
         self.declare_parameter(
             "localization_command",
             profile["localization_command"],
+        )
+        self.declare_parameter("mapping_config_file", mapping_config_default)
+        self.declare_parameter(
+            "localization_config_file", localization_config_default
         )
         self.declare_parameter("map_save_service", "/map_save")
         self.declare_parameter("cloud_topic", "/cloud_registered_global")
@@ -164,6 +209,31 @@ class SlamManagerNode(Node):
         self._localization_command = str(
             self.get_parameter("localization_command").value
         )
+        self._mapping_config_file = str(
+            self.get_parameter("mapping_config_file").value
+        )
+        self._localization_config_file = str(
+            self.get_parameter("localization_config_file").value
+        )
+        if robot_profile == "matrix":
+            for parameter_name, config_path in (
+                ("mapping_config_file", self._mapping_config_file),
+                ("localization_config_file", self._localization_config_file),
+            ):
+                path = Path(config_path).expanduser()
+                if (
+                    not path.is_absolute()
+                    or not path.is_file()
+                    or not os.access(path, os.R_OK)
+                ):
+                    raise ValueError(
+                        f"{parameter_name} must reference a readable installed "
+                        "FAST-LIO yaml"
+                    )
+                if parameter_name == "mapping_config_file":
+                    self._mapping_config_file = str(path.resolve())
+                else:
+                    self._localization_config_file = str(path.resolve())
         self._stop_timeout = float(self.get_parameter("process_stop_timeout_sec").value)
         self._save_timeout = float(self.get_parameter("map_save_timeout_sec").value)
         self._fresh_timeout = (
@@ -390,6 +460,7 @@ class SlamManagerNode(Node):
                         "base_frame": self._tf_frames["base"],
                         "tracking_frame": self._tf_frames["tracking"],
                         "icp_sensor_frame": self._tf_frames["icp_sensor"],
+                        "mapping_config_file": self._mapping_config_file,
                     },
                 )
             except ProcessSupervisorError as error:
@@ -657,6 +728,7 @@ class SlamManagerNode(Node):
                         "base_frame": self._tf_frames["base"],
                         "tracking_frame": self._tf_frames["tracking"],
                         "icp_sensor_frame": self._tf_frames["icp_sensor"],
+                        "localization_config_file": self._localization_config_file,
                     },
                 )
                 self._machine.transition(SlamState.RELOCALIZING)
@@ -714,7 +786,9 @@ class SlamManagerNode(Node):
         )
 
     def _select_asset(self, map_id: str, version: int) -> MapAsset:
-        return self._store.current(map_id) if version == 0 else self._store.version(map_id, version)
+        if version == 0:
+            return self._store.current(map_id)
+        return self._store.version(map_id, version)
 
     def _stop_localization(self, reason: int, message: str) -> None:
         with self._lock:
@@ -865,16 +939,32 @@ def _spin_until_context_shutdown(executor: MultiThreadedExecutor) -> None:
 
 
 def main(args=None) -> None:
-    rclpy.init(args=args)
-    node = SlamManagerNode()
-    executor = MultiThreadedExecutor(num_threads=4)
-    executor.add_node(node)
-    try:
-        _spin_until_context_shutdown(executor)
-    finally:
-        executor.shutdown()
-        node.destroy_node()
-        # SIGINT 可能已经由 rclpy 的信号处理器关闭了默认 context。
-        # 仅在 context 仍有效时执行关闭，避免正常退出被重复 shutdown 误报为失败。
-        if rclpy.ok():
-            rclpy.shutdown()
+    lock_path = os.environ.get(
+        "OMNI_SLAM_MANAGER_LOCK_FILE", "/tmp/omni/slam-manager.lock"
+    )
+    # 锁必须早于 rclpy.init 和任何 ROS provider 创建，否则两个并发实例会在
+    # 发现彼此前短暂同时发布状态并接受建图命令。
+    with InstanceLock(lock_path):
+        node = None
+        executor = None
+        initialized = False
+        try:
+            rclpy.init(args=args)
+            initialized = True
+            node = SlamManagerNode()
+            executor = MultiThreadedExecutor(num_threads=4)
+            executor.add_node(node)
+            _spin_until_context_shutdown(executor)
+        finally:
+            try:
+                if executor is not None:
+                    executor.shutdown()
+            finally:
+                try:
+                    if node is not None:
+                        node.destroy_node()
+                finally:
+                    # 节点构造或执行器注册失败时同样清理 ROS context；单例锁则在
+                    # 整个清理流程完成后由 with 语句最后释放。
+                    if initialized and rclpy.ok():
+                        rclpy.shutdown()

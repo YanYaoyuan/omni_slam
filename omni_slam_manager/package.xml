@@ -11,6 +11,7 @@
   <exec_depend>action_msgs</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>fast_lio</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>omni_slam_interfaces</exec_depend>
   <exec_depend>omni_tf_manager</exec_depend>
@@ -18,6 +19,7 @@
   <exec_depend>rclpy</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_srvs</exec_depend>
   <test_depend>python3-pytest</test_depend>

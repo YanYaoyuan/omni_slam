@@ -1,6 +1,9 @@
+import signal
+import subprocess
 import sys
 import time
 import unittest
+from unittest.mock import patch
 
 from omni_slam_manager.process_supervisor import (
     ProcessSupervisor,
@@ -41,6 +44,71 @@ class ProcessSupervisorTests(unittest.TestCase):
         self.assertTrue(supervisor.running)
         self.assertIsNotNone(supervisor.stop(timeout_sec=0.2))
         self.assertFalse(supervisor.running)
+
+    def test_stop_escalates_sigint_then_sigterm_then_sigkill(self):
+        class SignalDrivenProcess:
+            pid = 4242
+
+            def __init__(self):
+                self.returncode = None
+
+            def poll(self):
+                return self.returncode
+
+            def wait(self, timeout=None):
+                if self.returncode is None:
+                    if timeout is not None:
+                        raise subprocess.TimeoutExpired("fake", timeout)
+                    raise AssertionError("SIGKILL should make the fake process exit")
+                return self.returncode
+
+        process = SignalDrivenProcess()
+        supervisor = ProcessSupervisor()
+        supervisor._process = process
+        delivered = []
+
+        def deliver(_process_group, signum):
+            delivered.append(signum)
+            if signum == signal.SIGKILL:
+                process.returncode = -signal.SIGKILL
+
+        with patch(
+            "omni_slam_manager.process_supervisor.os.killpg", side_effect=deliver
+        ):
+            self.assertEqual(supervisor.stop(timeout_sec=0.0), -signal.SIGKILL)
+
+        self.assertEqual(
+            delivered, [signal.SIGINT, signal.SIGTERM, signal.SIGKILL]
+        )
+        self.assertFalse(supervisor.running)
+
+    def test_stop_does_not_escalate_after_clean_sigint_exit(self):
+        class InterruptibleProcess:
+            pid = 4343
+            returncode = None
+
+            def poll(self):
+                return self.returncode
+
+            def wait(self, timeout=None):
+                del timeout
+                return self.returncode
+
+        process = InterruptibleProcess()
+        supervisor = ProcessSupervisor()
+        supervisor._process = process
+        delivered = []
+
+        def deliver(_process_group, signum):
+            delivered.append(signum)
+            process.returncode = -signum
+
+        with patch(
+            "omni_slam_manager.process_supervisor.os.killpg", side_effect=deliver
+        ):
+            self.assertEqual(supervisor.stop(timeout_sec=0.0), -signal.SIGINT)
+
+        self.assertEqual(delivered, [signal.SIGINT])
 
     def test_natural_exit_is_observable(self):
         supervisor = ProcessSupervisor()

@@ -40,6 +40,20 @@ the matching `omni_vbot_dog.yaml` TF profile. The default `omni_dog` robot
 selects `omni_dog.yaml`. An explicit `tf_profile_path` still overrides this
 selection.
 
+MATRiX 仿真使用相同的 manager-owned 生命周期，不再由 Bridge 单独拉起建图或
+重定位脚本：
+
+```bash
+ros2 launch omni_slam_manager manager.launch.py \
+  robot_profile:=matrix \
+  map_root:=/tmp/omni/maps \
+  map_source_path:=/tmp/omni/work/map.pcd
+```
+
+`matrix` profile 选择 `matrix_xgw.yaml`、`matrix_sim.yaml` 与
+`matrix_sim_relocalization.yaml`。TF Manager 只启动一次；后续通过 typed API 切换
+建图与定位时，仅 FAST-LIO/ICP 子进程组发生变化。
+
 `tf_profile_path` is the single source of truth for map, odom, base and IMU
 tracking frame names. The launch also starts `omni_tf_manager`; the SLAM child
 processes only publish pose data and never publish managed TF edges.

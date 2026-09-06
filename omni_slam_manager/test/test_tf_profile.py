@@ -56,6 +56,10 @@ class TfProfileTest(unittest.TestCase):
         self.assertIn(
             '"vbot": tf_manager_share / "config" / "omni_vbot_dog.yaml"', source
         )
+        self.assertIn(
+            '"matrix": tf_manager_share / "config" / "matrix_xgw.yaml"', source
+        )
+        self.assertIn('"robot_profile": robot_profile', source)
         self.assertIn("requested_tf_profile or", source)
 
 

@@ -35,6 +35,35 @@ class RosContractTests(unittest.TestCase):
             ROBOT_PROFILES["omni_dog"]["imu_topic"],
             "/omni/sensors/imu/data",
         )
+        self.assertIn(
+            "matrix_sim.yaml", ROBOT_PROFILES["matrix"]["mapping_config"]
+        )
+        self.assertIn(
+            "config_file:={mapping_config_file}",
+            ROBOT_PROFILES["matrix"]["mapping_command"],
+        )
+        self.assertIn(
+            "config_file:={localization_config_file}",
+            ROBOT_PROFILES["matrix"]["localization_command"],
+        )
+        self.assertIn(
+            "ros2 launch fast_lio omni_dog.launch.py",
+            ROBOT_PROFILES["matrix"]["mapping_command"],
+        )
+        self.assertIn(
+            "ros2 launch fast_lio omni_dog_relocalization.launch.py",
+            ROBOT_PROFILES["matrix"]["localization_command"],
+        )
+        self.assertNotIn(
+            "external_runtime", ROBOT_PROFILES["matrix"]["mapping_command"]
+        )
+        self.assertNotIn(
+            "run_matrix_", ROBOT_PROFILES["matrix"]["localization_command"]
+        )
+        self.assertEqual(
+            ROBOT_PROFILES["matrix"]["imu_topic"],
+            "/omni/sensors/imu/data",
+        )
         self.assertTrue(callable(main))
         self.assertTrue(issubclass(SlamManagerNode, object))
 

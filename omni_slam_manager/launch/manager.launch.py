@@ -16,6 +16,7 @@ def _launch_managed_stack(context):
     default_profiles = {
         "omni_dog": tf_manager_share / "config" / "omni_dog.yaml",
         "vbot": tf_manager_share / "config" / "omni_vbot_dog.yaml",
+        "matrix": tf_manager_share / "config" / "matrix_xgw.yaml",
     }
     if robot_profile not in default_profiles:
         raise RuntimeError(f"unsupported robot_profile: {robot_profile}")
@@ -61,7 +62,7 @@ def generate_launch_description():
                 default_value="",
                 description=(
                     "Optional TF profile override; empty selects the matching "
-                    "omni_dog/omni_vbot_dog profile"
+                    "omni_dog/vbot/matrix profile"
                 ),
             ),
             DeclareLaunchArgument("start_tf_manager", default_value="true"),
