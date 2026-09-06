@@ -12,6 +12,8 @@ SYNTH_IMU=0
 START_ZENOH=1
 TF_PROFILE_FILE="${TF_PROFILE_FILE:-$SCRIPT_DIR/../omni_tf_manager/config/matrix_xgw.yaml}"
 START_TF_MANAGER=1
+START_SLAM_MANAGER=1
+SLAM_MAP_ID="${SLAM_MAP_ID:-matrix_sim}"
 
 usage() {
     cat <<EOF
@@ -22,6 +24,7 @@ Options:
   --synth-imu          Publish ${IMU_TOPIC} from ${ODOM_TOPIC} if MATRiX has no IMU topic.
   --no-zenoh          Do not auto-start rmw_zenohd.
   --no-tf-manager     Do not start omni_tf_manager (only for externally managed runs).
+  --no-slam-manager   Do not publish the typed /omni/slam/status observation.
   --lidar-topic TOPIC  Override LiDAR topic. Default: ${LIDAR_TOPIC}
   --imu-topic TOPIC    Override IMU topic. Default: ${IMU_TOPIC}
   --odom-topic TOPIC   Override odometry topic for --synth-imu. Default: ${ODOM_TOPIC}
@@ -47,6 +50,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-tf-manager)
             START_TF_MANAGER=0
+            shift
+            ;;
+        --no-slam-manager)
+            START_SLAM_MANAGER=0
             shift
             ;;
         --lidar-topic)
@@ -137,6 +144,22 @@ if [[ "$START_TF_MANAGER" == "1" ]]; then
         mode:=profile \
         slam_state_required:=false \
         fallback_slam_mode:=mapping &
+    cleanup_pids+=("$!")
+fi
+if [[ "$START_SLAM_MANAGER" == "1" ]]; then
+    if ros2 node list 2>/dev/null | grep -Fxq "/omni_slam_manager"; then
+        echo "[ERROR] /omni_slam_manager is already running; refuse duplicate SlamStatus owner" >&2
+        exit 1
+    fi
+    echo "[INFO] starting omni_slam_manager in external mapping observation mode"
+    ros2 run omni_slam_manager omni_slam_manager \
+        --ros-args \
+        -p tf_profile_path:="$TF_PROFILE_FILE" \
+        -p map_root:=/tmp/omni_matrix_maps \
+        -p map_source_path:=/tmp/omni_slam_work/map.pcd \
+        -p external_runtime_mode:=mapping \
+        -p external_map_id:="$SLAM_MAP_ID" \
+        -p external_map_version:=1 &
     cleanup_pids+=("$!")
 fi
 echo "[INFO] waiting for LiDAR: $LIDAR_TOPIC"

@@ -3,7 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/FAST_LIO/config/matrix_sim_relocalization.yaml}"
-MAP_PATH="${MAP_PATH:-$SCRIPT_DIR/maps/matrix_sim_scans.pcd}"
+# 当前 MATRiX 基准地图随 Planner 仓库存放；仍可通过 MAP_PATH/--map 覆盖。
+MAP_PATH="${MAP_PATH:-$SCRIPT_DIR/../omni_planner/scans.pcd}"
 LIDAR_TOPIC="${LIDAR_TOPIC:-/livox/lidar}"
 IMU_TOPIC="${IMU_TOPIC:-/livox/imu}"
 FAST_LIO_LIDAR_TOPIC="${FAST_LIO_LIDAR_TOPIC:-/omni/sensors/lidar/points}"
@@ -20,6 +21,8 @@ FITNESS_SCORE_THRE="${FITNESS_SCORE_THRE:-0.2}"
 CONVERGED_COUNT_THRE="${CONVERGED_COUNT_THRE:-10}"
 TF_PROFILE_FILE="${TF_PROFILE_FILE:-$SCRIPT_DIR/../omni_tf_manager/config/matrix_xgw.yaml}"
 START_TF_MANAGER=1
+START_SLAM_MANAGER=1
+SLAM_MAP_ID="${SLAM_MAP_ID:-matrix_sim}"
 
 usage() {
     cat <<EOF
@@ -31,6 +34,7 @@ Options:
   --synth-imu          Publish ${IMU_TOPIC} from ${ODOM_TOPIC} if MATRiX has no IMU topic.
   --no-zenoh           Do not auto-start rmw_zenohd.
   --no-tf-manager      Do not start omni_tf_manager (only for externally managed runs).
+  --no-slam-manager    Do not publish the typed /omni/slam/status observation.
   --lidar-topic TOPIC  Override LiDAR topic. Default: ${LIDAR_TOPIC}
   --imu-topic TOPIC    Override IMU topic. Default: ${IMU_TOPIC}
   --odom-topic TOPIC   Override odometry topic for --synth-imu. Default: ${ODOM_TOPIC}
@@ -63,6 +67,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-tf-manager)
             START_TF_MANAGER=0
+            shift
+            ;;
+        --no-slam-manager)
+            START_SLAM_MANAGER=0
             shift
             ;;
         --lidar-topic)
@@ -126,7 +134,11 @@ cleanup() {
         rm -f "$RUNTIME_CONFIG_FILE"
     fi
 }
-trap cleanup EXIT INT TERM
+# 信号处理必须显式退出；只调用 cleanup 后返回会继续执行当前脚本，使上层
+# Bridge 只能等到 SIGKILL 才能完成“取消导航启动”。
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 topic_exists() {
     ros2 topic list 2>/dev/null | grep -Fxq "$1"
@@ -175,6 +187,22 @@ if [[ "$START_TF_MANAGER" == "1" ]]; then
         mode:=profile \
         slam_state_required:=false \
         fallback_slam_mode:=localization &
+    cleanup_pids+=("$!")
+fi
+if [[ "$START_SLAM_MANAGER" == "1" ]]; then
+    if ros2 node list 2>/dev/null | grep -Fxq "/omni_slam_manager"; then
+        echo "[ERROR] /omni_slam_manager is already running; refuse duplicate SlamStatus owner" >&2
+        exit 1
+    fi
+    echo "[INFO] starting omni_slam_manager in external localization observation mode"
+    ros2 run omni_slam_manager omni_slam_manager \
+        --ros-args \
+        -p tf_profile_path:="$TF_PROFILE_FILE" \
+        -p map_root:=/tmp/omni_matrix_maps \
+        -p map_source_path:=/tmp/omni_slam_work/map.pcd \
+        -p external_runtime_mode:=localization \
+        -p external_map_id:="$SLAM_MAP_ID" \
+        -p external_map_version:=1 &
     cleanup_pids+=("$!")
 fi
 echo "[INFO] waiting for LiDAR: $LIDAR_TOPIC"

@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -28,6 +29,8 @@ public:
             "target_frame", "omni_map");
         source_frame_ = declare_parameter<std::string>(
             "source_frame", "omni_odom");
+        const auto transform_timeout_ms = declare_parameter<std::int64_t>(
+            "transform_timeout_ms", 250);
 
         if (input_topic_.empty() || output_topic_.empty() ||
             target_frame_.empty() || source_frame_.empty())
@@ -45,6 +48,13 @@ public:
             throw std::invalid_argument(
                 "target_frame and source_frame must be different");
         }
+        if (transform_timeout_ms < 0 || transform_timeout_ms > 1000)
+        {
+            throw std::invalid_argument(
+                "transform_timeout_ms must be in [0, 1000]");
+        }
+        transform_timeout_sec_ =
+            static_cast<double>(transform_timeout_ms) / 1000.0;
 
         tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
         tf_listener_ =
@@ -90,10 +100,14 @@ private:
         geometry_msgs::msg::TransformStamped target_from_source;
         try
         {
+            // map->odom 与注册点云都由传感器帧驱动，点云可能比同时间戳 TF
+            // 早到一个发布周期。短暂等待对应 TF，避免把正常的调度先后误判成
+            // 数据丢失，进而让 SLAM Manager 错误退回 RELOCALIZING。
             target_from_source = tf_buffer_->lookupTransform(
                 target_frame_,
                 source_frame_,
-                rclcpp::Time(message->header.stamp));
+                rclcpp::Time(message->header.stamp),
+                rclcpp::Duration::from_seconds(transform_timeout_sec_));
         }
         catch (const tf2::TransformException &exception)
         {
@@ -173,6 +187,7 @@ private:
     std::string output_topic_;
     std::string target_frame_;
     std::string source_frame_;
+    double transform_timeout_sec_{0.25};
 
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;

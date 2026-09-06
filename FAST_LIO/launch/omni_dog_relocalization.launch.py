@@ -133,6 +133,8 @@ def generate_launch_description():
             {'output_topic': '/cloud_registered_global'},
             {'target_frame': map_frame},
             {'source_frame': odom_frame},
+            # TF Manager 与 FAST-LIO 同频发布，允许点云等待一个 TF 周期。
+            {'transform_timeout_ms': 250},
         ],
         on_exit=Shutdown(reason='global pointcloud publisher exited'))
 

@@ -205,6 +205,23 @@ class Phase0RegressionTests(unittest.TestCase):
         self.assertNotIn("global_odometry_node", product_launch)
         self.assertNotIn("map_odom_trans", product_launch)
 
+    def test_global_cloud_waits_for_same_stamp_transform(self):
+        source = (
+            PACKAGE_ROOT.parent
+            / "icp_relocalization"
+            / "src"
+            / "global_pointcloud_publisher.cpp"
+        ).read_text(encoding="utf-8")
+        launch_source = (
+            PACKAGE_ROOT / "launch" / "omni_dog_relocalization.launch.py"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('"transform_timeout_ms", 250', source)
+        self.assertIn(
+            "rclcpp::Duration::from_seconds(transform_timeout_sec_)", source
+        )
+        self.assertIn("{'transform_timeout_ms': 250}", launch_source)
+
     def test_real_dog_profiles_consume_only_manager_normalized_sensors(self):
         for name in (
             "omni_dog.yaml",
