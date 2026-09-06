@@ -1,6 +1,6 @@
 """Engineering control plane for omni_slam."""
 
-from .map_store import MapAsset, MapStore, MapStoreError
+from .map_store import MapAsset, MapStore, MapStoreError, MapStoreImportCancelled
 from .state_machine import (
     InvalidTransition,
     SlamMode,
@@ -14,6 +14,7 @@ __all__ = [
     "MapAsset",
     "MapStore",
     "MapStoreError",
+    "MapStoreImportCancelled",
     "SlamMode",
     "SlamState",
     "SlamStateMachine",

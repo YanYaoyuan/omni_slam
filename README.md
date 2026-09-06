@@ -1,5 +1,9 @@
 # Omni SLAM
 
+> `omni_slam_ctl` 是独立模块诊断入口，不是巡检产品的启动方式。完整系统由
+> `omni_mission_manager` 统一启动 TF/SLAM 控制面并按需拉起建图、定位与 Planner，
+> 禁止与该控制面并行再启动第二个 SLAM Manager。
+
 Omni SLAM 是基于 FAST-LIO2 的 ROS 2 建图与先验地图重定位工程，支持 x86_64、
 NVIDIA Orin 和 D-Robotics RDK S100。VBot 驱动发布 `/lidar_points` 点云和
 `/lidar_imu` IMU；`omni_tf_manager` 校验并规范为
@@ -161,6 +165,7 @@ FAST-LIO 配置与 `vbot_calib.yaml` 外参，`omni_vbot_dog.yaml` 已审核并�
 - `/omni/slam/save_map`：`SaveMap.action`
 - `/omni/slam/start_localization`：`StartLocalization.action`
 - `/omni/slam/stop_localization`：`StopLocalization.srv`
+- `/omni/slam/maps/list`：`omni_robot_interfaces/srv/ListMaps`（Mission 内部使用）
 - `/omni/slam/status`：`omni_tf_manager/msg/SlamStatus`
 
 原始 `ros2 service/action` 调用示例见

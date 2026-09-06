@@ -80,6 +80,40 @@ class _StubStore:
         pass
 
 
+class _CancelBeforeCommitStore(_StubStore):
+    """模拟长导入在提交点前观察到 Action cancel。"""
+
+    def __init__(self, goal_handle):
+        super().__init__()
+        self._goal_handle = goal_handle
+
+    def import_pcd(self, map_id, source, **kwargs):
+        from omni_slam_manager.map_store import MapStoreImportCancelled
+
+        del map_id, source
+        self.import_called = True
+        self._goal_handle.cancel_now()
+        cancel_requested = kwargs["cancel_requested"]
+        if cancel_requested():
+            raise MapStoreImportCancelled("canceled before commit")
+        return _StubAsset()
+
+
+class _CommittedThenCancelStore(_StubStore):
+    """模拟资产已经原子提交后才到达的迟到 cancel。"""
+
+    def __init__(self, goal_handle):
+        super().__init__()
+        self._goal_handle = goal_handle
+
+    def import_pcd(self, map_id, source, **kwargs):
+        del map_id, source, kwargs
+        self.import_called = True
+        # import_pcd 的返回边界即提交点；此后的 cancel 不能改写磁盘事实。
+        self._goal_handle.cancel_now()
+        return _StubAsset()
+
+
 class _GoalHandle:
     """Minimal stand-in for an rclpy action goal handle."""
 
@@ -221,6 +255,49 @@ class SaveMapCancelTests(unittest.TestCase):
             self.assertEqual(result.reason_code, REASON_NONE)
             self.assertEqual(node._machine.snapshot.state, SlamState.MAP_READY)
             self.assertTrue(node._store.import_called)
+        finally:
+            node.destroy_node()
+
+    def test_cancel_observed_inside_import_before_commit_is_canceled(self):
+        from omni_slam_manager.manager_node import REASON_SAVE_CANCELLED
+        from omni_slam_manager.state_machine import SlamState
+
+        node = self._make_node()
+        try:
+            handle = _GoalHandle(self._make_goal())
+            node._store = _CancelBeforeCommitStore(handle)
+            node._map_save_client = _StubSaveClient(
+                _StubFuture(delay=0.01, result=self._success_response())
+            )
+
+            result = node._execute_save_map(handle)
+
+            self.assertEqual(handle.terminal, "canceled")
+            self.assertFalse(result.success)
+            self.assertEqual(result.reason_code, REASON_SAVE_CANCELLED)
+            self.assertEqual(node._machine.snapshot.state, SlamState.MAPPING)
+            self.assertTrue(node._store.import_called)
+        finally:
+            node.destroy_node()
+
+    def test_cancel_after_store_commit_returns_committed_success(self):
+        from omni_slam_manager.manager_node import REASON_NONE
+        from omni_slam_manager.state_machine import SlamState
+
+        node = self._make_node()
+        try:
+            handle = _GoalHandle(self._make_goal())
+            node._store = _CommittedThenCancelStore(handle)
+            node._map_save_client = _StubSaveClient(
+                _StubFuture(delay=0.01, result=self._success_response())
+            )
+
+            result = node._execute_save_map(handle)
+
+            self.assertEqual(handle.terminal, "succeeded")
+            self.assertTrue(result.success)
+            self.assertEqual(result.reason_code, REASON_NONE)
+            self.assertEqual(node._machine.snapshot.state, SlamState.MAP_READY)
         finally:
             node.destroy_node()
 

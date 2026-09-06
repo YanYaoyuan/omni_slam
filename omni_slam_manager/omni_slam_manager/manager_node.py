@@ -23,13 +23,14 @@ from sensor_msgs.msg import Imu, PointCloud2
 from std_msgs.msg import Float64
 from std_srvs.srv import Trigger
 
+from omni_robot_interfaces.srv import ListMaps
 from omni_slam_interfaces.action import SaveMap, StartLocalization
 from omni_slam_interfaces.srv import StartMapping, StopLocalization, StopMapping
 from omni_tf_manager.msg import SlamStatus
 
 from .cancel_wait import wait_with_cancel
 from .instance_lock import InstanceLock
-from .map_store import MapAsset, MapStore, MapStoreError
+from .map_store import MapAsset, MapStore, MapStoreError, MapStoreImportCancelled
 from .process_supervisor import ProcessSupervisor, ProcessSupervisorError
 from .state_machine import InvalidTransition, SlamState, SlamStateMachine
 from .telemetry_monitor import (
@@ -371,6 +372,12 @@ class SlamManagerNode(Node):
             self._stop_localization_service,
             callback_group=self._callbacks,
         )
+        self.create_service(
+            ListMaps,
+            "/omni/slam/maps/list",
+            self._list_maps,
+            callback_group=self._callbacks,
+        )
         self._save_action = ActionServer(
             self,
             SaveMap,
@@ -430,6 +437,16 @@ class SlamManagerNode(Node):
     def _initial_pose_callback(self, _: Odometry) -> None:
         with self._lock:
             self._last_initial_pose = self._now_steady()
+
+    def _list_maps(self, _request, response):
+        """只发布校验通过的 current 地图三元组，供 Mission 对外转发。"""
+        for asset in self._store.list_current():
+            response.map_ids.append(asset.map_id)
+            response.map_versions.append(asset.version)
+            response.map_checksums.append(asset.checksum)
+            response.created_at.append(asset.created_at)
+            response.size_bytes.append(asset.size_bytes)
+        return response
 
     def _icp_fitness_callback(self, message: Float64) -> None:
         with self._lock:
@@ -604,13 +621,18 @@ class SlamManagerNode(Node):
                 calibration_hash=goal_handle.request.calibration_hash,
                 metadata={"mapping_session_id": self._mapping_session_id},
                 publish_current=goal_handle.request.make_current,
+                cancel_requested=lambda: goal_handle.is_cancel_requested,
             )
-            self._store.verify(asset)
+        except MapStoreImportCancelled:
+            return self._cancel_save(goal_handle, result)
         except (OSError, MapStoreError) as error:
             return self._save_failed(
                 goal_handle, result, REASON_MAP_IMPORT_FAILED, str(error)
             )
 
+        # import_pcd 返回即表示版本（以及可选 current）已经原子提交。提交点之后的
+        # cancel 不能再报告 CANCELED，否则客户端看到的终态会与磁盘事实矛盾；该
+        # 请求按已提交成功返回，后续删除/切换必须使用显式资产管理操作。
         self._publish_save_feedback(
             goal_handle,
             SaveMap.Feedback.STAGE_VERIFYING_CHECKSUM,
@@ -649,19 +671,18 @@ class SlamManagerNode(Node):
         return result
 
     def _cancel_save(self, goal_handle, result: SaveMap.Result) -> SaveMap.Result:
-        # The atomic store either has no version yet or keeps the previous
-        # current version, so rolling the state back to MAPPING is all the
-        # rollback that is needed.
+        # MapStore 只会在不可取消提交点之前抛出 MapStoreImportCancelled；因此走到
+        # 这里时不会存在已发布的新版本，仅需把运行状态退回 MAPPING。
         with self._lock:
             if self._machine.snapshot.state == SlamState.SAVING:
                 self._machine.transition(
                     SlamState.MAPPING,
                     reason_code=REASON_SAVE_CANCELLED,
-                    reason_text="map save canceled before any version was published",
+                    reason_text="map save canceled before the asset commit point",
                 )
         result.success = False
         result.reason_code = REASON_SAVE_CANCELLED
-        result.message = "map save canceled; no map version was published"
+        result.message = "map save canceled before commit; no map version was published"
         goal_handle.canceled()
         self._publish_status()
         return result

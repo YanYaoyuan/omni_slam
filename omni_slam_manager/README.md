@@ -1,5 +1,9 @@
 # omni_slam_manager
 
+> 产品运行时不要单独执行 `omni_slam_ctl manager-start`。机器人只启动 Bridge
+> 与 Mission 两个顶层入口，Mission 的 `inspection_runtime.launch.py` 创建本
+> 控制面并按模式管理 FAST-LIO/ICP；以下直接命令仅用于模块开发和故障诊断。
+
 This package is the engineering control plane for FAST-LIO and publishes the
 typed state consumed by `omni_tf_manager`. `MapStore` is its immutable,
 crash-safe map asset store.
@@ -60,13 +64,15 @@ processes only publish pose data and never publish managed TF edges.
 FAST-LIO consumes only `/omni/sensors/lidar/points` and
 `/omni/sensors/imu/data`; the TF profile owns each vendor-topic alias.
 
-Stable control-plane endpoints:
+Stable internal control-plane endpoints:
 
 - `/omni/slam/start_mapping` (`StartMapping`)
 - `/omni/slam/stop_mapping` (`StopMapping`)
 - `/omni/slam/save_map` (`SaveMap` action)
 - `/omni/slam/start_localization` (`StartLocalization` action)
 - `/omni/slam/stop_localization` (`StopLocalization`)
+- `/omni/slam/maps/list` (`omni_robot_interfaces/srv/ListMaps`，仅供 Mission
+  转发；APP 使用 `/omni/maps/list`)
 - `/omni/slam/status` (`omni_tf_manager/msg/SlamStatus`, reliable
   transient-local heartbeat)
 

@@ -4,7 +4,11 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from omni_slam_manager.map_store import MapStore, MapStoreError
+from omni_slam_manager.map_store import (
+    MapStore,
+    MapStoreError,
+    MapStoreImportCancelled,
+)
 
 
 def _pcd(path: Path, payload: bytes = b"pcd-map-data") -> Path:
@@ -65,6 +69,57 @@ class MapStoreTests(unittest.TestCase):
         self.assertEqual(candidate.version, 2)
         self.assertEqual(store.current("warehouse"), first)
         self.assertEqual(store.version("warehouse", 2), candidate)
+
+    def test_cancel_during_copy_publishes_no_version_and_keeps_current(self):
+        source = _pcd(self.root / "source.pcd", b"first")
+        store = MapStore(self.root / "maps")
+        current = store.import_pcd("warehouse", source)
+        source.write_bytes(b"x" * (3 * 1024 * 1024))
+        observations = 0
+
+        def cancel_requested():
+            nonlocal observations
+            observations += 1
+            return observations >= 3
+
+        with self.assertRaises(MapStoreImportCancelled):
+            store.import_pcd(
+                "warehouse", source, cancel_requested=cancel_requested
+            )
+
+        self.assertEqual(store.current("warehouse"), current)
+        versions = self.root / "maps/warehouse/versions"
+        self.assertEqual(
+            sorted(path.name for path in versions.iterdir()), ["v000001"]
+        )
+        self.assertFalse(any(path.name.startswith(".tmp-") for path in versions.iterdir()))
+
+    def test_catalog_returns_only_verified_current_versions_newest_first(self):
+        source = _pcd(self.root / "source.pcd", b"first")
+        store = MapStore(self.root / "maps")
+        first = store.import_pcd("factory-a", source)
+        source.write_bytes(b"second")
+        second = store.import_pcd("factory-b", source)
+
+        catalog = store.list_current()
+
+        self.assertEqual([item.map_id for item in catalog], ["factory-b", "factory-a"])
+        by_id = {item.map_id: item for item in catalog}
+        self.assertEqual(by_id["factory-a"].version, first.version)
+        self.assertEqual(by_id["factory-a"].checksum, first.checksum)
+        self.assertEqual(by_id["factory-b"].size_bytes, second.size_bytes)
+        self.assertTrue(by_id["factory-a"].created_at)
+
+    def test_catalog_omits_corrupt_and_symlinked_assets(self):
+        source = _pcd(self.root / "source.pcd")
+        store = MapStore(self.root / "maps")
+        corrupt = store.import_pcd("corrupt", source)
+        corrupt.pcd_path.write_bytes(b"changed")
+        outside = self.root / "outside-map"
+        outside.mkdir()
+        (store.root / "escaped").symlink_to(outside, target_is_directory=True)
+
+        self.assertEqual(store.list_current(), [])
 
     def test_invalid_map_id_is_rejected(self):
         source = _pcd(self.root / "source.pcd")

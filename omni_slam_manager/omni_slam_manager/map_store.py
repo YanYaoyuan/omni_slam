@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 import re
 import shutil
-from typing import BinaryIO, Dict, Iterator, Optional, Tuple
+from typing import BinaryIO, Callable, Dict, Iterator, Optional, Tuple
 import uuid
 
 
@@ -27,6 +27,10 @@ _CHUNK_SIZE = 1024 * 1024
 
 class MapStoreError(RuntimeError):
     """Raised when a map cannot be safely imported or verified."""
+
+
+class MapStoreImportCancelled(MapStoreError):
+    """不可变地图版本到达提交点前观察到取消时抛出。"""
 
 
 @dataclass(frozen=True)
@@ -40,6 +44,17 @@ class MapAsset:
     size_bytes: int
 
 
+@dataclass(frozen=True)
+class MapCatalogEntry:
+    """一个已校验、可由定位运行时选择的 current 地图版本。"""
+
+    map_id: str
+    version: int
+    checksum: str
+    created_at: str
+    size_bytes: int
+
+
 def _fsync_directory(path: Path) -> None:
     descriptor = os.open(str(path), os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
     try:
@@ -49,14 +64,27 @@ def _fsync_directory(path: Path) -> None:
 
 
 def _hash_stream(stream: BinaryIO) -> Tuple[str, int]:
+    return _hash_stream_with_cancel(stream, None)
+
+
+def _hash_stream_with_cancel(
+    stream: BinaryIO,
+    cancel_requested: Optional[Callable[[], bool]],
+) -> Tuple[str, int]:
+    """流式计算摘要，并在资产提交点之前持续响应取消。"""
+
     digest = hashlib.sha256()
     size = 0
     while True:
+        if cancel_requested is not None and cancel_requested():
+            raise MapStoreImportCancelled("map import canceled before commit")
         chunk = stream.read(_CHUNK_SIZE)
         if not chunk:
             break
         digest.update(chunk)
         size += len(chunk)
+    if cancel_requested is not None and cancel_requested():
+        raise MapStoreImportCancelled("map import canceled before commit")
     return digest.hexdigest(), size
 
 
@@ -86,8 +114,15 @@ class MapStore:
         calibration_hash: str = "",
         metadata: Optional[Dict[str, object]] = None,
         publish_current: bool = True,
+        cancel_requested: Optional[Callable[[], bool]] = None,
     ) -> MapAsset:
-        """Import a non-empty PCD and atomically publish it as current."""
+        """导入、校验并原子发布非空 PCD。
+
+        在可能耗时较长的复制和校验阶段持续采样 ``cancel_requested``。首次原子
+        rename 前观察到取消时会删除临时目录，不发布版本，也不更新 ``current``。
+        rename 开始后进入很短的不可取消提交区，避免资产已经发布而调用方却收到
+        CANCELED 终态。
+        """
 
         map_id = self.validate_map_id(map_id)
         source_path = Path(source).expanduser().resolve(strict=True)
@@ -109,7 +144,10 @@ class MapStore:
             try:
                 staging_directory.mkdir(mode=0o750)
                 pcd_path = staging_directory / "map.pcd"
-                checksum, size_bytes = self._copy_and_hash(source_path, pcd_path)
+                self._raise_if_cancelled(cancel_requested)
+                checksum, size_bytes = self._copy_and_hash(
+                    source_path, pcd_path, cancel_requested
+                )
                 if size_bytes <= 0:
                     raise MapStoreError("source PCD became empty while importing")
 
@@ -133,6 +171,15 @@ class MapStore:
                     os.fsync(stream.fileno())
 
                 _fsync_directory(staging_directory)
+                # 发布前重新读取落盘内容。校验期间仍可取消；之后进入不可取消的
+                # 原子提交点，确保 Action 终态与磁盘事实不会互相矛盾。
+                with pcd_path.open("rb") as stream:
+                    verified_checksum, verified_size = _hash_stream_with_cancel(
+                        stream, cancel_requested
+                    )
+                if verified_checksum != checksum or verified_size != size_bytes:
+                    raise MapStoreError("staged PCD checksum verification failed")
+                self._raise_if_cancelled(cancel_requested)
                 os.replace(staging_directory, final_directory)
                 _fsync_directory(versions_directory)
 
@@ -188,6 +235,43 @@ class MapStore:
             self.verify(asset)
         return asset
 
+    def list_current(self) -> list[MapCatalogEntry]:
+        """
+        返回所有可安全选择的 current 地图。
+
+        临时目录、越界符号链接、缺失 manifest 以及校验失败的资产均不进入
+        目录，避免 APP 在冷启动后看到一个定位必然失败或内容已漂移的地图。
+        """
+
+        catalog: list[MapCatalogEntry] = []
+        for map_directory in self.root.iterdir():
+            if (
+                not map_directory.is_dir()
+                or map_directory.is_symlink()
+                or not _MAP_ID_PATTERN.fullmatch(map_directory.name)
+            ):
+                continue
+            try:
+                asset = self.current(map_directory.name, verify=True)
+                manifest = json.loads(asset.manifest_path.read_text(encoding="utf-8"))
+                created_at = str(manifest["created_at"])
+                created = datetime.fromisoformat(created_at)
+                if created.tzinfo is None:
+                    raise ValueError("created_at must include a timezone")
+            except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError, MapStoreError):
+                continue
+            catalog.append(
+                MapCatalogEntry(
+                    map_id=asset.map_id,
+                    version=asset.version,
+                    checksum=asset.checksum,
+                    created_at=created_at,
+                    size_bytes=asset.size_bytes,
+                )
+            )
+        catalog.sort(key=lambda item: (item.created_at, item.map_id), reverse=True)
+        return catalog
+
     def verify(self, asset: MapAsset) -> None:
         with asset.pcd_path.open("rb") as stream:
             checksum, size_bytes = _hash_stream(stream)
@@ -227,17 +311,30 @@ class MapStore:
         )
 
     @staticmethod
-    def _copy_and_hash(source: Path, destination: Path) -> Tuple[str, int]:
+    def _raise_if_cancelled(
+        cancel_requested: Optional[Callable[[], bool]],
+    ) -> None:
+        if cancel_requested is not None and cancel_requested():
+            raise MapStoreImportCancelled("map import canceled before commit")
+
+    @staticmethod
+    def _copy_and_hash(
+        source: Path,
+        destination: Path,
+        cancel_requested: Optional[Callable[[], bool]] = None,
+    ) -> Tuple[str, int]:
         digest = hashlib.sha256()
         size = 0
         with source.open("rb") as source_stream, destination.open("xb") as target_stream:
             while True:
+                MapStore._raise_if_cancelled(cancel_requested)
                 chunk = source_stream.read(_CHUNK_SIZE)
                 if not chunk:
                     break
                 target_stream.write(chunk)
                 digest.update(chunk)
                 size += len(chunk)
+            MapStore._raise_if_cancelled(cancel_requested)
             target_stream.flush()
             os.fsync(target_stream.fileno())
         return digest.hexdigest(), size
