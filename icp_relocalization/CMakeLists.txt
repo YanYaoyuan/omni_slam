@@ -20,6 +20,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(fast_lio REQUIRED)
 
 # Ubuntu 22.04 exports Qhull::qhull_r, but the ROS Humble pcl_ros package
 # refers to PCL's QHULL::QHULL compatibility target.  Imported CMake targets
@@ -82,6 +83,7 @@ ament_target_dependencies(
   tf2
   tf2_ros
   tf2_geometry_msgs
+  fast_lio
   pcl_ros
   pcl_conversions
 )

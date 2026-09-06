@@ -9,6 +9,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/registration/icp.h>
 #include <pcl/filters/voxel_grid.h>
+#include "fast_lio/extent_safe_voxel_filter.hpp"
 #include <Eigen/Geometry>
 #include <cmath>
 #include <stdexcept>
@@ -112,12 +113,21 @@ public:
         }
         RCLCPP_INFO(this->get_logger(), "Loaded %d data points from target.pcd", target_cloud_->width * target_cloud_->height);
 
-        // downsample the target cloud
-        pcl::VoxelGrid<pcl::PointXYZ> sor_map;
-        sor_map.setInputCloud(target_cloud_);
-        sor_map.setLeafSize(map_voxel_leaf_size, map_voxel_leaf_size, map_voxel_leaf_size);
-        sor_map.filter(*target_cloud_);
-        RCLCPP_INFO(this->get_logger(), "Downsampled target cloud to %d data points", target_cloud_->width * target_cloud_->height);
+        // 普通 VoxelGrid 的全局体素索引使用 32 位乘积，少量远距离离群点就会
+        // 让它放弃过滤。使用与 FAST-LIO 相同的 64 位哈希体素实现，保证 ICP
+        // 和持续定位消费完全一致的先验地图分辨率。
+        const auto filter_stats = fast_lio::pointcloud::extentSafeVoxelFilter(
+            *target_cloud_, map_voxel_leaf_size, target_cloud_.get());
+        if (target_cloud_->empty())
+        {
+            RCLCPP_FATAL(this->get_logger(), "Map is empty after extent-safe voxel filtering: %s", map_path.c_str());
+            throw std::runtime_error("filtered ICP map is empty");
+        }
+        RCLCPP_INFO(
+            this->get_logger(),
+            "Target map ready: raw_points=%zu filtered_points=%zu rejected_non_finite=%zu rejected_index_overflow=%zu",
+            filter_stats.input_points, filter_stats.output_points,
+            filter_stats.rejected_non_finite, filter_stats.rejected_index_overflow);
         // Publish the downsampled target cloud
 
         pcl::toROSMsg(*target_cloud_, target_cloud_msg);

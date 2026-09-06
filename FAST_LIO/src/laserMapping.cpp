@@ -57,6 +57,7 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/pcd_io.h>
 #include "fast_lio/atomic_file.hpp"
+#include "fast_lio/extent_safe_voxel_filter.hpp"
 #include <pcl_ros/transforms.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/imu.hpp>
@@ -78,6 +79,11 @@
 #define LASER_POINT_COV (0.001)
 #define MAXN (720000)
 #define PUBFRAME_PERIOD (20)
+
+// 原实现先做无界最近邻搜索，再用第 5 个点的平方距离 5 m² 拒绝结果。
+// 把同一阈值前置给 KD 树，可在初始位姿短暂偏离或出现异常回波时及时剪枝。
+constexpr float kNearestSearchRadiusM = 2.2360679775F;
+constexpr float kNearestSearchRadiusSquaredM = 5.0F;
 
 /*** Time Log Variables ***/
 double kdtree_incremental_time = 0.0, kdtree_search_time = 0.0, kdtree_delete_time = 0.0;
@@ -295,8 +301,10 @@ void h_share_model(state_ikfom &s, esekfom::dyn_share_datastruct<double> &ekfom_
         if (ekfom_data.converge)
         {
             /** Find the closest surfaces in the map **/
-            ikdtree.Nearest_Search(point_world, NUM_MATCH_POINTS, points_near, pointSearchSqDis);
-            point_selected_surf[i] = points_near.size() < NUM_MATCH_POINTS ? false : pointSearchSqDis[NUM_MATCH_POINTS - 1] > 5 ? false
+            ikdtree.Nearest_Search(
+                point_world, NUM_MATCH_POINTS, points_near, pointSearchSqDis,
+                kNearestSearchRadiusM);
+            point_selected_surf[i] = points_near.size() < NUM_MATCH_POINTS ? false : pointSearchSqDis[NUM_MATCH_POINTS - 1] > kNearestSearchRadiusSquaredM ? false
                                                                                                                                 : true;
         }
 
@@ -339,8 +347,11 @@ void h_share_model(state_ikfom &s, esekfom::dyn_share_datastruct<double> &ekfom_
     if (effct_feat_num < 1)
     {
         ekfom_data.valid = false;
-        std::cerr << "No Effective Points!" << std::endl;
-        // ROS_WARN("No Effective Points! \n");
+        static rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+        RCLCPP_WARN_THROTTLE(
+            rclcpp::get_logger("omni_fast_lio"), steady_clock, 1000,
+            "当前帧没有有效地图匹配点：scan_points=%d；仅保留 IMU 传播并等待下一帧",
+            feats_down_size);
         return;
     }
 
@@ -536,16 +547,18 @@ public:
                 RCLCPP_FATAL(this->get_logger(), "Prior PCD is missing, unreadable, malformed, or empty: %s", prior_map_path.c_str());
                 throw std::runtime_error("prior PCD is unusable");
             }
-            downSizeFilterMap.setInputCloud(prior_map);
-            downSizeFilterMap.filter(*feats_down_prior_map);
+            const auto filter_stats = fast_lio::pointcloud::extentSafeVoxelFilter(
+                *prior_map, filter_size_map_min, feats_down_prior_map.get());
             if (feats_down_prior_map->empty())
             {
                 RCLCPP_FATAL(this->get_logger(), "Prior PCD became empty after voxel filtering: %s", prior_map_path.c_str());
                 throw std::runtime_error("filtered prior PCD is empty");
             }
             RCLCPP_INFO(
-                this->get_logger(), "Prior map ready: raw_points=%zu filtered_points=%zu",
-                prior_map->size(), feats_down_prior_map->size());
+                this->get_logger(),
+                "Prior map ready: raw_points=%zu filtered_points=%zu rejected_non_finite=%zu rejected_index_overflow=%zu",
+                filter_stats.input_points, filter_stats.output_points,
+                filter_stats.rejected_non_finite, filter_stats.rejected_index_overflow);
         }
 
         Lidar_T_wrt_IMU << VEC_FROM_ARRAY(extrinT);
@@ -810,6 +823,17 @@ private:
 
         PointCloudXYZI::Ptr ptr(new PointCloudXYZI());
         p_pre->process(msg, ptr);
+        const auto range_stats = fast_lio::pointcloud::filterByMaximumRange(
+            *ptr, static_cast<double>(DET_RANGE), ptr.get());
+        if (range_stats.rejected_non_finite > 0U || range_stats.rejected_out_of_range > 0U)
+        {
+            RCLCPP_WARN_THROTTLE(
+                this->get_logger(), *this->get_clock(), 5000,
+                "过滤 LiDAR 异常回波：input=%zu output=%zu non_finite=%zu out_of_range=%zu limit=%.1fm",
+                range_stats.input_points, range_stats.output_points,
+                range_stats.rejected_non_finite, range_stats.rejected_out_of_range,
+                static_cast<double>(DET_RANGE));
+        }
         lidar_buffer.push_back(ptr);
         time_buffer.push_back(cur_time);
         last_timestamp_lidar = cur_time;
@@ -856,6 +880,17 @@ private:
 
         PointCloudXYZI::Ptr ptr(new PointCloudXYZI());
         p_pre->process(msg, ptr);
+        const auto range_stats = fast_lio::pointcloud::filterByMaximumRange(
+            *ptr, static_cast<double>(DET_RANGE), ptr.get());
+        if (range_stats.rejected_non_finite > 0U || range_stats.rejected_out_of_range > 0U)
+        {
+            RCLCPP_WARN_THROTTLE(
+                this->get_logger(), *this->get_clock(), 5000,
+                "过滤 LiDAR 异常回波：input=%zu output=%zu non_finite=%zu out_of_range=%zu limit=%.1fm",
+                range_stats.input_points, range_stats.output_points,
+                range_stats.rejected_non_finite, range_stats.rejected_out_of_range,
+                static_cast<double>(DET_RANGE));
+        }
         lidar_buffer.push_back(ptr);
         time_buffer.push_back(last_timestamp_lidar);
 

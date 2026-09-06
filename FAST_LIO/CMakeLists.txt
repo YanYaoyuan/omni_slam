@@ -192,6 +192,9 @@ if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_gtest(test_atomic_file test/test_atomic_file.cpp)
   target_include_directories(test_atomic_file PRIVATE include)
+  ament_add_gtest(test_extent_safe_voxel_filter test/test_extent_safe_voxel_filter.cpp)
+  target_include_directories(test_extent_safe_voxel_filter PRIVATE include ${PCL_INCLUDE_DIRS})
+  target_link_libraries(test_extent_safe_voxel_filter pcl_common)
   ament_add_pytest_test(phase0_regressions
     test/test_phase0_regressions.py
   )
@@ -200,6 +203,10 @@ if(BUILD_TESTING)
   )
 endif()
 
-install(DIRECTORY include/fast_lio/ DESTINATION include/fast_lio)
+# ROSIDL 会把本包的公共 include 根导出为 include/fast_lio。公共工具头也安装
+# 到同一包命名空间下，保证下游可以稳定使用 <fast_lio/...>，且不会污染
+# 工作区的全局 include 根。
+install(DIRECTORY include/fast_lio/ DESTINATION include/${PROJECT_NAME}/fast_lio)
+ament_export_include_directories(include/${PROJECT_NAME})
 
 ament_package()
