@@ -15,6 +15,7 @@ from typing import List, Optional, Tuple
 import rclpy
 from nav_msgs.msg import Odometry
 from rclpy.executors import ExternalShutdownException
+from rclpy.impl.implementation_singleton import rclpy_implementation
 from rclpy.node import Node
 from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from rclpy.utilities import remove_ros_args
@@ -325,6 +326,21 @@ def parse_args() -> argparse.Namespace:
     return arguments
 
 
+def _spin_once_until_context_shutdown(node: Node, timeout_sec: float) -> bool:
+    """执行一次回调；ROS context 正常关闭时返回 False。"""
+    try:
+        rclpy.spin_once(node, timeout_sec=timeout_sec)
+    except ExternalShutdownException:
+        return False
+    except rclpy_implementation.RCLError:
+        # Humble 的 SIGINT 可能与 WaitSet 初始化并发。只有 context 已关闭时
+        # 才将其视为正常退出，不能吞掉运行期间的真实 RCL 故障。
+        if rclpy.ok():
+            raise
+        return False
+    return True
+
+
 def main() -> int:
     arguments = parse_args()
     events: "queue.Queue[str]" = queue.Queue()
@@ -342,7 +358,8 @@ def main() -> int:
     try:
         recorder = PathRecorder(arguments)
         while rclpy.ok() and not stop_requested["value"]:
-            rclpy.spin_once(recorder, timeout_sec=0.1)
+            if not _spin_once_until_context_shutdown(recorder, timeout_sec=0.1):
+                break
             while True:
                 try:
                     event = events.get_nowait()

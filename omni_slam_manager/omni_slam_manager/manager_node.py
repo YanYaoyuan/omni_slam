@@ -13,7 +13,8 @@ from action_msgs.msg import GoalStatus
 from nav_msgs.msg import Odometry
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
-from rclpy.executors import MultiThreadedExecutor
+from rclpy.executors import ExternalShutdownException, MultiThreadedExecutor
+from rclpy.impl.implementation_singleton import rclpy_implementation
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import Imu, PointCloud2
@@ -147,6 +148,9 @@ class SlamManagerNode(Node):
         self.declare_parameter("pose_jump_position_threshold_m", 0.5)
         self.declare_parameter("pose_jump_yaw_threshold_deg", 45.0)
         self.declare_parameter("pose_jump_refractory_sec", 0.5)
+        self.declare_parameter("external_runtime_mode", "none")
+        self.declare_parameter("external_map_id", "")
+        self.declare_parameter("external_map_version", 0)
 
         self._map_source_path = Path(
             self.get_parameter("map_source_path").value
@@ -191,6 +195,38 @@ class SlamManagerNode(Node):
         self._active_asset: Optional[MapAsset] = None
         self._mapping_dirty = False
         self._mapping_session_id = ""
+        self._external_runtime_mode = str(
+            self.get_parameter("external_runtime_mode").value
+        ).strip().lower()
+        if self._external_runtime_mode not in ("none", "mapping", "localization"):
+            raise ValueError(
+                "external_runtime_mode must be one of: none, mapping, localization"
+            )
+        self._external_map_id = str(self.get_parameter("external_map_id").value).strip()
+        self._external_map_version = int(
+            self.get_parameter("external_map_version").value
+        )
+        if self._external_map_version < 0:
+            raise ValueError("external_map_version must be non-negative")
+
+        # MATRiX 脚本直接启动 FAST-LIO，SLAM Manager 不应再创建第二个后端进程。
+        # 观察模式只依据标准遥测推进状态机，仍由本节点独占 SlamStatus 发布权。
+        if self._external_runtime_mode == "mapping":
+            self._mapping_dirty = True
+            self._mapping_session_id = "external-runtime"
+            self._machine.transition(
+                SlamState.STARTING_MAPPING,
+                reason_text="observing externally managed mapping runtime",
+            )
+        elif self._external_runtime_mode == "localization":
+            self._machine.transition(
+                SlamState.STARTING_LOCALIZATION,
+                reason_text="observing externally managed localization runtime",
+            )
+            self._machine.transition(
+                SlamState.RELOCALIZING,
+                reason_text="waiting for external ICP and fresh telemetry",
+            )
 
         self.get_logger().info(f"Using SLAM robot profile: {robot_profile}")
         self.get_logger().info(
@@ -331,6 +367,10 @@ class SlamManagerNode(Node):
 
     def _start_mapping(self, request, response):
         with self._lock:
+            if self._external_runtime_mode != "none":
+                return self._service_reject(
+                    response, "SLAM process lifecycle is externally managed"
+                )
             if self._machine.snapshot.state != SlamState.STOPPED:
                 return self._service_reject(response, "SLAM is not stopped")
             if not request.session_id.strip():
@@ -363,6 +403,10 @@ class SlamManagerNode(Node):
 
     def _stop_mapping(self, request, response):
         with self._lock:
+            if self._external_runtime_mode != "none":
+                return self._service_reject(
+                    response, "SLAM process lifecycle is externally managed"
+                )
             state = self._machine.snapshot.state
             if state not in (
                 SlamState.STARTING_MAPPING,
@@ -398,6 +442,10 @@ class SlamManagerNode(Node):
     def _stop_localization_service(self, request, response):
         del request
         with self._lock:
+            if self._external_runtime_mode != "none":
+                return self._service_reject(
+                    response, "SLAM process lifecycle is externally managed"
+                )
             state = self._machine.snapshot.state
             if state not in (
                 SlamState.STARTING_LOCALIZATION,
@@ -556,6 +604,8 @@ class SlamManagerNode(Node):
         goal_handle.publish_feedback(feedback)
 
     def _localization_goal(self, goal_request) -> GoalResponse:
+        if self._external_runtime_mode != "none":
+            return GoalResponse.REJECT
         initial_guess = (
             goal_request.initial_x,
             goal_request.initial_y,
@@ -727,6 +777,18 @@ class SlamManagerNode(Node):
                             reason_code=REASON_LOCALIZATION_TIMEOUT,
                             reason_text="SLAM telemetry exceeded lost timeout",
                         )
+                elif (
+                    state == SlamState.LOST
+                    and self._external_runtime_mode == "localization"
+                    and fresh
+                ):
+                    # 外部后端可能在不重启 Manager 的情况下恢复。先回到重定位态，
+                    # 下一次新的 ICP 结果和随后 odom 会再次证明 LOCALIZED。
+                    self._last_initial_pose = None
+                    self._machine.transition(
+                        SlamState.RELOCALIZING,
+                        reason_text="external telemetry recovered; waiting for ICP",
+                    )
         self._publish_status()
 
     def _telemetry_fresh(self, now: float, timeout: float) -> bool:
@@ -756,8 +818,12 @@ class SlamManagerNode(Node):
             message.stamp = self.get_clock().now().to_msg()
             message.mode = int(snapshot.mode)
             message.state = int(snapshot.state)
-            message.map_id = "" if asset is None else asset.map_id
-            message.map_version = 0 if asset is None else asset.version
+            message.map_id = (
+                self._external_map_id if asset is None else asset.map_id
+            )
+            message.map_version = (
+                self._external_map_version if asset is None else asset.version
+            )
             message.map_checksum = "" if asset is None else asset.checksum
             message.initialized = snapshot.state in (
                 SlamState.MAPPING,
@@ -784,14 +850,31 @@ class SlamManagerNode(Node):
         return super().destroy_node()
 
 
+def _spin_until_context_shutdown(executor: MultiThreadedExecutor) -> None:
+    """运行执行器，并只吞掉由 ROS context 正常关闭产生的退出异常。"""
+    try:
+        executor.spin()
+    except ExternalShutdownException:
+        # 其他节点触发 context shutdown 时，rclpy 会用该异常唤醒执行器。
+        pass
+    except rclpy_implementation.RCLError:
+        # ROS 2 Humble 在 SIGINT 与 WaitSet 初始化并发时可能抛出 RCLError。
+        # 仅当 context 已关闭才视为正常退出，避免掩盖真实的 RCL 故障。
+        if rclpy.ok():
+            raise
+
+
 def main(args=None) -> None:
     rclpy.init(args=args)
     node = SlamManagerNode()
     executor = MultiThreadedExecutor(num_threads=4)
     executor.add_node(node)
     try:
-        executor.spin()
+        _spin_until_context_shutdown(executor)
     finally:
         executor.shutdown()
         node.destroy_node()
-        rclpy.shutdown()
+        # SIGINT 可能已经由 rclpy 的信号处理器关闭了默认 context。
+        # 仅在 context 仍有效时执行关闭，避免正常退出被重复 shutdown 误报为失败。
+        if rclpy.ok():
+            rclpy.shutdown()
