@@ -20,6 +20,9 @@ WORK_ROOT=${S100_WORK_ROOT:-${RUNNER_TEMP:-/tmp}/s100-cross}
 S100_IMAGE=${S100_IMAGE:-pc_tros_ubuntu22.04:v1.0.0}
 ROBOT_DEV_CONFIG_REF=${ROBOT_DEV_CONFIG_REF:-f44b1ad2575b34c189fd470de1db9c5ad48b6886}
 S100_SYSROOT_REF=${S100_SYSROOT_REF:-de9fa286f71a72d24c349477cd59f41cc2cc3d8f}
+ROBOT_DEV_CONFIG_URL=${ROBOT_DEV_CONFIG_URL:-https://github.com/D-Robotics/robot_dev_config.git}
+S100_SYSROOT_URL=${S100_SYSROOT_URL:-https://github.com/D-Robotics/sysroot_docker.git}
+TROS_ARM_BUILD_URL=${TROS_ARM_BUILD_URL:-https://github.com/D-Robotics/tros_arm_build.git}
 S100_CLEAN=${S100_CLEAN:-1}
 
 log() {
@@ -61,10 +64,12 @@ mkdir -p "${TROS_ROOT}/src/omni_slam" "${TROS_ROOT}/src/omni_tf_manager"
 if [[ ! -d "${ROBOT_DEV_CONFIG_DIR}/.git" ]]; then
   log "cloning robot_dev_config at ${ROBOT_DEV_CONFIG_REF}"
   git clone --filter=blob:none \
-    https://github.com/D-Robotics/robot_dev_config.git \
+    "${ROBOT_DEV_CONFIG_URL}" \
     "${ROBOT_DEV_CONFIG_DIR}"
 else
   log "reusing robot_dev_config checkout at ${ROBOT_DEV_CONFIG_REF}"
+  git -C "${ROBOT_DEV_CONFIG_DIR}" remote set-url origin \
+    "${ROBOT_DEV_CONFIG_URL}"
   if ! git -C "${ROBOT_DEV_CONFIG_DIR}" cat-file -e \
       "${ROBOT_DEV_CONFIG_REF}^{commit}" 2>/dev/null; then
     git -C "${ROBOT_DEV_CONFIG_DIR}" fetch --no-tags origin \
@@ -101,6 +106,8 @@ log "starting toolchain container"
 docker run --rm -i \
   --network host \
   -e "S100_SYSROOT_REF=${S100_SYSROOT_REF}" \
+  -e "S100_SYSROOT_URL=${S100_SYSROOT_URL}" \
+  -e "TROS_ARM_BUILD_URL=${TROS_ARM_BUILD_URL}" \
   -e "HTTP_PROXY=${S100_CONTAINER_HTTP_PROXY:-${HTTP_PROXY:-}}" \
   -e "HTTPS_PROXY=${S100_CONTAINER_HTTPS_PROXY:-${HTTPS_PROXY:-}}" \
   -e "NO_PROXY=${NO_PROXY:-}" \
@@ -111,6 +118,10 @@ docker run --rm -i \
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
+if [[ -f /mnt/s100-cross/.codeup-git-credentials ]]; then
+  git config --global credential.helper \
+    'store --file=/mnt/s100-cross/.codeup-git-credentials'
+fi
 report_container_error() {
   local exit_code=$?
   printf '[s100-container] ERROR: line %s: %s (exit %s)\n' \
@@ -188,8 +199,9 @@ checkout_sysroot_in_batches() {
   mkdir -p "${cache}"
   if [[ ! -d "${cache}/.git" ]]; then
     git -C "${cache}" init --quiet
-    git -C "${cache}" remote add origin \
-      https://github.com/D-Robotics/sysroot_docker.git
+    git -C "${cache}" remote add origin "${S100_SYSROOT_URL}"
+  else
+    git -C "${cache}" remote set-url origin "${S100_SYSROOT_URL}"
   fi
 
   git -C "${cache}" config http.version HTTP/1.1
@@ -309,7 +321,7 @@ checkout_sysroot_in_batches() {
 echo "=== Fetch required ROS/TROS dependencies ==="
 checkout_sysroot_in_batches "${S100_SYSROOT_REF}"
 shallow_checkout \
-  https://github.com/D-Robotics/tros_arm_build.git \
+  "${TROS_ARM_BUILD_URL}" \
   develop \
   tros_arm_build
 
