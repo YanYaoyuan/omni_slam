@@ -22,6 +22,12 @@
             imu_topic: "/omni/sensors/imu/data"
             time_sync_en: false
             time_offset_lidar_to_imu: 0.0
+            # Matrix 仿真提供带绝对位姿的 MuJoCo 里程计。首个 tracking
+            # 位姿会成为本次建图会话的局部原点；真机配置不设置该 topic。
+            reference_odom_topic: "/odom/mujoco_odom"
+            reference_odom_parent_frame_id: "world"
+            reference_odom_pose_frame_id: "omni_base_link"
+            reference_odom_max_age_s: 0.25
 
         preprocess:
             # MATRiX publishes the Mid360 cloud as sensor_msgs/PointCloud2 with
@@ -37,6 +43,8 @@
             gyr_cov: 0.1
             b_acc_cov: 0.0001
             b_gyr_cov: 0.0001
+            # 仿真 IMU 约 205 Hz；500 个样本提供约 2.4 秒的静止初始化窗口。
+            imu_init_min_samples: 500
             fov_degree: 360.0
             det_range: 100.0
             extrinsic_est_en: false

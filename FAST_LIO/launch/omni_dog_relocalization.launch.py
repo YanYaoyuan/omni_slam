@@ -60,6 +60,10 @@ def generate_launch_description():
     max_correspondence_distance = LaunchConfiguration('max_correspondence_distance')
     fitness_score_thre = LaunchConfiguration('fitness_score_thre')
     converged_count_thre = LaunchConfiguration('converged_count_thre')
+    candidate_position_tolerance_m = LaunchConfiguration(
+        'candidate_position_tolerance_m')
+    candidate_angle_tolerance_rad = LaunchConfiguration(
+        'candidate_angle_tolerance_rad')
     map_voxel_leaf_size = LaunchConfiguration('map_voxel_leaf_size')
     cloud_voxel_leaf_size = LaunchConfiguration('cloud_voxel_leaf_size')
     pointcloud_topic = LaunchConfiguration('pointcloud_topic')
@@ -96,6 +100,14 @@ def generate_launch_description():
         'converged_count_thre',
         default_value='10',
         description='Number of consecutive good ICP results required before publishing pose')
+    declare_candidate_position_tolerance_m = DeclareLaunchArgument(
+        'candidate_position_tolerance_m',
+        default_value='0.35',
+        description='Maximum translation spread of one stable ICP candidate cluster')
+    declare_candidate_angle_tolerance_rad = DeclareLaunchArgument(
+        'candidate_angle_tolerance_rad',
+        default_value='0.174533',
+        description='Maximum rotation spread of one stable ICP candidate cluster')
     declare_map_voxel_leaf_size = DeclareLaunchArgument(
         'map_voxel_leaf_size',
         default_value='0.5',
@@ -158,6 +170,10 @@ def generate_launch_description():
             {'map_path': map_path},
             {'fitness_score_thre': ParameterValue(fitness_score_thre, value_type=float)},
             {'converged_count_thre': ParameterValue(converged_count_thre, value_type=int)},
+            {'candidate_position_tolerance_m': ParameterValue(
+                candidate_position_tolerance_m, value_type=float)},
+            {'candidate_angle_tolerance_rad': ParameterValue(
+                candidate_angle_tolerance_rad, value_type=float)},
             {'pcl_type': 'pointcloud2'},
             {'pointcloud_topic': pointcloud_topic},
         ],
@@ -203,6 +219,8 @@ def generate_launch_description():
     ld.add_action(declare_max_correspondence_distance)
     ld.add_action(declare_fitness_score_thre)
     ld.add_action(declare_converged_count_thre)
+    ld.add_action(declare_candidate_position_tolerance_m)
+    ld.add_action(declare_candidate_angle_tolerance_rad)
     ld.add_action(declare_map_voxel_leaf_size)
     ld.add_action(declare_cloud_voxel_leaf_size)
     ld.add_action(declare_pointcloud_topic)

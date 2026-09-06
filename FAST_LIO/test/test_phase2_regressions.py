@@ -69,6 +69,15 @@ class SaveMapCancelRegressionTests(unittest.TestCase):
 
 
 class TelemetryWiringRegressionTests(unittest.TestCase):
+    def test_sensor_telemetry_uses_compatible_qos(self):
+        source = _manager_source()
+        self.assertIn("qos_profile_sensor_data", source)
+        subscription_block = source[
+            source.index("telemetry_qos = qos_profile_sensor_data"):
+            source.index("self._map_save_client = self.create_client(")
+        ]
+        self.assertEqual(subscription_block.count("telemetry_qos"), 4)
+
     def test_status_reports_real_pose_jump_and_fitness(self):
         source = _manager_source()
         publish = source[source.index("def _publish_status("):]
@@ -128,6 +137,24 @@ class IcpFitnessPublisherRegressionTests(unittest.TestCase):
                 tail,
                 r"fitness_msg\.data\s*=\s*fitness_score;\s*fitness_pub_->publish\(fitness_msg\);",
             )
+
+    def test_icp_requires_one_consistent_pose_cluster(self):
+        source = _icp_source()
+        self.assertIn("RelocalizationConvergenceGate", source)
+        self.assertIn("convergence_gate_->Observe(quality_accepted, candidate)", source)
+        self.assertIn("convergence_gate_->Estimate()", source)
+        self.assertIn("initGuess = candidate", source)
+        self.assertNotIn("converged_count++", source)
+
+        launch_source = (
+            PACKAGE_ROOT / "launch" / "omni_dog_relocalization.launch.py"
+        ).read_text(encoding="utf-8")
+        for parameter in (
+            "candidate_position_tolerance_m",
+            "candidate_angle_tolerance_rad",
+        ):
+            self.assertIn(f"DeclareLaunchArgument(\n        '{parameter}'", launch_source)
+            self.assertIn(f"'{parameter}': ParameterValue(", launch_source)
 
 
 class StateMachineCancelPathRegressionTests(unittest.TestCase):

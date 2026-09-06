@@ -222,6 +222,47 @@ class Phase0RegressionTests(unittest.TestCase):
         )
         self.assertIn("{'transform_timeout_ms': 250}", launch_source)
 
+    def test_matrix_profiles_require_a_stable_imu_initialization_window(self):
+        source = (PACKAGE_ROOT / "src" / "laserMapping.cpp").read_text(
+            encoding="utf-8"
+        )
+        imu_source = (PACKAGE_ROOT / "src" / "IMU_Processing.hpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('"mapping.imu_init_min_samples"', source)
+        self.assertIn("set_init_sample_count(imu_init_min_samples)", source)
+        self.assertIn("init_iter_num > init_sample_count_", imu_source)
+        for name in ("matrix_sim.yaml", "matrix_sim_relocalization.yaml"):
+            config = (PACKAGE_ROOT / "config" / name).read_text(encoding="utf-8")
+            self.assertIn("imu_init_min_samples: 500", config)
+
+    def test_matrix_profiles_use_session_relative_reference_odometry(self):
+        source = (PACKAGE_ROOT / "src" / "laserMapping.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('"common.reference_odom_topic"', source)
+        self.assertIn("reference_odom_tracker_.reset()", source)
+        self.assertIn("apply_reference_odometry(Measures.lidar_end_time)", source)
+        self.assertIn("if (reference_odom_enabled_)", source)
+
+        for name in ("matrix_sim.yaml", "matrix_sim_relocalization.yaml"):
+            config = (PACKAGE_ROOT / "config" / name).read_text(encoding="utf-8")
+            self.assertIn('reference_odom_topic: "/odom/mujoco_odom"', config)
+            self.assertIn('reference_odom_parent_frame_id: "world"', config)
+            self.assertIn(
+                'reference_odom_pose_frame_id: "omni_base_link"', config
+            )
+
+        # 外部真值只能属于仿真 profile，不能悄悄改变真机定位语义。
+        for name in (
+            "omni_dog.yaml",
+            "omni_dog_relocalization.yaml",
+            "vbot.yaml",
+            "vbot_relocalization.yaml",
+        ):
+            config = (PACKAGE_ROOT / "config" / name).read_text(encoding="utf-8")
+            self.assertNotIn("reference_odom_topic:", config)
+
     def test_real_dog_profiles_consume_only_manager_normalized_sensors(self):
         for name in (
             "omni_dog.yaml",

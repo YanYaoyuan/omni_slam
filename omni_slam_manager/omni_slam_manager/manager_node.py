@@ -18,7 +18,13 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import ExternalShutdownException, MultiThreadedExecutor
 from rclpy.impl.implementation_singleton import rclpy_implementation
 from rclpy.node import Node
-from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
+from rclpy.qos import (
+    DurabilityPolicy,
+    HistoryPolicy,
+    QoSProfile,
+    ReliabilityPolicy,
+    qos_profile_sensor_data,
+)
 from sensor_msgs.msg import Imu, PointCloud2
 from std_msgs.msg import Float64
 from std_srvs.srv import Trigger
@@ -314,25 +320,29 @@ class SlamManagerNode(Node):
         self._status_publisher = self.create_publisher(
             SlamStatus, "/omni/slam/status", status_qos
         )
+        # 点云和 IMU 上游按 ROS 2 SensorDataQoS 发布。订阅端必须显式请求
+        # BEST_EFFORT，否则部分 DDS/RMW 会把 RELIABLE 订阅判定为不兼容；
+        # 里程计也复用该策略，可同时匹配 BEST_EFFORT 与 RELIABLE 发布端。
+        telemetry_qos = qos_profile_sensor_data
         self.create_subscription(
             PointCloud2,
             str(self.get_parameter("cloud_topic").value),
             self._cloud_callback,
-            10,
+            telemetry_qos,
             callback_group=self._callbacks,
         )
         self.create_subscription(
             Imu,
             str(self.get_parameter("imu_topic").value),
             self._imu_callback,
-            20,
+            telemetry_qos,
             callback_group=self._callbacks,
         )
         self.create_subscription(
             Odometry,
             str(self.get_parameter("odom_topic").value),
             self._odom_callback,
-            20,
+            telemetry_qos,
             callback_group=self._callbacks,
         )
         self.create_subscription(

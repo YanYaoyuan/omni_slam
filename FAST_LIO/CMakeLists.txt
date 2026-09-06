@@ -195,6 +195,9 @@ if(BUILD_TESTING)
   ament_add_gtest(test_extent_safe_voxel_filter test/test_extent_safe_voxel_filter.cpp)
   target_include_directories(test_extent_safe_voxel_filter PRIVATE include ${PCL_INCLUDE_DIRS})
   target_link_libraries(test_extent_safe_voxel_filter pcl_common)
+  ament_add_gtest(test_reference_odometry test/test_reference_odometry.cpp)
+  target_include_directories(test_reference_odometry PRIVATE include)
+  target_link_libraries(test_reference_odometry Eigen3::Eigen)
   ament_add_pytest_test(phase0_regressions
     test/test_phase0_regressions.py
   )

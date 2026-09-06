@@ -1,7 +1,9 @@
 #include <cmath>
+#include <cstddef>
 #include <math.h>
 #include <deque>
 #include <mutex>
+#include <stdexcept>
 #include <thread>
 #include <fstream>
 #include <csignal>
@@ -22,8 +24,6 @@
 #include "use-ikfom.hpp"
 
 /// *************Preconfiguration
-
-#define MAX_INI_COUNT (10)
 
 const bool time_list(PointType &x, PointType &y) { return (x.curvature < y.curvature); };
 
@@ -46,6 +46,7 @@ public:
   void set_acc_cov(const V3D &scaler);
   void set_gyr_bias_cov(const V3D &b_g);
   void set_acc_bias_cov(const V3D &b_a);
+  void set_init_sample_count(int sample_count);
   Eigen::Matrix<double, 12, 12> Q;
   void Process(const MeasureGroup &meas, esekfom::esekf<state_ikfom, 12, input_ikfom> &kf_state, PointCloudXYZI::Ptr pcl_un_);
 
@@ -77,6 +78,7 @@ private:
   double start_timestamp_;
   double last_lidar_end_time_;
   int init_iter_num = 1;
+  int init_sample_count_ = 10;
   bool b_first_frame_ = true;
   bool imu_need_init_ = true;
 };
@@ -151,6 +153,17 @@ void ImuProcess::set_gyr_bias_cov(const V3D &b_g)
 void ImuProcess::set_acc_bias_cov(const V3D &b_a)
 {
   cov_bias_acc = b_a;
+}
+
+void ImuProcess::set_init_sample_count(const int sample_count)
+{
+  // 该值来自已校验的 ROS 参数。仍在组件边界做防御，避免后续调用方把
+  // 零或负数传入后跳过重力与陀螺零偏初始化。
+  if (sample_count <= 0)
+  {
+    throw std::invalid_argument("IMU initialization sample count must be positive");
+  }
+  init_sample_count_ = sample_count;
 }
 
 void ImuProcess::IMU_init(const MeasureGroup &meas, esekfom::esekf<state_ikfom, 12, input_ikfom> &kf_state, int &N)
@@ -359,14 +372,19 @@ void ImuProcess::Process(const MeasureGroup &meas, esekfom::esekf<state_ikfom, 1
     last_imu_ = meas.imu.back();
 
     state_ikfom imu_state = kf_state.get_x();
-    if (init_iter_num > MAX_INI_COUNT)
+    if (init_iter_num > init_sample_count_)
     {
       cov_acc *= pow(G_m_s2 / mean_acc.norm(), 2);
       imu_need_init_ = false;
 
       cov_acc = cov_acc_scale;
       cov_gyr = cov_gyr_scale;
-      std::cout << "IMU Initial Done" << std::endl;
+      RCLCPP_INFO(
+        rclcpp::get_logger("omni_fast_lio"),
+        "IMU 初始化完成：samples=%d mean_acc=(%.6f, %.6f, %.6f) "
+        "mean_gyro=(%.6f, %.6f, %.6f)",
+        init_iter_num, mean_acc.x(), mean_acc.y(), mean_acc.z(),
+        mean_gyr.x(), mean_gyr.y(), mean_gyr.z());
       // ROS_INFO("IMU Initial Done: Gravity: %.4f %.4f %.4f %.4f; state.bias_g: %.4f %.4f %.4f; acc covarience: %.8f %.8f %.8f; gry covarience: %.8f %.8f %.8f",\
       //          imu_state.grav[0], imu_state.grav[1], imu_state.grav[2], mean_acc.norm(), cov_bias_gyr[0], cov_bias_gyr[1], cov_bias_gyr[2], cov_acc[0], cov_acc[1], cov_acc[2], cov_gyr[0], cov_gyr[1], cov_gyr[2]);
       fout_imu.open(DEBUG_FILE_DIR("imu.txt"), ios::out);

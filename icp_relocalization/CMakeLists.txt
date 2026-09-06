@@ -71,6 +71,7 @@ endif()
 
 include_directories(${OpenMP_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(include)
 
 add_executable(icp_node src/icp_node.cpp)
 ament_target_dependencies(
@@ -104,6 +105,16 @@ if(CMAKE_CROSSCOMPILING)
 endif()
 if(USE_LIVOX)
   ament_target_dependencies(icp_node livox_ros_driver2)
+endif()
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(
+    test_relocalization_convergence
+    test/test_relocalization_convergence.cpp
+  )
+  target_include_directories(
+    test_relocalization_convergence PRIVATE include ${EIGEN3_INCLUDE_DIR})
 endif()
 
 add_executable(global_pointcloud_publisher src/global_pointcloud_publisher.cpp)
@@ -161,5 +172,7 @@ install(
     sac_ia_gicp
   DESTINATION lib/${PROJECT_NAME}
 )
+
+install(DIRECTORY include/ DESTINATION include)
 
 ament_package()

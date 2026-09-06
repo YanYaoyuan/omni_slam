@@ -22,6 +22,12 @@
             imu_topic: "/omni/sensors/imu/data"
             time_sync_en: false
             time_offset_lidar_to_imu: 0.0
+            # 重定位成功后重新建立局部里程计原点，避免把 MuJoCo world 的
+            # 绝对坐标混入 Omni 地图坐标系。
+            reference_odom_topic: "/odom/mujoco_odom"
+            reference_odom_parent_frame_id: "world"
+            reference_odom_pose_frame_id: "omni_base_link"
+            reference_odom_max_age_s: 0.25
 
         preprocess:
             lidar_type: 5
@@ -35,6 +41,8 @@
             gyr_cov: 0.1
             b_acc_cov: 0.0001
             b_gyr_cov: 0.0001
+            # 与建图使用相同的重力初始化窗口，防止定位会话起步即产生漂移。
+            imu_init_min_samples: 500
             fov_degree: 360.0
             det_range: 100.0
             extrinsic_est_en: false

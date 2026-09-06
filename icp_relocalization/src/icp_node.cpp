@@ -12,12 +12,14 @@
 #include "fast_lio/extent_safe_voxel_filter.hpp"
 #include <Eigen/Geometry>
 #include <cmath>
+#include <memory>
 #include <stdexcept>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/transform_datatypes.h>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include "icp_relocalization/relocalization_convergence.hpp"
 #ifdef USE_LIVOX
 #include <livox_ros_driver2/msg/custom_msg.hpp>
 #endif
@@ -43,6 +45,8 @@ public:
         this->declare_parameter("map_voxel_leaf_size", 0.1);
         this->declare_parameter("cloud_voxel_leaf_size", 0.1);
         this->declare_parameter("converged_count_thre", 20);
+        this->declare_parameter("candidate_position_tolerance_m", 0.35);
+        this->declare_parameter("candidate_angle_tolerance_rad", 0.174533);
         this->declare_parameter("pcl_type","livox");
         this->declare_parameter("livox_topic", "/livox/lidar");
         this->declare_parameter("pointcloud_topic", "/pointcloud2");
@@ -62,9 +66,23 @@ public:
         this->get_parameter("map_voxel_leaf_size", map_voxel_leaf_size);
         this->get_parameter("cloud_voxel_leaf_size", cloud_voxel_leaf_size);
         this->get_parameter("converged_count_thre", converged_count_thre);
+        this->get_parameter(
+            "candidate_position_tolerance_m", candidate_position_tolerance_m);
+        this->get_parameter(
+            "candidate_angle_tolerance_rad", candidate_angle_tolerance_rad);
         this->get_parameter("pcl_type", pcl_type);
         this->get_parameter("livox_topic", livox_topic);
         this->get_parameter("pointcloud_topic", pointcloud_topic);
+
+        if (converged_count_thre <= 0)
+        {
+            throw std::invalid_argument("converged_count_thre must be positive");
+        }
+        convergence_gate_ =
+            std::make_unique<icp_relocalization::RelocalizationConvergenceGate>(
+                static_cast<std::size_t>(converged_count_thre),
+                candidate_position_tolerance_m,
+                candidate_angle_tolerance_rad);
 
         publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("icp_result", 10);
         fitness_pub_ = this->create_publisher<std_msgs::msg::Float64>(icp_fitness_topic, 10);
@@ -105,6 +123,11 @@ public:
             }
         }
         RCLCPP_INFO(this->get_logger(), "Initial guess: \n x: %f, y: %f, z: %f, a: %f", initial_x, initial_y, initial_z, initial_a);
+        RCLCPP_INFO(
+            this->get_logger(),
+            "Relocalization convergence gate: samples=%d position_tolerance=%.3f m angle_tolerance=%.3f rad",
+            converged_count_thre, candidate_position_tolerance_m,
+            candidate_angle_tolerance_rad);
         // Load the target point cloud from a PCD file
         if (pcl::io::loadPCDFile<pcl::PointXYZ>(map_path, *target_cloud_) == -1)
         {
@@ -171,6 +194,131 @@ private:
         cloud.swap(filtered);
     }
 
+    using IcpSolver =
+        pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ>;
+
+    /**
+     * @brief 评估一帧 ICP 结果，并在形成稳定候选簇后给出最终初始位姿。
+     *
+     * fitness 只说明点到点残差，不能排除重复结构导致的跳解。因此这里还要求
+     * 连续候选在 SE(3) 中相互一致。质量合格的候选会成为下一帧 ICP 初值，
+     * 避免 PointCloud2 分支持续从用户给定的旧初值重新搜索。
+     */
+    bool evaluate_candidate(
+        IcpSolver & icp,
+        const double fitness_score,
+        Eigen::Matrix4f & stable_transformation)
+    {
+        const bool quality_accepted =
+            icp.hasConverged() && std::isfinite(fitness_score) &&
+            fitness_score < fitness_score_thre;
+        const Eigen::Matrix4f candidate = quality_accepted ?
+            icp.getFinalTransformation() : initGuess;
+        const auto decision =
+            convergence_gate_->Observe(quality_accepted, candidate);
+
+        if (!quality_accepted)
+        {
+            RCLCPP_INFO(
+                this->get_logger(),
+                "ICP candidate rejected: converged=%s fitness=%.6f threshold=%.6f; stable evidence cleared",
+                icp.hasConverged() ? "true" : "false", fitness_score,
+                fitness_score_thre);
+            return false;
+        }
+
+        if (decision == icp_relocalization::ConvergenceDecision::kRejected)
+        {
+            RCLCPP_ERROR(
+                this->get_logger(),
+                "ICP returned a non-finite or non-rigid transformation; candidate discarded and stable evidence cleared");
+            return false;
+        }
+
+        // 仅用通过基础质量门的有限刚体变换更新搜索种子；高残差或非法结果
+        // 不得污染下一帧初值。
+        initGuess = candidate;
+        const double yaw = std::atan2(candidate(1, 0), candidate(0, 0));
+        if (decision == icp_relocalization::ConvergenceDecision::kClusterRestarted)
+        {
+            RCLCPP_WARN(
+                this->get_logger(),
+                "ICP candidate changed pose cluster; convergence evidence restarted at X=%.3f Y=%.3f Z=%.3f YAW=%.3f rad, fitness=%.6f",
+                candidate(0, 3), candidate(1, 3), candidate(2, 3), yaw,
+                fitness_score);
+            return false;
+        }
+
+        RCLCPP_INFO(
+            this->get_logger(),
+            "Relocalization stable candidate [%zu/%zu]: X=%.3f Y=%.3f Z=%.3f YAW=%.3f rad (%.1f deg), fitness=%.6f",
+            convergence_gate_->sample_count(),
+            convergence_gate_->required_samples(),
+            candidate(0, 3), candidate(1, 3), candidate(2, 3), yaw,
+            yaw * 180.0 / M_PI, fitness_score);
+        if (decision != icp_relocalization::ConvergenceDecision::kReady)
+        {
+            return false;
+        }
+
+        // 发布稳定簇的均值，而不是最后一帧的瞬时解，降低初始化 TF 抖动。
+        stable_transformation = convergence_gate_->Estimate();
+        return true;
+    }
+
+    void publish_transformed_cloud(
+        pcl::PointCloud<pcl::PointXYZ>::Ptr & input_cloud,
+        const Eigen::Matrix4f & transformation)
+    {
+        pcl::transformPointCloud(
+            *input_cloud, *input_cloud, transformation);
+        sensor_msgs::msg::PointCloud2 transformed_cloud_msg;
+        pcl::toROSMsg(*input_cloud, transformed_cloud_msg);
+        transformed_cloud_msg.header.stamp = this->now();
+        transformed_cloud_msg.header.frame_id = map_frame;
+        transformed_cloud_pub_->publish(transformed_cloud_msg);
+
+        target_cloud_msg.header.stamp = this->now();
+        map_pub_->publish(target_cloud_msg);
+    }
+
+    template<typename StampT>
+    void publish_relocalization_result(
+        const StampT & source_stamp,
+        const Eigen::Matrix4f & transformation,
+        const double fitness_score)
+    {
+        // ICP 对齐结果表示 T_map_sensor，由 TF Manager 统一换算并维护
+        // T_map_odom；ICP 节点本身不争用 TF 发布权。
+        nav_msgs::msg::Odometry pose_msg;
+        pose_msg.header.stamp = source_stamp;
+        if (pose_msg.header.stamp.sec == 0 &&
+            pose_msg.header.stamp.nanosec == 0)
+        {
+            pose_msg.header.stamp = this->now();
+        }
+        pose_msg.header.frame_id = map_frame;
+        pose_msg.child_frame_id = sensor_frame;
+        pose_msg.pose.pose.position.x = transformation(0, 3);
+        pose_msg.pose.pose.position.y = transformation(1, 3);
+        pose_msg.pose.pose.position.z = transformation(2, 3);
+        const Eigen::Quaternionf orientation(
+            transformation.block<3, 3>(0, 0));
+        pose_msg.pose.pose.orientation.x = orientation.x();
+        pose_msg.pose.pose.orientation.y = orientation.y();
+        pose_msg.pose.pose.orientation.z = orientation.z();
+        pose_msg.pose.pose.orientation.w = orientation.w();
+        publisher_->publish(pose_msg);
+
+        const double yaw = std::atan2(
+            transformation(1, 0), transformation(0, 0));
+        RCLCPP_INFO(
+            this->get_logger(),
+            "RELOCALIZATION SUCCEEDED: published /icp_result, X=%.3f Y=%.3f Z=%.3f YAW=%.3f rad (%.1f deg), fitness=%.6f",
+            transformation(0, 3), transformation(1, 3), transformation(2, 3),
+            yaw, yaw * 180.0 / M_PI, fitness_score);
+    }
+
     void cloud_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
     {
         // Convert the incoming point cloud to PCL format
@@ -180,6 +328,7 @@ private:
 
         if (input_cloud->empty())
         {
+            convergence_gate_->Reset();
             RCLCPP_WARN(this->get_logger(), "ICP input cloud is empty after filtering");
             return;
         }
@@ -216,76 +365,17 @@ private:
         fitness_msg.data = fitness_score;
         fitness_pub_->publish(fitness_msg);
 
-        if (fitness_score < fitness_score_thre && icp.hasConverged())
+        Eigen::Matrix4f stable_transformation = Eigen::Matrix4f::Identity();
+        const bool ready = evaluate_candidate(
+            icp, fitness_score, stable_transformation);
+        publish_transformed_cloud(
+            input_cloud, ready ? stable_transformation : initGuess);
+        if (ready)
         {
-            converged_count++;
-            const Eigen::Matrix4f transformation_result = icp.getFinalTransformation();
-            const double yaw = std::atan2(
-                transformation_result(1, 0), transformation_result(0, 0));
-            RCLCPP_INFO(
-                this->get_logger(),
-                "Relocalization candidate [%d/%d]: X=%.3f Y=%.3f Z=%.3f YAW=%.3f rad (%.1f deg), fitness=%.6f",
-                converged_count, converged_count_thre,
-                transformation_result(0, 3), transformation_result(1, 3),
-                transformation_result(2, 3), yaw, yaw * 180.0 / M_PI, fitness_score);
-            if(converged_count < converged_count_thre)
-            {
-                RCLCPP_INFO(this->get_logger(), "ICP converged, but not enough count, no pose is published");
-                return;
-            }
-            // ICP aligns sensor-frame points into the map.  Therefore this
-            // result is T_map_sensor, not T_map_odom.
-            nav_msgs::msg::Odometry pose_msg;
-            pose_msg.header.stamp = msg->header.stamp;
-            if (pose_msg.header.stamp.sec == 0 &&
-                pose_msg.header.stamp.nanosec == 0)
-            {
-                pose_msg.header.stamp = this->now();
-            }
-            pose_msg.header.frame_id = map_frame;
-            pose_msg.child_frame_id = sensor_frame;
-            pose_msg.pose.pose.position.x = transformation_result(0, 3);
-            pose_msg.pose.pose.position.y = transformation_result(1, 3);
-            pose_msg.pose.pose.position.z = transformation_result(2, 3);
-            // set orientation
-            Eigen::Matrix3f rotation = transformation_result.block<3, 3>(0, 0);
-            Eigen::Quaternionf q(rotation);
-            pose_msg.pose.pose.orientation.x = q.x();
-            pose_msg.pose.pose.orientation.y = q.y();
-            pose_msg.pose.pose.orientation.z = q.z();
-            pose_msg.pose.pose.orientation.w = q.w();
-            publisher_->publish(pose_msg);
-            RCLCPP_INFO(
-                this->get_logger(),
-                "RELOCALIZATION SUCCEEDED: published /icp_result, X=%.3f Y=%.3f Z=%.3f YAW=%.3f rad (%.1f deg), fitness=%.6f",
-                transformation_result(0, 3), transformation_result(1, 3),
-                transformation_result(2, 3), yaw, yaw * 180.0 / M_PI, fitness_score);
-
-            // Transform the input cloud using the ICP result
-            pcl::transformPointCloud(*input_cloud, *input_cloud, transformation_result);
-            // Publish the transformed input cloud
-            sensor_msgs::msg::PointCloud2 transformed_cloud_msg;
-            pcl::toROSMsg(*input_cloud, transformed_cloud_msg);
-            transformed_cloud_msg.header.stamp = this->now();
-            transformed_cloud_msg.header.frame_id = map_frame;
-            transformed_cloud_pub_->publish(transformed_cloud_msg);
+            publish_relocalization_result(
+                msg->header.stamp, stable_transformation, fitness_score);
             rclcpp::shutdown();
         }
-        else
-        {
-            converged_count = 0;
-            Eigen::Matrix4f transformation_result = initGuess;
-            pcl::transformPointCloud(*input_cloud, *input_cloud, transformation_result);
-            // Publish the transformed input cloud
-            sensor_msgs::msg::PointCloud2 transformed_cloud_msg;
-            pcl::toROSMsg(*input_cloud, transformed_cloud_msg);
-            transformed_cloud_msg.header.stamp = this->now();
-            transformed_cloud_msg.header.frame_id = map_frame;
-            transformed_cloud_pub_->publish(transformed_cloud_msg);
-            RCLCPP_INFO(this->get_logger(), "ICP fitness score is higher than the threshold, no pose is published");
-        }
-        target_cloud_msg.header.stamp = this->now();
-        map_pub_->publish(target_cloud_msg);
     }
 
 #ifdef USE_LIVOX
@@ -307,6 +397,7 @@ private:
 
         if (input_cloud->empty())
         {
+            convergence_gate_->Reset();
             RCLCPP_WARN(this->get_logger(), "ICP input cloud is empty after filtering");
             return;
         }
@@ -343,73 +434,18 @@ private:
         fitness_msg.data = fitness_score;
         fitness_pub_->publish(fitness_msg);
 
-        if (icp.hasConverged() && fitness_score < fitness_score_thre && converged_count > converged_count_thre)
-        {
-            RCLCPP_INFO(this->get_logger(), "ICP converged!!!");
-            Eigen::Matrix4f transformation_result = icp.getFinalTransformation();
-            // ICP aligns sensor-frame points into the map.  Therefore this
-            // result is T_map_sensor, not T_map_odom.
-            nav_msgs::msg::Odometry pose_msg;
-            pose_msg.header.stamp = msg->header.stamp;
-            if (pose_msg.header.stamp.sec == 0 &&
-                pose_msg.header.stamp.nanosec == 0)
-            {
-                pose_msg.header.stamp = this->now();
-            }
-            pose_msg.header.frame_id = map_frame;
-            pose_msg.child_frame_id = sensor_frame;
-            pose_msg.pose.pose.position.x = transformation_result(0, 3);
-            pose_msg.pose.pose.position.y = transformation_result(1, 3);
-            pose_msg.pose.pose.position.z = transformation_result(2, 3);
-            // set orientation
-            Eigen::Matrix3f rotation = transformation_result.block<3, 3>(0, 0);
-            Eigen::Quaternionf q(rotation);
-            pose_msg.pose.pose.orientation.x = q.x();
-            pose_msg.pose.pose.orientation.y = q.y();
-            pose_msg.pose.pose.orientation.z = q.z();
-            pose_msg.pose.pose.orientation.w = q.w();
-            publisher_->publish(pose_msg);
+        Eigen::Matrix4f stable_transformation = Eigen::Matrix4f::Identity();
+        const bool ready = evaluate_candidate(
+            icp, fitness_score, stable_transformation);
 
-            // Transform the input cloud using ICP result
-            pcl::transformPointCloud(*input_cloud, *input_cloud, transformation_result);
-            // Publish the transformed input cloud for the last time
-            sensor_msgs::msg::PointCloud2 transformed_cloud_msg;
-            pcl::toROSMsg(*input_cloud, transformed_cloud_msg);
-            transformed_cloud_msg.header.stamp = this->now();
-            transformed_cloud_msg.header.frame_id = map_frame;
-            transformed_cloud_pub_->publish(transformed_cloud_msg);
+        publish_transformed_cloud(
+            input_cloud, ready ? stable_transformation : initGuess);
+        if (ready)
+        {
+            publish_relocalization_result(
+                msg->header.stamp, stable_transformation, fitness_score);
             rclcpp::shutdown();
         }
-        else if(icp.hasConverged() && fitness_score < fitness_score_thre && converged_count <= converged_count_thre)
-        {
-            converged_count++;
-            initGuess = icp.getFinalTransformation(); // update the initial guess with the ICP result
-            pcl::transformPointCloud(*input_cloud, *input_cloud, initGuess);
-            RCLCPP_INFO(this->get_logger(), "ICP converged with low error, but not enough count, no pose is published");
-        }
-        else if(icp.hasConverged() && fitness_score >= fitness_score_thre)
-        {
-            converged_count = 0;
-            initGuess = icp.getFinalTransformation(); // update the initial guess with the ICP result
-            pcl::transformPointCloud(*input_cloud, *input_cloud, initGuess);
-            RCLCPP_INFO(this->get_logger(), "ICP converged with high error, no pose is published");
-        }
-        else // if ICP doesn't converge
-        {
-            converged_count = 0;
-            pcl::transformPointCloud(*input_cloud, *input_cloud, initGuess);
-            RCLCPP_INFO(this->get_logger(), "ICP doesn't converge!!!");
-        }
-
-        // Publish the transformed input cloud
-        sensor_msgs::msg::PointCloud2 transformed_cloud_msg;
-        pcl::toROSMsg(*input_cloud, transformed_cloud_msg);
-        transformed_cloud_msg.header.stamp = this->now();
-        transformed_cloud_msg.header.frame_id = map_frame;
-        transformed_cloud_pub_->publish(transformed_cloud_msg);
-        RCLCPP_INFO(this->get_logger(), "ICP fitness score is higher than the threshold, no pose is published");
-        target_cloud_msg.header.stamp = this->now();
-        map_pub_->publish(target_cloud_msg);
     }
 #endif
 
@@ -431,6 +467,8 @@ private:
                 initGuess(i, j) = rot_mat[i][j];
             }
         }
+        // 操作者更新初值后，旧候选簇已不属于同一次搜索，必须清空。
+        convergence_gate_->Reset();
         double r,p,yaw;
         rot_mat.getRPY(r, p, yaw);
         RCLCPP_INFO(this->get_logger(), "Initial guess: \n x: %f, y: %f, z: %f, a: %f", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, yaw);
@@ -456,8 +494,11 @@ private:
     double fitness_score_thre;
     double map_voxel_leaf_size, cloud_voxel_leaf_size;
     sensor_msgs::msg::PointCloud2 target_cloud_msg;
-    int converged_count = 0;
     int converged_count_thre;
+    double candidate_position_tolerance_m;
+    double candidate_angle_tolerance_rad;
+    std::unique_ptr<icp_relocalization::RelocalizationConvergenceGate>
+        convergence_gate_;
     std::string pcl_type;
     std::string livox_topic;
     std::string pointcloud_topic;

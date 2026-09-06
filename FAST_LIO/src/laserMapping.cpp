@@ -58,6 +58,7 @@
 #include <pcl/io/pcd_io.h>
 #include "fast_lio/atomic_file.hpp"
 #include "fast_lio/extent_safe_voxel_filter.hpp"
+#include "fast_lio/reference_odometry.hpp"
 #include <pcl_ros/transforms.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/imu.hpp>
@@ -199,6 +200,7 @@ double filter_size_corner_min = 0, filter_size_surf_min = 0, filter_size_map_min
 double cube_len = 0, HALF_FOV_COS = 0, FOV_DEG = 0, total_distance = 0, lidar_end_time = 0, first_lidar_time = 0.0;
 int effct_feat_num = 0, time_log_counter = 0, scan_count = 0, publish_count = 0;
 int iterCount = 0, feats_down_size = 0, NUM_MAX_ITERATIONS = 0, laserCloudValidNum = 0, pcd_save_interval = -1, pcd_index = 0;
+int imu_init_min_samples = 10;
 bool point_selected_surf[100000] = {0};
 bool lidar_pushed, flg_first_scan = true, flg_exit = false, flg_EKF_inited;
 bool scan_pub_en = false, dense_pub_en = false, scan_body_pub_en = false;
@@ -421,6 +423,10 @@ public:
         this->declare_parameter<string>("common.lidar_frame_id", "lidar");
         this->declare_parameter<string>("common.base_frame_id", "base_frame");
         this->declare_parameter<bool>("common.send_odom_base_tf", false);
+        this->declare_parameter<string>("common.reference_odom_topic", "");
+        this->declare_parameter<string>("common.reference_odom_parent_frame_id", "");
+        this->declare_parameter<string>("common.reference_odom_pose_frame_id", "");
+        this->declare_parameter<double>("common.reference_odom_max_age_s", 0.25);
         this->declare_parameter<double>("filter_size_corner", 0.5);
         this->declare_parameter<double>("filter_size_surf", 0.5);
         this->declare_parameter<double>("filter_size_map", 0.5);
@@ -431,6 +437,7 @@ public:
         this->declare_parameter<double>("mapping.acc_cov", 0.1);
         this->declare_parameter<double>("mapping.b_gyr_cov", 0.0001);
         this->declare_parameter<double>("mapping.b_acc_cov", 0.0001);
+        this->declare_parameter<int>("mapping.imu_init_min_samples", 10);
         this->declare_parameter<double>("preprocess.blind", 0.01);
         this->declare_parameter<int>("preprocess.lidar_type", AVIA);
         this->declare_parameter<int>("preprocess.scan_line", 16);
@@ -466,6 +473,16 @@ public:
         this->get_parameter_or<string>("common.lidar_frame_id", lidar_frame, "lidar");
         this->get_parameter_or<string>("common.base_frame_id", base_frame, "base_frame");
         this->get_parameter_or<bool>("common.send_odom_base_tf", send_odom_base_tf, false);
+        this->get_parameter_or<string>(
+            "common.reference_odom_topic", reference_odom_topic_, "");
+        this->get_parameter_or<string>(
+            "common.reference_odom_parent_frame_id",
+            reference_odom_parent_frame_id_, "");
+        this->get_parameter_or<string>(
+            "common.reference_odom_pose_frame_id",
+            reference_odom_pose_frame_id_, "");
+        this->get_parameter_or<double>(
+            "common.reference_odom_max_age_s", reference_odom_max_age_s_, 0.25);
         this->get_parameter_or<double>("common.time_offset_lidar_to_imu", time_diff_lidar_to_imu, 0.0);
         this->get_parameter_or<double>("filter_size_corner", filter_size_corner_min, 0.5);
         this->get_parameter_or<double>("filter_size_surf", filter_size_surf_min, 0.5);
@@ -477,6 +494,7 @@ public:
         this->get_parameter_or<double>("mapping.acc_cov", acc_cov, 0.1);
         this->get_parameter_or<double>("mapping.b_gyr_cov", b_gyr_cov, 0.0001);
         this->get_parameter_or<double>("mapping.b_acc_cov", b_acc_cov, 0.0001);
+        this->get_parameter_or<int>("mapping.imu_init_min_samples", imu_init_min_samples, 10);
         this->get_parameter_or<double>("preprocess.blind", p_pre->blind, 0.01);
         this->get_parameter_or<int>("preprocess.lidar_type", p_pre->lidar_type, AVIA);
         this->get_parameter_or<int>("preprocess.scan_line", p_pre->N_SCANS, 16);
@@ -498,6 +516,26 @@ public:
         {
             RCLCPP_FATAL(this->get_logger(), "Invalid LiDAR-IMU extrinsic: mapping.extrinsic_T must have 3 values and mapping.extrinsic_R must have 9 values.");
             throw std::runtime_error("invalid LiDAR-IMU extrinsic");
+        }
+        if (imu_init_min_samples < 10 || imu_init_min_samples > 100000)
+        {
+            RCLCPP_FATAL(
+                this->get_logger(),
+                "mapping.imu_init_min_samples must be in [10, 100000], got %d",
+                imu_init_min_samples);
+            throw std::invalid_argument("invalid IMU initialization sample count");
+        }
+        reference_odom_enabled_ = !reference_odom_topic_.empty();
+        if (reference_odom_enabled_ &&
+            (reference_odom_parent_frame_id_.empty() ||
+             reference_odom_pose_frame_id_.empty() ||
+             !std::isfinite(reference_odom_max_age_s_) ||
+             reference_odom_max_age_s_ <= 0.0))
+        {
+            RCLCPP_FATAL(
+                this->get_logger(),
+                "reference odometry requires non-empty parent/pose frames and a positive max age");
+            throw std::invalid_argument("invalid reference odometry configuration");
         }
 
         path.header.stamp = this->get_clock()->now();
@@ -568,6 +606,9 @@ public:
         p_imu->set_acc_cov(V3D(acc_cov, acc_cov, acc_cov));
         p_imu->set_gyr_bias_cov(V3D(b_gyr_cov, b_gyr_cov, b_gyr_cov));
         p_imu->set_acc_bias_cov(V3D(b_acc_cov, b_acc_cov, b_acc_cov));
+        // Matrix IMU 的横向白噪声明显高于默认 FAST-LIO 数据集。使用配置化
+        // 窗口估计重力与陀螺零偏，避免一帧噪声被积分成持续加速漂移。
+        p_imu->set_init_sample_count(imu_init_min_samples);
 
         fill(epsi, epsi + 23, 0.001);
         kf.init_dyn_share(get_f, df_dx, df_dw, h_share_model, NUM_MAX_ITERATIONS, epsi);
@@ -616,6 +657,23 @@ public:
         }
         tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
         tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+        if (reference_odom_enabled_)
+        {
+            // 参考里程计只由 Matrix 仿真 profile 显式启用。真机配置 topic 为空，
+            // 因而不会绕过 FAST-LIO 的 LiDAR-IMU 状态估计。
+            sub_reference_odom_ = this->create_subscription<nav_msgs::msg::Odometry>(
+                reference_odom_topic_, rclcpp::SensorDataQoS().keep_last(50),
+                std::bind(
+                    &LaserMappingNode::reference_odom_callback, this,
+                    std::placeholders::_1));
+            RCLCPP_WARN(
+                this->get_logger(),
+                "Matrix 仿真参考里程计已启用：topic=%s parent=%s pose_frame=%s；"
+                "位姿由仿真真值约束，LiDAR 仍用于地图点云",
+                reference_odom_topic_.c_str(),
+                reference_odom_parent_frame_id_.c_str(),
+                reference_odom_pose_frame_id_.c_str());
+        }
 
         auto period_ms = std::chrono::milliseconds(static_cast<int64_t>(1000.0 / 100.0));
         timer_ = rclcpp::create_timer(this, this->get_clock(), period_ms, std::bind(&LaserMappingNode::timer_callback, this));
@@ -641,6 +699,7 @@ private:
     rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr sub_pcl_livox_;
 #endif
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_init_pose_;
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_reference_odom_;
 
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -655,6 +714,187 @@ private:
     double epsi[23] = {0.001};
     bool initial_pose_received = false;
     nav_msgs::msg::Odometry initial_pose;
+    bool reference_odom_enabled_{false};
+    bool reference_pose_to_tracking_resolved_{false};
+    bool have_reference_update_{false};
+    std::string reference_odom_topic_;
+    std::string reference_odom_parent_frame_id_;
+    std::string reference_odom_pose_frame_id_;
+    double reference_odom_max_age_s_{0.25};
+    fast_lio::reference_odometry::Pose reference_pose_to_tracking_;
+    fast_lio::reference_odometry::Update latest_reference_update_;
+    fast_lio::reference_odometry::SessionTracker reference_odom_tracker_;
+
+    static fast_lio::reference_odometry::Pose to_reference_pose(
+        const geometry_msgs::msg::Pose & message)
+    {
+        fast_lio::reference_odometry::Pose result;
+        result.translation = Eigen::Vector3d(
+            message.position.x, message.position.y, message.position.z);
+        result.rotation = Eigen::Quaterniond(
+            message.orientation.w, message.orientation.x,
+            message.orientation.y, message.orientation.z);
+        return result;
+    }
+
+    bool resolve_reference_pose_to_tracking()
+    {
+        if (reference_pose_to_tracking_resolved_)
+        {
+            return true;
+        }
+        if (reference_odom_pose_frame_id_ == sensor_frame)
+        {
+            reference_pose_to_tracking_ = fast_lio::reference_odometry::Pose{};
+            reference_pose_to_tracking_resolved_ = true;
+            return true;
+        }
+        try
+        {
+            // lookupTransform(to, from) 返回 T_to_from；这里需要
+            // T_reference_pose_frame_tracking。
+            const auto transform = tf_buffer_->lookupTransform(
+                reference_odom_pose_frame_id_, sensor_frame,
+                tf2::TimePointZero);
+            reference_pose_to_tracking_.translation = Eigen::Vector3d(
+                transform.transform.translation.x,
+                transform.transform.translation.y,
+                transform.transform.translation.z);
+            reference_pose_to_tracking_.rotation = Eigen::Quaterniond(
+                transform.transform.rotation.w,
+                transform.transform.rotation.x,
+                transform.transform.rotation.y,
+                transform.transform.rotation.z);
+            if (!fast_lio::reference_odometry::normalizePose(
+                    &reference_pose_to_tracking_))
+            {
+                RCLCPP_ERROR(
+                    this->get_logger(),
+                    "参考里程计到 tracking 的静态外参包含非法数值");
+                return false;
+            }
+            reference_pose_to_tracking_resolved_ = true;
+            return true;
+        }
+        catch (const tf2::TransformException & error)
+        {
+            RCLCPP_WARN_THROTTLE(
+                this->get_logger(), *this->get_clock(), 2000,
+                "等待参考里程计外参 %s <- %s：%s",
+                reference_odom_pose_frame_id_.c_str(), sensor_frame.c_str(),
+                error.what());
+            return false;
+        }
+    }
+
+    void reference_odom_callback(
+        const nav_msgs::msg::Odometry::UniquePtr message)
+    {
+        if (message->header.frame_id != reference_odom_parent_frame_id_)
+        {
+            RCLCPP_ERROR_THROTTLE(
+                this->get_logger(), *this->get_clock(), 2000,
+                "拒绝参考里程计：header.frame_id=%s，期望 %s",
+                message->header.frame_id.c_str(),
+                reference_odom_parent_frame_id_.c_str());
+            return;
+        }
+        // Matrix 旧发布器的 child_frame_id 为空；若上游填写，则必须与配置
+        // 明确一致，避免把 camera/base 等其他位姿误标成 tracking。
+        if (!message->child_frame_id.empty() &&
+            message->child_frame_id != reference_odom_pose_frame_id_)
+        {
+            RCLCPP_ERROR_THROTTLE(
+                this->get_logger(), *this->get_clock(), 2000,
+                "拒绝参考里程计：child_frame_id=%s，期望 %s 或空值",
+                message->child_frame_id.c_str(),
+                reference_odom_pose_frame_id_.c_str());
+            return;
+        }
+        if (!resolve_reference_pose_to_tracking())
+        {
+            return;
+        }
+
+        const bool first_sample = !reference_odom_tracker_.initialized();
+        fast_lio::reference_odometry::Update update;
+        fast_lio::reference_odometry::UpdateError error;
+        if (!reference_odom_tracker_.update(
+                to_reference_pose(message->pose.pose),
+                reference_pose_to_tracking_,
+                get_time_sec(message->header.stamp), &update, &error))
+        {
+            RCLCPP_WARN_THROTTLE(
+                this->get_logger(), *this->get_clock(), 2000,
+                "拒绝非法或乱序的 Matrix 参考里程计样本：error=%d",
+                static_cast<int>(error));
+            return;
+        }
+        latest_reference_update_ = update;
+        have_reference_update_ = true;
+        if (first_sample)
+        {
+            RCLCPP_INFO(
+                this->get_logger(),
+                "已建立 Matrix 参考里程计会话原点：stamp=%.6f",
+                update.stamp_seconds);
+        }
+    }
+
+    bool apply_reference_odometry(const double cloud_stamp_seconds)
+    {
+        if (!reference_odom_enabled_)
+        {
+            return true;
+        }
+        if (!have_reference_update_)
+        {
+            RCLCPP_WARN_THROTTLE(
+                this->get_logger(), *this->get_clock(), 2000,
+                "等待 Matrix 参考里程计首个有效样本");
+            return false;
+        }
+        const double age = cloud_stamp_seconds -
+            latest_reference_update_.stamp_seconds;
+        if (!std::isfinite(age) || age > reference_odom_max_age_s_ ||
+            age < -reference_odom_max_age_s_)
+        {
+            RCLCPP_ERROR_THROTTLE(
+                this->get_logger(), *this->get_clock(), 2000,
+                "Matrix 参考里程计与点云不同步：age=%.3fs limit=%.3fs",
+                age, reference_odom_max_age_s_);
+            return false;
+        }
+
+        state_ikfom referenced_state = kf.get_x();
+        const auto & pose = latest_reference_update_.reference_to_tracking;
+        referenced_state.pos = V3D(
+            pose.translation.x(), pose.translation.y(), pose.translation.z());
+        referenced_state.rot = SO3(
+            pose.rotation.w(), pose.rotation.x(),
+            pose.rotation.y(), pose.rotation.z());
+        referenced_state.vel = V3D(
+            latest_reference_update_.linear_velocity.x(),
+            latest_reference_update_.linear_velocity.y(),
+            latest_reference_update_.linear_velocity.z());
+        kf.change_x(referenced_state);
+
+        // 参考位姿在 Matrix 仿真中是权威量。清除其与惯导偏置的交叉协方差，
+        // 避免下一次 IMU 传播重新放大已经被真值纠正的位姿误差。
+        auto covariance = kf.get_P();
+        for (const int start : {0, 3, 12})
+        {
+            for (int axis = 0; axis < 3; ++axis)
+            {
+                const int index = start + axis;
+                covariance.row(index).setZero();
+                covariance.col(index).setZero();
+                covariance(index, index) = 1.0e-5;
+            }
+        }
+        kf.change_P(covariance);
+        return true;
+    }
 
     inline void dump_lio_state_to_log(FILE *fp)
     {
@@ -1267,6 +1507,12 @@ private:
             svd_time = 0;
             t0 = omp_get_wtime();
             p_imu->Process(Measures, kf, feats_undistort);
+            if (!apply_reference_odometry(Measures.lidar_end_time))
+            {
+                // 外部参考失联时不发布沿用旧位姿的新点云/里程计，让上层新鲜度
+                // 门禁自然转入 DEGRADED/LOST，而不是伪装成可继续导航。
+                return;
+            }
             state_point = kf.get_x();
             pos_lid = state_point.pos + state_point.rot * state_point.offset_T_L_I;
             // RCLCPP_INFO(this->get_logger(),"pos_lid: %f %f %f", pos_lid(0), pos_lid(1), pos_lid(2));
@@ -1363,7 +1609,17 @@ private:
             /*** iterated state estimation ***/
             double t_update_start = omp_get_wtime();
             double solve_H_time = 0;
-            kf.update_iterated_dyn_share_modified(LASER_POINT_COV, solve_H_time);
+            if (reference_odom_enabled_)
+            {
+                // Matrix 仿真点云每帧采样形态变化较大，点到平面更新会把这种
+                // 变化误估为速度并最终发散。仿真 profile 已有权威参考里程计，
+                // 因此保留点云建图/发布，但不再用扫描残差反向修改真值位姿。
+                effct_feat_num = 0;
+            }
+            else
+            {
+                kf.update_iterated_dyn_share_modified(LASER_POINT_COV, solve_H_time);
+            }
             state_point = kf.get_x();
             euler_cur = SO3ToEuler(state_point.rot);
             pos_lid = state_point.pos + state_point.rot * state_point.offset_T_L_I;
@@ -1490,6 +1746,13 @@ private:
         initial_pose.pose.pose.position.z = map_to_tracking.getOrigin().z();
         initial_pose.pose.pose.orientation = tf2::toMsg(map_to_tracking.getRotation());
         initial_pose_received = true;
+        if (reference_odom_enabled_)
+        {
+            // ICP 给出的 map->tracking 对应此刻机器人位置；从下一条参考里程计
+            // 样本重新建立局部原点，确保 map->odom 不隐含仿真 world 坐标。
+            reference_odom_tracker_.reset();
+            have_reference_update_ = false;
+        }
         RCLCPP_INFO(
             this->get_logger(), "Accepted ICP seed %s -> %s, normalized from %s",
             map_frame.c_str(), sensor_frame.c_str(), lidar_frame.c_str());
