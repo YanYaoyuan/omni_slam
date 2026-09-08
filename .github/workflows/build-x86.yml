@@ -59,6 +59,15 @@ jobs:
           token: ${{ secrets.OMNI_CI_REPO_TOKEN }}
           persist-credentials: false
 
+      - name: Checkout Omni Robot Interfaces
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: YanYaoyuan/omni_robot_interfaces
+          ref: main
+          path: omni_robot_interfaces_source
+          token: ${{ secrets.OMNI_CI_REPO_TOKEN }}
+          persist-credentials: false
+
       - name: Record Omni TF Manager revision
         run: echo "OMNI_TF_MANAGER_SHA=$(git -C omni_tf_manager_source rev-parse HEAD)" >> "${GITHUB_ENV}"
 
@@ -92,18 +101,24 @@ jobs:
 
       - name: Prepare isolated colcon workspace
         run: |
-          mkdir -p "${ROS_WS}/src/omni_slam" "${ROS_WS}/src/livox_ros_driver2/msg"
+          mkdir -p "${ROS_WS}/src/omni_slam" \
+            "${ROS_WS}/src/livox_ros_driver2/msg"
           rsync -a --delete \
             --exclude='/.git/' --exclude='/.github/' \
             --exclude='/build/' --exclude='/build_orin/' \
             --exclude='/install/' --exclude='/install_orin/' \
             --exclude='/dist/' --exclude='/log/' --exclude='/ros_logs/' \
             --exclude='/omni_tf_manager_source/' \
+            --exclude='/omni_robot_interfaces_source/' \
             "${GITHUB_WORKSPACE}/" "${ROS_WS}/src/omni_slam/"
           rsync -a --delete \
             --exclude='/.git/' --exclude='/build/' --exclude='/install/' --exclude='/log/' \
             "${GITHUB_WORKSPACE}/omni_tf_manager_source/" \
             "${ROS_WS}/src/omni_tf_manager/"
+          rsync -a --delete \
+            --exclude='/.git/' --exclude='/build/' --exclude='/install/' --exclude='/log/' \
+            "${GITHUB_WORKSPACE}/omni_robot_interfaces_source/" \
+            "${ROS_WS}/src/omni_robot_interfaces/"
           cp .github/ci/livox_stub/package.xml "${ROS_WS}/src/livox_ros_driver2/"
           cp .github/ci/livox_stub/CMakeLists.txt "${ROS_WS}/src/livox_ros_driver2/"
           cp .github/ci/livox_stub/msg/*.msg "${ROS_WS}/src/livox_ros_driver2/msg/"
@@ -128,7 +143,7 @@ jobs:
           colcon build --merge-install \
             --packages-select livox_ros_driver2 fast_lio icp_relocalization \
               omni_slam_interfaces omni_slam_manager \
-              omni_tf_manager \
+              omni_tf_manager omni_robot_interfaces \
             --event-handlers console_direct+ \
             --cmake-args -DCMAKE_BUILD_TYPE=Release
           source install/setup.bash

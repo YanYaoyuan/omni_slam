@@ -52,6 +52,15 @@ jobs:
           token: ${{ secrets.OMNI_CI_REPO_TOKEN }}
           persist-credentials: false
 
+      - name: Checkout Omni Robot Interfaces
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: YanYaoyuan/omni_robot_interfaces
+          ref: main
+          path: omni_robot_interfaces_source
+          token: ${{ secrets.OMNI_CI_REPO_TOKEN }}
+          persist-credentials: false
+
       - name: Record Omni TF Manager revision
         run: echo "OMNI_TF_MANAGER_SHA=$(git -C omni_tf_manager_source rev-parse HEAD)" >> "${GITHUB_ENV}"
 

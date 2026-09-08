@@ -16,6 +16,7 @@ trap 'report_error "${LINENO}" "${BASH_COMMAND}"' ERR
 
 SOURCE_ROOT=${S100_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
 TF_MANAGER_SOURCE=${OMNI_TF_MANAGER_SOURCE:-${SOURCE_ROOT}/../omni_tf_manager}
+ROBOT_INTERFACES_SOURCE=${OMNI_ROBOT_INTERFACES_SOURCE:-${SOURCE_ROOT}/../omni_robot_interfaces}
 WORK_ROOT=${S100_WORK_ROOT:-${RUNNER_TEMP:-/tmp}/s100-cross}
 S100_IMAGE=${S100_IMAGE:-pc_tros_ubuntu22.04:v1.0.0}
 ROBOT_DEV_CONFIG_REF=${ROBOT_DEV_CONFIG_REF:-f44b1ad2575b34c189fd470de1db9c5ad48b6886}
@@ -40,10 +41,13 @@ done
 
 SOURCE_ROOT=$(realpath -m "${SOURCE_ROOT}")
 TF_MANAGER_SOURCE=$(realpath -m "${TF_MANAGER_SOURCE}")
+ROBOT_INTERFACES_SOURCE=$(realpath -m "${ROBOT_INTERFACES_SOURCE}")
 WORK_ROOT=$(realpath -m "${WORK_ROOT}")
 
 [[ -f "${TF_MANAGER_SOURCE}/package.xml" ]] || \
   die "invalid OMNI_TF_MANAGER_SOURCE: ${TF_MANAGER_SOURCE}"
+[[ -f "${ROBOT_INTERFACES_SOURCE}/package.xml" ]] || \
+  die "invalid OMNI_ROBOT_INTERFACES_SOURCE: ${ROBOT_INTERFACES_SOURCE}"
 
 case "${WORK_ROOT}" in
   /|/data|/home|"${SOURCE_ROOT}")
@@ -59,7 +63,10 @@ if [[ "${S100_CLEAN}" == "1" ]]; then
   rm -rf "${WORK_ROOT}/cc_ws"
 fi
 
-mkdir -p "${TROS_ROOT}/src/omni_slam" "${TROS_ROOT}/src/omni_tf_manager"
+mkdir -p \
+  "${TROS_ROOT}/src/omni_slam" \
+  "${TROS_ROOT}/src/omni_tf_manager" \
+  "${TROS_ROOT}/src/omni_robot_interfaces"
 
 if [[ ! -d "${ROBOT_DEV_CONFIG_DIR}/.git" ]]; then
   log "cloning robot_dev_config at ${ROBOT_DEV_CONFIG_REF}"
@@ -88,6 +95,7 @@ rsync -a --delete \
   --exclude='/log/' \
   --exclude='/dist/' \
   --exclude='/omni_tf_manager_source/' \
+  --exclude='/omni_robot_interfaces_source/' \
   "${SOURCE_ROOT}/" \
   "${TROS_ROOT}/src/omni_slam/"
 
@@ -99,6 +107,15 @@ rsync -a --delete \
   --exclude='/log/' \
   "${TF_MANAGER_SOURCE}/" \
   "${TROS_ROOT}/src/omni_tf_manager/"
+
+log "copying Omni Robot Interfaces source into the cross workspace"
+rsync -a --delete \
+  --exclude='/.git/' \
+  --exclude='/build/' \
+  --exclude='/install/' \
+  --exclude='/log/' \
+  "${ROBOT_INTERFACES_SOURCE}/" \
+  "${TROS_ROOT}/src/omni_robot_interfaces/"
 
 test -f "${TROS_ROOT}/src/omni_slam/FAST_LIO/include/IKFoM_toolkit/mtk/build_manifold.hpp"
 
@@ -499,6 +516,7 @@ test -x install/lib/fast_lio/fastlio_mapping
 test -x install/lib/icp_relocalization/icp_node
 test -f install/share/omni_slam_interfaces/package.xml
 test -f install/share/omni_slam_manager/package.xml
+test -f install/share/omni_robot_interfaces/package.xml
 test -x install/lib/omni_tf_manager/omni_tf_manager_node
 test -f install/share/omni_tf_manager/config/generic_four_sensor.yaml
 test -f install/share/omni_tf_manager/config/omni_dog.yaml
