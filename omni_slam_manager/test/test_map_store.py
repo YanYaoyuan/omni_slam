@@ -1,8 +1,12 @@
 import hashlib
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
+
+from omni_slam_manager import map_store
 
 from omni_slam_manager.map_store import (
     MapStore,
@@ -119,6 +123,41 @@ class MapStoreTests(unittest.TestCase):
         outside.mkdir()
         (store.root / "escaped").symlink_to(outside, target_is_directory=True)
 
+        self.assertEqual(store.list_current(), [])
+
+    def test_repeated_catalog_verifies_unchanged_pcd_only_once(self):
+        store = MapStore(self.root / "maps")
+        store.import_pcd("plant-a", _pcd(self.root / "source.pcd"))
+        with mock.patch.object(map_store, "_hash_stream", wraps=map_store._hash_stream) as hash_file:
+            first = store.list_current()
+            self.assertEqual(store.list_current(), first)
+            self.assertEqual(len(first), 1)
+            self.assertEqual(hash_file.call_count, 1)
+
+    def test_cached_catalog_rejects_same_size_edit_with_restored_mtime(self):
+        store = MapStore(self.root / "maps")
+        asset = store.import_pcd("plant-a", _pcd(self.root / "source.pcd", b"first"))
+        self.assertEqual(len(store.list_current()), 1)
+        before = asset.pcd_path.stat()
+        asset.pcd_path.write_bytes(b"other")
+        os.utime(asset.pcd_path, ns=(before.st_atime_ns, before.st_mtime_ns))
+        self.assertEqual(store.list_current(), [])
+
+    def test_cached_catalog_rejects_manifest_checksum_change(self):
+        store = MapStore(self.root / "maps")
+        asset = store.import_pcd("plant-a", _pcd(self.root / "source.pcd"))
+        self.assertEqual(len(store.list_current()), 1)
+        manifest = json.loads(asset.manifest_path.read_text())
+        manifest["checksum"] = "0" * 64
+        asset.manifest_path.write_text(json.dumps(manifest))
+        self.assertEqual(store.list_current(), [])
+
+    def test_cached_catalog_revalidates_replaced_file(self):
+        store = MapStore(self.root / "maps")
+        asset = store.import_pcd("plant-a", _pcd(self.root / "source.pcd", b"first"))
+        self.assertEqual(len(store.list_current()), 1)
+        replacement = _pcd(self.root / "replacement.pcd", b"other")
+        os.replace(replacement, asset.pcd_path)
         self.assertEqual(store.list_current(), [])
 
     def test_invalid_map_id_is_rejected(self):

@@ -11,6 +11,20 @@
         runtime_pos_log_enable: false
         map_file_path: "./maps/scans.pcd"
 
+        loop_closure:
+            enabled: true
+            frequency_hz: 1.0
+            keyframe_distance: 1.0
+            keyframe_angle_deg: 15.0
+            keyframe_seconds: 5.0
+            minimum_loop_seconds: 30.0
+            candidates: 5
+            descriptor_threshold: 0.20
+            maximum_correspondence: 1.5
+            maximum_fitness: 0.15
+            minimum_overlap: 0.5
+            overlap_distance: 0.3
+
         common:
             map_frame_id: "omni_map"
             odom_frame_id: "omni_odom"
@@ -52,6 +66,7 @@
                           0.0027346740, -0.0129649238,  0.9999122123]
 
         publish:
+            map_max_points: 300000
             tf_en: false
             path_en: true
             effect_map_en: true

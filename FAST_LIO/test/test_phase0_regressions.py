@@ -41,7 +41,9 @@ class Phase0RegressionTests(unittest.TestCase):
         )
 
         save_wrapper = _function_body(source, r"\bbool\s+save_to_pcd\s*\(\s*\)")
-        self.assertRegex(save_wrapper, r"return\s+save_cloud_to_pcd\s*\(")
+        self.assertIn("!mapping_backend_", save_wrapper)
+        self.assertRegex(save_wrapper, r"const bool saved\s*=\s*mapping_backend_->save\(")
+        self.assertRegex(save_wrapper, r"return\s+saved\s*;")
 
         callback = _function_body(source, r"\bvoid\s+map_save_callback\s*\(")
         self.assertRegex(
@@ -288,9 +290,11 @@ class Phase0RegressionTests(unittest.TestCase):
         self.assertLess(validation, subscriptions)
         validation_block = source[validation:subscriptions]
         self.assertIn("prior_map_path.empty()", validation_block)
-        self.assertIn("load_result < 0 || prior_map->empty()", validation_block)
-        self.assertIn("feats_down_prior_map->empty()", validation_block)
-        self.assertGreaterEqual(validation_block.count("throw std::"), 4)
+        # SpatialMap now streams/validates the PCD before endpoints exist;
+        # malformed and empty inputs are covered by its executable tests.
+        self.assertIn("std::make_unique<fast_lio::SpatialMap>", validation_block)
+        self.assertIn("throw std::invalid_argument", validation_block)
+        self.assertNotIn("catch (", validation_block)
         self.assertNotIn("return;", validation_block)
 
     def test_relocalization_launch_exit_contract_is_fail_closed(self):

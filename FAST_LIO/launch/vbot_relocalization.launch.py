@@ -25,7 +25,7 @@ def generate_launch_description():
          'Maximum translation spread of one stable ICP candidate cluster'),
         ('candidate_angle_tolerance_rad', '0.174533',
          'Maximum rotation spread of one stable ICP candidate cluster'),
-        ('map_voxel_leaf_size', '0.5', 'Prior-map voxel size'),
+        ('map_voxel_leaf_size', '0.3', 'Prior-map voxel size'),
         ('cloud_voxel_leaf_size', '0.2', 'Live-scan voxel size'),
         ('config_file', vbot_config, 'Vbot Fast-LIO relocalization parameters'),
         ('pointcloud_topic', '/omni/sensors/lidar/points',

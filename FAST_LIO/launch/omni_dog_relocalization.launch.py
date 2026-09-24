@@ -156,6 +156,7 @@ def generate_launch_description():
         name='omni_icp_relocalization',
         output='screen',
         parameters=[
+            config_file,
             {'initial_x': ParameterValue(initial_x, value_type=float)},
             {'initial_y': ParameterValue(initial_y, value_type=float)},
             {'initial_z': ParameterValue(initial_z, value_type=float)},

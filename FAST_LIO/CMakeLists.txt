@@ -74,7 +74,9 @@ if(TARGET Qhull::qhull_r AND NOT TARGET QHULL::QHULL)
   )
 endif()
 
-find_package(PCL REQUIRED COMPONENTS common io filters kdtree)
+find_package(PCL REQUIRED COMPONENTS common io filters kdtree registration)
+find_package(GTSAM 4.2 REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
@@ -141,6 +143,20 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 ament_export_dependencies(rosidl_default_runtime)
 
 add_executable(fastlio_mapping src/laserMapping.cpp include/ikd-Tree/ikd_Tree.cpp src/preprocess.cpp)
+add_library(fastlio_map_archive src/map_archive.cpp)
+target_include_directories(fastlio_map_archive PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+  ${PCL_INCLUDE_DIRS})
+target_link_libraries(fastlio_map_archive PUBLIC pcl_common Eigen3::Eigen)
+
+add_library(fastlio_loop_backend src/loop_closure_backend.cpp)
+target_link_libraries(fastlio_loop_backend PUBLIC fastlio_map_archive
+  PRIVATE gtsam pcl_filters pcl_registration pcl_kdtree)
+
+add_library(fastlio_spatial_map src/spatial_map.cpp src/pcd_stream.cpp)
+target_compile_features(fastlio_spatial_map PRIVATE cxx_std_17)
+target_link_libraries(fastlio_spatial_map PUBLIC fastlio_map_archive PRIVATE OpenSSL::Crypto)
 
 if(CMAKE_CROSSCOMPILING)
   target_link_options(fastlio_mapping PRIVATE
@@ -154,6 +170,8 @@ target_include_directories(fastlio_mapping PUBLIC
 )
 target_link_libraries(
   fastlio_mapping
+  fastlio_loop_backend
+  fastlio_spatial_map
   pcl_common
   pcl_io
   pcl_filters
@@ -181,6 +199,10 @@ ament_target_dependencies(fastlio_mapping ${dependencies})
 install(TARGETS fastlio_mapping
   DESTINATION lib/${PROJECT_NAME}
 )
+install(TARGETS fastlio_map_archive fastlio_loop_backend fastlio_spatial_map EXPORT fastlio_map_archiveTargets
+  ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
+ament_export_targets(fastlio_map_archiveTargets HAS_LIBRARY_TARGET)
+ament_export_dependencies(Eigen3 PCL GTSAM OpenSSL)
 
 install(
   DIRECTORY config launch rviz
@@ -190,6 +212,24 @@ install(
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake_pytest REQUIRED)
+  ament_add_gtest(test_map_archive test/test_map_archive.cpp)
+  target_compile_features(test_map_archive PRIVATE cxx_std_17)
+  target_link_libraries(test_map_archive fastlio_map_archive pcl_io)
+  ament_add_gtest(test_loop_closure_backend test/test_loop_closure_backend.cpp)
+  target_compile_features(test_loop_closure_backend PRIVATE cxx_std_17)
+  target_link_libraries(test_loop_closure_backend fastlio_loop_backend pcl_io)
+  ament_add_gtest(test_spatial_map test/test_spatial_map.cpp)
+  ament_add_gtest(test_ikd_tree_deletion test/test_ikd_tree_deletion.cpp include/ikd-Tree/ikd_Tree.cpp)
+  target_include_directories(test_ikd_tree_deletion PRIVATE include)
+  target_link_libraries(test_ikd_tree_deletion pcl_common pthread)
+  target_compile_features(test_spatial_map PRIVATE cxx_std_17)
+  target_link_libraries(test_spatial_map fastlio_spatial_map pcl_io)
+  add_executable(spatial_map_benchmark test/spatial_map_benchmark.cpp)
+  target_compile_features(spatial_map_benchmark PRIVATE cxx_std_17)
+  target_link_libraries(spatial_map_benchmark fastlio_spatial_map)
+  add_executable(map_pipeline_benchmark test/map_pipeline_benchmark.cpp)
+  target_compile_features(map_pipeline_benchmark PRIVATE cxx_std_17)
+  target_link_libraries(map_pipeline_benchmark fastlio_loop_backend fastlio_spatial_map)
   ament_add_gtest(test_atomic_file test/test_atomic_file.cpp)
   target_include_directories(test_atomic_file PRIVATE include)
   ament_add_gtest(test_extent_safe_voxel_filter test/test_extent_safe_voxel_filter.cpp)

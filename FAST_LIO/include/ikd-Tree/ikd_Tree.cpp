@@ -869,7 +869,14 @@ void KD_TREE<PointType>::Delete_by_point(KD_TREE_NODE **root, PointType point, b
     struct timespec Timeout;
     delete_log.op = DELETE_POINT;
     delete_log.point = point;
-    if (((*root)->division_axis == 0 && point.x < (*root)->point.x) || ((*root)->division_axis == 1 && point.y < (*root)->point.y) || ((*root)->division_axis == 2 && point.z < (*root)->point.z))
+    const int axis = (*root)->division_axis;
+    const float delta = axis == 0 ? point.x - (*root)->point.x :
+                        axis == 1 ? point.y - (*root)->point.y :
+                                    point.z - (*root)->point.z;
+    // BuildTree uses nth_element: equal split coordinates can occur on either
+    // side. Follow both branches on a tie, otherwise deleting old map tiles
+    // leaves points behind even though the exact point was supplied.
+    if (delta < 0 || fabs(delta) < EPSS)
     {
         if ((Rebuild_Ptr == nullptr) || (*root)->left_son_ptr != *Rebuild_Ptr)
         {
@@ -888,7 +895,7 @@ void KD_TREE<PointType>::Delete_by_point(KD_TREE_NODE **root, PointType point, b
             pthread_mutex_unlock(&working_flag_mutex);
         }
     }
-    else
+    if (delta >= 0 || fabs(delta) < EPSS)
     {
         if ((Rebuild_Ptr == nullptr) || (*root)->right_son_ptr != *Rebuild_Ptr)
         {

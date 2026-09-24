@@ -59,6 +59,11 @@
 #include "fast_lio/atomic_file.hpp"
 #include "fast_lio/extent_safe_voxel_filter.hpp"
 #include "fast_lio/reference_odometry.hpp"
+#include "fast_lio/loop_closure_backend.hpp"
+#include "fast_lio/spatial_map.hpp"
+#include <future>
+#include <map>
+#include <set>
 #include <pcl_ros/transforms.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/imu.hpp>
@@ -202,7 +207,7 @@ int effct_feat_num = 0, time_log_counter = 0, scan_count = 0, publish_count = 0;
 int iterCount = 0, feats_down_size = 0, NUM_MAX_ITERATIONS = 0, laserCloudValidNum = 0, pcd_save_interval = -1, pcd_index = 0;
 int imu_init_min_samples = 10;
 bool point_selected_surf[100000] = {0};
-bool lidar_pushed, flg_first_scan = true, flg_exit = false, flg_EKF_inited;
+bool lidar_pushed, flg_first_scan = true, flg_EKF_inited;
 bool scan_pub_en = false, dense_pub_en = false, scan_body_pub_en = false;
 bool effect_pub_en = false, map_pub_en = false, ikd_tree_pub_en = false;
 bool is_first_lidar = true;
@@ -220,18 +225,15 @@ PointCloudXYZI::Ptr featsFromMap(new PointCloudXYZI());
 PointCloudXYZI::Ptr feats_undistort(new PointCloudXYZI());
 PointCloudXYZI::Ptr feats_down_body(new PointCloudXYZI());  // downsampled point cloud in body frame
 PointCloudXYZI::Ptr feats_down_world(new PointCloudXYZI()); // downsampled point cloud in world frame, transformed from body frame
-PointCloudXYZI::Ptr feats_down_prior_map(new PointCloudXYZI());
 PointCloudXYZI::Ptr normvec(new PointCloudXYZI(100000, 1));
 PointCloudXYZI::Ptr laserCloudOri(new PointCloudXYZI(100000, 1));
 PointCloudXYZI::Ptr corr_normvect(new PointCloudXYZI(100000, 1));
 PointCloudXYZI::Ptr _featsArray;
-pcl::PointCloud<PointType>::Ptr prior_map(new pcl::PointCloud<PointType>());
 
 pcl::VoxelGrid<PointType> downSizeFilterSurf;
 pcl::VoxelGrid<PointType> downSizeFilterMap;
 
 
-PointCloudXYZI::Ptr pcl_wait_pub(new PointCloudXYZI());
 
 KD_TREE<PointType> ikdtree;
 
@@ -263,13 +265,6 @@ bool locate_in_prior_map = false;
 string prior_map_path;
 FILE *fp;
 ofstream fout_pre, fout_out, fout_dbg;
-
-void SigHandle(int sig)
-{
-    flg_exit = true;
-    std::cout << "catch sig" << sig << std::endl;
-    sig_buffer.notify_all();
-}
 
 void h_share_model(state_ikfom &s, esekfom::dyn_share_datastruct<double> &ekfom_data)
 {
@@ -510,6 +505,47 @@ public:
         this->get_parameter_or<vector<double>>("mapping.extrinsic_R", extrinR, vector<double>());
         this->get_parameter_or<bool>("locate_in_prior_map", locate_in_prior_map, false);
         this->get_parameter_or<string>("prior_map_path", prior_map_path, "");
+        fast_lio::SpatialMap::Config map_cache_config;
+        map_cache_config.voxel_size=filter_size_map_min;
+        map_cache_config.tile_size=this->declare_parameter<double>("map_cache.tile_size",20.0);
+        prior_radius_=this->declare_parameter<double>("map_cache.active_radius",80.0);
+        const int cache_points=this->declare_parameter<int>("map_cache.max_cached_points",1000000);
+        const int region_points=this->declare_parameter<int>("map_cache.max_region_points",2000000);
+        if (cache_points<0 || region_points<1 || !std::isfinite(prior_radius_) || prior_radius_<=0)
+            throw std::invalid_argument("map cache budgets/radius are invalid");
+        map_cache_config.cache_points=cache_points;
+        map_cache_config.region_points=region_points;
+        prior_point_budget_=region_points;
+        std::string map_cache_directory=this->declare_parameter<string>("map_cache.directory","");
+        if (map_cache_directory.empty()) map_cache_directory=map_parent_directory(prior_map_path)+"/.spatial_cache";
+
+        fast_lio::LoopClosureBackend::Config loop_config;
+        loop_config.enabled=this->declare_parameter<bool>("loop_closure.enabled", false);
+        loop_config.frequency_hz=this->declare_parameter<double>("loop_closure.frequency_hz", 1.0);
+        loop_config.keyframe_distance=this->declare_parameter<double>("loop_closure.keyframe_distance", 1.0);
+        const double keyframe_degrees=this->declare_parameter<double>("loop_closure.keyframe_angle_deg", 15.0);
+        loop_config.keyframe_angle=keyframe_degrees*M_PI/180.0;
+        loop_config.keyframe_seconds=this->declare_parameter<double>("loop_closure.keyframe_seconds", 5.0);
+        loop_config.minimum_loop_seconds=this->declare_parameter<double>("loop_closure.minimum_loop_seconds", 30.0);
+        loop_config.descriptor_threshold=this->declare_parameter<double>("loop_closure.descriptor_threshold", 0.20);
+        loop_config.maximum_correspondence=this->declare_parameter<double>("loop_closure.maximum_correspondence", 1.5);
+        loop_config.maximum_fitness=this->declare_parameter<double>("loop_closure.maximum_fitness", 0.15);
+        loop_config.minimum_overlap=this->declare_parameter<double>("loop_closure.minimum_overlap", 0.5);
+        loop_config.overlap_distance=this->declare_parameter<double>("loop_closure.overlap_distance", 0.3);
+        loop_config.voxel_size=filter_size_map_min;
+        const int candidates=this->declare_parameter<int>("loop_closure.candidates", 5);
+        const int preview_points=this->declare_parameter<int>("publish.map_max_points", 300000);
+        if (candidates<1 || candidates>5 || preview_points<1 || preview_points>300000)
+            throw std::invalid_argument("loop candidates must be 1..5; map preview points 1..300000");
+        loop_config.candidates=candidates; loop_config.preview_points=preview_points;
+        const string archive_parent=this->declare_parameter<string>(
+            "pcd_save.chunk_directory", map_parent_directory(map_file_path)+"/.dense_chunks");
+        if (!locate_in_prior_map && (map_pub_en || pcd_save_en))
+        {
+            if (!ensure_directory(archive_parent))
+                throw std::runtime_error("Cannot create dense map storage: "+archive_parent);
+            mapping_backend_=std::make_unique<fast_lio::LoopClosureBackend>(archive_parent,loop_config);
+        }
 
         RCLCPP_INFO(this->get_logger(), "p_pre->lidar_type %d", p_pre->lidar_type);
         if (extrinT.size() != 3 || extrinR.size() != 9)
@@ -569,34 +605,14 @@ public:
                 RCLCPP_FATAL(this->get_logger(), "prior_map_path must be a non-empty absolute PCD path");
                 throw std::invalid_argument("invalid prior_map_path");
             }
-            RCLCPP_INFO(this->get_logger(), "Loading prior map: %s", prior_map_path.c_str());
-            int load_result = -1;
-            try
-            {
-                load_result = pcl::io::loadPCDFile<PointType>(prior_map_path, *prior_map);
-            }
-            catch (const std::exception & error)
-            {
-                RCLCPP_FATAL(this->get_logger(), "Prior PCD load threw for %s: %s", prior_map_path.c_str(), error.what());
-                throw std::runtime_error("prior PCD load threw");
-            }
-            if (load_result < 0 || prior_map->empty())
-            {
-                RCLCPP_FATAL(this->get_logger(), "Prior PCD is missing, unreadable, malformed, or empty: %s", prior_map_path.c_str());
-                throw std::runtime_error("prior PCD is unusable");
-            }
-            const auto filter_stats = fast_lio::pointcloud::extentSafeVoxelFilter(
-                *prior_map, filter_size_map_min, feats_down_prior_map.get());
-            if (feats_down_prior_map->empty())
-            {
-                RCLCPP_FATAL(this->get_logger(), "Prior PCD became empty after voxel filtering: %s", prior_map_path.c_str());
-                throw std::runtime_error("filtered prior PCD is empty");
-            }
+            RCLCPP_INFO(this->get_logger(), "Indexing prior map: %s", prior_map_path.c_str());
+            spatial_map_=std::make_unique<fast_lio::SpatialMap>(
+                prior_map_path,map_cache_directory,map_cache_config,[] {return !rclcpp::ok();});
+            const auto stats=spatial_map_->stats();
             RCLCPP_INFO(
                 this->get_logger(),
-                "Prior map ready: raw_points=%zu filtered_points=%zu rejected_non_finite=%zu rejected_index_overflow=%zu",
-                filter_stats.input_points, filter_stats.output_points,
-                filter_stats.rejected_non_finite, filter_stats.rejected_index_overflow);
+                "Prior map indexed: input=%lu filtered=%lu tiles=%zu reused=%d; active radius=%.1f m",
+                stats.input_points,stats.filtered_points,stats.tiles,stats.reused_index,prior_radius_);
         }
 
         Lidar_T_wrt_IMU << VEC_FROM_ARRAY(extrinT);
@@ -644,10 +660,10 @@ public:
         pubLaserCloudFull_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/cloud_registered", 20);
         pubLaserCloudFull_body_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/cloud_registered_body", 20);
         pubLaserCloudEffect_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/cloud_effected", 20);
-        pubLaserCloudMap_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/Laser_map", 20);
+        pubLaserCloudMap_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/Laser_map", 1);
         pubIkdTree_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/ikd_tree", 20);
         pubOdomAftMapped_ = this->create_publisher<nav_msgs::msg::Odometry>("/Odometry", 20);
-        pubPath_ = this->create_publisher<nav_msgs::msg::Path>("/path", 20);
+        pubPath_ = this->create_publisher<nav_msgs::msg::Path>("/path", 1);
         if (publish_tf)
         {
             tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -678,14 +694,42 @@ public:
         auto period_ms = std::chrono::milliseconds(static_cast<int64_t>(1000.0 / 100.0));
         timer_ = rclcpp::create_timer(this, this->get_clock(), period_ms, std::bind(&LaserMappingNode::timer_callback, this));
         auto map_period_ms = std::chrono::milliseconds(static_cast<int64_t>(1000.0));
-        map_pub_timer_ = rclcpp::create_timer(this, this->get_clock(), map_period_ms, std::bind(&LaserMappingNode::map_publish_callback, this));
+        preview_group_=this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+        save_group_=this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+        map_pub_timer_ = rclcpp::create_timer(this, this->get_clock(), map_period_ms,
+            std::bind(&LaserMappingNode::map_publish_callback, this),preview_group_);
 
-        map_save_srv_ = this->create_service<std_srvs::srv::Trigger>("map_save", std::bind(&LaserMappingNode::map_save_callback, this, std::placeholders::_1, std::placeholders::_2));
+        map_save_srv_ = this->create_service<std_srvs::srv::Trigger>("map_save",
+            std::bind(&LaserMappingNode::map_save_callback, this, std::placeholders::_1, std::placeholders::_2),
+            rmw_qos_profile_services_default,save_group_);
 
         RCLCPP_INFO(this->get_logger(), "Node init finished.");
     }
 
+    void save_on_shutdown()
+    {
+        if (!pcd_save_en || !mapping_backend_ || mapping_backend_->snapshot().frames.empty()) return;
+        mapping_backend_->processPending();
+        if (save_to_pcd()) mapping_backend_->discardSavedChunks();
+    }
+
 private:
+    using PriorTile=fast_lio::SpatialMap::Tile;
+    struct PriorRegion {
+        Eigen::Vector3d center;
+        std::vector<PriorTile> keys;
+        std::map<PriorTile,PointCloudXYZI::ConstPtr> added;
+    };
+    std::unique_ptr<fast_lio::SpatialMap> spatial_map_;
+    double prior_radius_{80.0};
+    std::size_t prior_point_budget_{2000000};
+    Eigen::Vector3d prior_center_{Eigen::Vector3d::Zero()};
+    Eigen::Isometry3d prior_from_odom_{Eigen::Isometry3d::Identity()};
+    std::future<PriorRegion> prior_load_;
+    std::map<PriorTile,PointCloudXYZI::Ptr> prior_live_tiles_;
+    sensor_msgs::msg::PointCloud2 prior_preview_;
+    std::unique_ptr<fast_lio::LoopClosureBackend> mapping_backend_;
+    rclcpp::CallbackGroup::SharedPtr preview_group_, save_group_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudFull_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudFull_body_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudEffect_;
@@ -724,6 +768,60 @@ private:
     fast_lio::reference_odometry::Pose reference_pose_to_tracking_;
     fast_lio::reference_odometry::Update latest_reference_update_;
     fast_lio::reference_odometry::SessionTracker reference_odom_tracker_;
+
+    bool update_prior_region()
+    {
+        if (!spatial_map_) return true;
+        const Eigen::Vector3d center=prior_from_odom_*state_point.pos;
+        if (prior_load_.valid() && prior_load_.wait_for(std::chrono::seconds(0))==std::future_status::ready)
+        {
+            auto loaded=prior_load_.get();
+            const std::set<PriorTile> wanted(loaded.keys.begin(),loaded.keys.end());
+            for (auto it=prior_live_tiles_.begin();it!=prior_live_tiles_.end();)
+            {
+                if (!wanted.count(it->first)) {
+                    ikdtree.Delete_Points(it->second->points);
+                    it=prior_live_tiles_.erase(it);
+                } else ++it;
+            }
+            PointVector initial;
+            const bool building=ikdtree.Root_Node==nullptr;
+            const Eigen::Matrix4f to_odom=prior_from_odom_.inverse().matrix().cast<float>();
+            for (const auto &entry:loaded.added)
+            {
+                PointCloudXYZI::Ptr local(new PointCloudXYZI);
+                pcl::transformPointCloud(*entry.second,*local,to_odom);
+                if (building) initial.insert(initial.end(),local->points.begin(),local->points.end());
+                else ikdtree.Add_Points(local->points,false);
+                prior_live_tiles_[entry.first]=local;
+            }
+            if (building) {
+                if (initial.size()<NUM_MATCH_POINTS) throw std::runtime_error("no usable prior map near initial pose");
+                ikdtree.set_downsample_param(filter_size_map_min);
+                ikdtree.Build(initial);
+            }
+            points_cache_collect();
+            prior_center_=loaded.center;
+        }
+        const double margin=std::max(1.0,std::min(20.0,prior_radius_*.125));
+        if (!prior_load_.valid() && (prior_live_tiles_.empty() || (center-prior_center_).lpNorm<Eigen::Infinity>()>margin))
+        {
+            std::set<PriorTile> retained;
+            for (const auto &entry:prior_live_tiles_) retained.insert(entry.first);
+            prior_load_=std::async(std::launch::async,[this,center,retained] {
+                PriorRegion result; result.center=center;
+                result.keys=spatial_map_->tilesFor(center,prior_radius_);
+                std::size_t points=0;
+                for (const auto &key:result.keys) {
+                    points+=spatial_map_->pointCount(key);
+                    if (points>prior_point_budget_) throw std::runtime_error("prior region exceeds configured point budget");
+                    if (!retained.count(key)) result.added.emplace(key,spatial_map_->tile(key));
+                }
+                return result;
+            });
+        }
+        return !prior_live_tiles_.empty();
+    }
 
     static fast_lio::reference_odometry::Pose to_reference_pose(
         const geometry_msgs::msg::Pose & message)
@@ -1351,23 +1449,40 @@ private:
 
     void publish_map(rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudMap)
     {
-        PointCloudXYZI::Ptr laserCloudFullRes(dense_pub_en ? feats_undistort : feats_down_body);
-        int size = laserCloudFullRes->points.size();
-        PointCloudXYZI::Ptr laserCloudWorld(
-            new PointCloudXYZI(size, 1));
-
-        for (int i = 0; i < size; i++)
-        {
-            RGBpointBodyToWorld(&laserCloudFullRes->points[i],
-                                &laserCloudWorld->points[i]);
-        }
-        *pcl_wait_pub += *laserCloudWorld;
-
+        if (!mapping_backend_) return;
+        const auto snapshot=mapping_backend_->snapshot();
+        if (snapshot.frames.empty()) return;
+        if (!snapshot.error.empty())
+            RCLCPP_ERROR_THROTTLE(this->get_logger(),*this->get_clock(),5000,
+                "Background loop optimization failed: %s",snapshot.error.c_str());
+        const auto stamp=get_ros_time(snapshot.frames.back().stamp);
         sensor_msgs::msg::PointCloud2 laserCloudmsg;
-        pcl::toROSMsg(*pcl_wait_pub, laserCloudmsg);
-        laserCloudmsg.header.stamp = get_ros_time(lidar_end_time);
-        laserCloudmsg.header.frame_id = odom_frame;
-        pubLaserCloudMap->publish(laserCloudmsg);
+        if (map_pub_en)
+        {
+            pcl::toROSMsg(mapping_backend_->preview(snapshot), laserCloudmsg);
+            laserCloudmsg.header.stamp=stamp;
+            laserCloudmsg.header.frame_id=map_frame;
+            pubLaserCloudMap->publish(laserCloudmsg);
+        }
+        if (path_en)
+        {
+            nav_msgs::msg::Path optimized_path;
+            optimized_path.header.stamp=stamp; optimized_path.header.frame_id=map_frame;
+            optimized_path.poses.reserve(snapshot.frames.size());
+            for (const auto &frame:snapshot.frames)
+            {
+                const auto pose=snapshot.keyframes.at(frame.keyframe)*frame.keyframe_from_frame;
+                const Eigen::Quaterniond rotation(pose.linear());
+                geometry_msgs::msg::PoseStamped p;
+                p.header.frame_id=map_frame; p.header.stamp=get_ros_time(frame.stamp);
+                p.pose.position.x=pose.translation().x(); p.pose.position.y=pose.translation().y();
+                p.pose.position.z=pose.translation().z();
+                p.pose.orientation.x=rotation.x(); p.pose.orientation.y=rotation.y();
+                p.pose.orientation.z=rotation.z(); p.pose.orientation.w=rotation.w();
+                optimized_path.poses.push_back(p);
+            }
+            pubPath_->publish(optimized_path);
+        }
     }
 
     void publish_ikd_tree(rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudMap)
@@ -1381,7 +1496,11 @@ private:
 
     bool save_to_pcd()
     {
-        return save_cloud_to_pcd(map_file_path, pcl_wait_pub);
+        if (!mapping_backend_ || !ensure_directory(map_parent_directory(map_file_path))) return false;
+        std::string error;
+        const bool saved=mapping_backend_->save(map_file_path,&error);
+        if (!saved) RCLCPP_ERROR(this->get_logger(),"Map export failed: %s",error.c_str());
+        return saved;
     }
 
     template <typename T>
@@ -1488,6 +1607,14 @@ private:
             RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 3000, "Waiting for initial pose...");
             return;
         }
+        if (locate_in_prior_map)
+        {
+            try { if (!update_prior_region()) return; }
+            catch (const std::exception &e) {
+                RCLCPP_FATAL(this->get_logger(),"Prior map region load failed: %s",e.what());
+                rclcpp::shutdown(); return;
+            }
+        }
         if (sync_packages(Measures))
         {
             if (flg_first_scan)
@@ -1525,7 +1652,7 @@ private:
 
             flg_EKF_inited = (Measures.lidar_beg_time - first_lidar_time) < INIT_TIME ? false : true;
             /*** Segment the map in lidar FOV ***/
-            lasermap_fov_segment();
+            if (!locate_in_prior_map) lasermap_fov_segment();
 
             /*** downsample the feature points in a scan ***/
             downSizeFilterSurf.setInputCloud(feats_undistort);
@@ -1539,27 +1666,7 @@ private:
             if (ikdtree.Root_Node == nullptr)
             {
                 RCLCPP_INFO_ONCE(this->get_logger(), "Initialize the map kdtree");
-                if (locate_in_prior_map)
-                {
-                    // if (!initial_pose_received)
-                    // {
-                    //     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 3000, "Waiting for initial pose...");
-                    //     return;
-                    // }
-                    tf2::Transform trans;
-                    tf2::fromMsg(initial_pose.pose.pose, trans);
-                    pcl_ros::transformPointCloud(*feats_down_prior_map, *feats_down_prior_map, trans.inverse());
-
-                    // puiblish the transformed prior map
-                    sensor_msgs::msg::PointCloud2 prior_map_msg;
-                    pcl::toROSMsg(*feats_down_prior_map, prior_map_msg);
-                    prior_map_msg.header.stamp = this->get_clock()->now();
-                    prior_map_msg.header.frame_id = odom_frame;
-                    pubLaserCloudMap_->publish(prior_map_msg);
-
-                    ikdtree.Build(feats_down_prior_map->points);
-                }
-                else if (feats_down_size > 5)
+                if (!locate_in_prior_map && feats_down_size > 5)
                 {
                     ikdtree.set_downsample_param(filter_size_map_min);
                     feats_down_world->resize(feats_down_size);
@@ -1638,11 +1745,30 @@ private:
             if (!locate_in_prior_map)
             {
                 map_incremental();
+                if (mapping_backend_)
+                {
+                    PointCloudXYZI imu_scan=*feats_undistort;
+                    for (auto &p:imu_scan)
+                    {
+                        const V3D point=state_point.offset_R_L_I*V3D(p.x,p.y,p.z)+state_point.offset_T_L_I;
+                        p.x=point.x(); p.y=point.y(); p.z=point.z();
+                        // FAST-LIO points carry acquisition time in curvature;
+                        // normals are not estimated by this preprocessing path.
+                        p.normal_x=0; p.normal_y=0; p.normal_z=0;
+                    }
+                    fast_lio::MapArchive::Pose pose=fast_lio::MapArchive::Pose::Identity();
+                    pose.linear()=state_point.rot.toRotationMatrix(); pose.translation()=state_point.pos;
+                    try { mapping_backend_->append(imu_scan,pose,lidar_end_time); }
+                    catch (const std::exception &e) {
+                        RCLCPP_ERROR_THROTTLE(this->get_logger(),*this->get_clock(),1000,
+                            "Dense map frame could not be stored: %s",e.what());
+                    }
+                }
             }
             t5 = omp_get_wtime();
 
             /******* Publish points *******/
-            if (path_en)
+            if (path_en && !mapping_backend_)
                 publish_path(pubPath_);
             if (scan_pub_en)
                 publish_frame_world(pubLaserCloudFull_);
@@ -1685,8 +1811,20 @@ private:
 
     void map_publish_callback()
     {
-        if (map_pub_en)
-            publish_map(pubLaserCloudMap_);
+        if (spatial_map_ && pubLaserCloudMap_->get_subscription_count()>0)
+        {
+            if (prior_preview_.data.empty()) pcl::toROSMsg(spatial_map_->preview(),prior_preview_);
+            prior_preview_.header.stamp=this->now(); prior_preview_.header.frame_id=map_frame;
+            pubLaserCloudMap_->publish(prior_preview_);
+        }
+        if (mapping_backend_ && (map_pub_en || path_en))
+        {
+            try { publish_map(pubLaserCloudMap_); }
+            catch (const std::exception &e) {
+                RCLCPP_ERROR_THROTTLE(this->get_logger(),*this->get_clock(),1000,
+                    "Map preview failed: %s",e.what());
+            }
+        }
     }
 
     void map_save_callback(std_srvs::srv::Trigger::Request::ConstSharedPtr req, std_srvs::srv::Trigger::Response::SharedPtr res)
@@ -1745,6 +1883,10 @@ private:
         initial_pose.pose.pose.position.y = map_to_tracking.getOrigin().y();
         initial_pose.pose.pose.position.z = map_to_tracking.getOrigin().z();
         initial_pose.pose.pose.orientation = tf2::toMsg(map_to_tracking.getRotation());
+        const auto &rotation=initial_pose.pose.pose.orientation;
+        prior_from_odom_.linear()=Eigen::Quaterniond(rotation.w,rotation.x,rotation.y,rotation.z).toRotationMatrix();
+        prior_from_odom_.translation()<<initial_pose.pose.pose.position.x,
+            initial_pose.pose.pose.position.y,initial_pose.pose.pose.position.z;
         initial_pose_received = true;
         if (reference_odom_enabled_)
         {
@@ -1763,17 +1905,16 @@ int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
 
-    signal(SIGINT, SigHandle);
-
-    rclcpp::spin(std::make_shared<LaserMappingNode>());
+    const auto node=std::make_shared<LaserMappingNode>();
+    // The default group still serializes LIO/IMU callbacks; bounded previews
+    // and streaming saves each have their own group and cannot block LIO.
+    rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(),3);
+    executor.add_node(node);
+    executor.spin();
     /**************** save map ****************/
     /* 1. make sure you have enough memories
     /* 2. pcd save will largely influence the real-time performences **/
-    if (pcl_wait_pub->size() > 0 && pcd_save_en)
-    {
-        cout << "current scan saved to " << map_file_path << endl;
-        save_cloud_to_pcd(map_file_path, pcl_wait_pub);
-    }
+    node->save_on_shutdown();
     fout_out.close();
     fout_pre.close();
     fout_dbg.close();
