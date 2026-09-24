@@ -76,6 +76,18 @@ TEST_F(ArchiveTest, LoopCorrectionTransformsEachFrameWithoutChangingStoredScans)
   EXPECT_EQ(archive.frames()[1].odom_pose.translation().x(), 3);
 }
 
+TEST_F(ArchiveTest, ExportCanSelectOneDenseFramePerSecondAndKeepFinalFrame) {
+  Archive archive(root, 4096, 20);
+  for (int i=0;i<7;++i) archive.append(scan(2),pose(i),i*.2,0,pose(i));
+  std::string error;
+  ASSERT_TRUE(archive.exportPcd(root+"/sampled.pcd",{},&error,{},7,1.0))<<error;
+  Archive::Cloud loaded;
+  ASSERT_EQ(pcl::io::loadPCDFile(root+"/sampled.pcd",loaded),0);
+  // t=0、t=1.0，以及不足下一秒但必须保留的最终帧 t=1.2。
+  EXPECT_EQ(loaded.size(),6u);
+  EXPECT_TRUE(archive.discardSavedChunks());
+}
+
 TEST_F(ArchiveTest, CancellationRetainsPreviousMapAndUnsavedChunks) {
   Archive archive(root, 128, 5);
   const auto target=root+"/map.pcd";

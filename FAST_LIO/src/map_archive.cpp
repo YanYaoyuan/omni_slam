@@ -157,7 +157,12 @@ MapArchive::Cloud MapArchive::preview(const Poses &poses, std::size_t frame_coun
   return cloud;
 }
 bool MapArchive::exportPcd(const std::string &path, const Poses &poses, std::string *error,
-                          const std::function<bool()> &cancel, std::size_t frame_count) {
+                          const std::function<bool()> &cancel, std::size_t frame_count,
+                          double minimum_frame_interval) {
+  if (!std::isfinite(minimum_frame_interval) || minimum_frame_interval<0) {
+    if (error) *error="minimum frame interval must be finite and non-negative";
+    return false;
+  }
   Frames snapshot;
   {
     std::lock_guard<std::mutex> lock(impl_->mutex);
@@ -169,7 +174,19 @@ bool MapArchive::exportPcd(const std::string &path, const Poses &poses, std::str
     if (!n) { if (error) *error="no committed frames to export"; return false; }
     snapshot.assign(impl_->frames.begin(), impl_->frames.begin()+n);
   }
-  const std::uint64_t total = snapshot.back().first_point + snapshot.back().point_count;
+  const std::uint64_t archived = snapshot.back().first_point + snapshot.back().point_count;
+  std::vector<std::size_t> selected;
+  selected.reserve(snapshot.size());
+  double last_stamp=-std::numeric_limits<double>::infinity();
+  for (std::size_t i=0; i<snapshot.size(); ++i) {
+    const bool final=i+1==snapshot.size();
+    if (selected.empty() || snapshot[i].stamp-last_stamp+1e-9>=minimum_frame_interval || final) {
+      if (selected.empty() || selected.back()!=i) selected.push_back(i);
+      last_stamp=snapshot[i].stamp;
+    }
+  }
+  std::uint64_t total=0;
+  for (const auto index:selected) total+=snapshot[index].point_count;
   bool written = false;
   try {
     written = atomic_replace_file(path, [&](const std::string &temporary) {
@@ -178,7 +195,8 @@ bool MapArchive::exportPcd(const std::string &path, const Poses &poses, std::str
         "SIZE 4 4 4 4 4 4 4 4\nTYPE F F F F F F F F\nCOUNT 1 1 1 1 1 1 1 1\nWIDTH " << total <<
         "\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS " << total << "\nDATA binary\n";
       try {
-        for (const auto &frame: snapshot) {
+        for (const auto index: selected) {
+          const auto &frame=snapshot[index];
           const auto pose = poseFor(frame, poses);
           impl_->read(frame.first_point, frame.point_count, [&](const PackedPoint *p, std::size_t n) {
             if (cancel && cancel()) throw std::runtime_error("map export canceled");
@@ -198,7 +216,7 @@ bool MapArchive::exportPcd(const std::string &path, const Poses &poses, std::str
   } catch (const std::exception &e) { if (error) *error=e.what(); }
   if (written) {
     std::lock_guard<std::mutex> lock(impl_->mutex);
-    impl_->saved=true; impl_->saved_count=total;
+    impl_->saved=true; impl_->saved_count=archived;
   }
   return written;
 }

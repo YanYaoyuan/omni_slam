@@ -16,6 +16,9 @@ protected:
     Pose p=Pose::Identity(); p.translation()<<x,y,0;
     p.linear()=Eigen::AngleAxisd(yaw,Eigen::Vector3d::UnitZ()).toRotationMatrix(); return p;
   }
+  static Pose poseWithZ(double x,double y,double z,double yaw=0) {
+    Pose p=pose(x,y,yaw); p.translation().z()=z; return p;
+  }
   static Backend::Cloud scene(const Pose &sensor=Pose::Identity()) {
     // Fixed asymmetric scene, many non-coplanar points over 360 degrees.
     std::mt19937 random(71); std::uniform_real_distribution<float> range(-8,8), height(-1,3);
@@ -90,6 +93,23 @@ TEST_F(LoopTest, LoopMatchesAfterTurningAndPreservesHeading) {
   const Pose error=returned.inverse()*s.keyframes.back();
   EXPECT_LT(error.translation().norm(),.25);
   EXPECT_LT(Eigen::AngleAxisd(error.linear()).angle(),.1);
+}
+TEST_F(LoopTest, GroundRobotLoopRecoversLargeVerticalOdomDrift) {
+  auto config=Backend::Config{}; config.minimum_loop_seconds=20;
+  config.planar_revisit_initialization=true; config.huber_delta=5.0;
+  config.vertical_sigma=.03;
+  Backend backend(root,config,false);
+  const std::vector<Pose,Eigen::aligned_allocator<Pose>> actual{
+    pose(0),pose(3),pose(3,3),pose(0,3),pose(0)};
+  for (std::size_t i=0;i<actual.size();++i) {
+    const Pose odom=poseWithZ(actual[i].translation().x(),actual[i].translation().y(),.425*i);
+    backend.append(scene(actual[i]),odom,i*6);
+  }
+  backend.processPending();
+  const auto s=backend.snapshot(); ASSERT_TRUE(s.error.empty())<<s.error;
+  ASSERT_EQ(s.loop_count,1u);
+  EXPECT_LT(std::abs(s.keyframes.back().translation().z()),.05);
+  EXPECT_NEAR(s.frames.back().odom_pose.translation().z(),1.7,1e-9);
 }
 TEST_F(LoopTest, SaveUsesOnePoseSnapshotWhileNewScansArrive) {
   Backend backend(root,Backend::Config{},false);

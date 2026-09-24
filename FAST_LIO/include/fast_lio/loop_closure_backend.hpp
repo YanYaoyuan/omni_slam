@@ -13,11 +13,15 @@ public:
   using Cloud = MapArchive::Cloud;
   struct Config {
     bool enabled{true};
+    bool planar_revisit_initialization{false};
     double frequency_hz{1.0};
     double keyframe_distance{1.0}, keyframe_angle{0.2617993878}, keyframe_seconds{5.0};
     double minimum_loop_seconds{30.0}, descriptor_threshold{0.20};
     double voxel_size{0.3}, maximum_correspondence{1.5};
     double maximum_fitness{0.15}, minimum_overlap{0.5}, overlap_distance{0.3};
+    double huber_delta{1.345};
+    double vertical_sigma{0.10};
+    double export_frame_interval{0.0};
     std::size_t candidates{5}, preview_points{300000}, chunk_bytes{64U << 20};
   };
   struct Snapshot {

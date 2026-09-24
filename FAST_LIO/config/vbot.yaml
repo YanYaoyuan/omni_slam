@@ -13,6 +13,8 @@
 
         loop_closure:
             enabled: true
+            # 四足机器人重访同一地点时真实高度差接近 0，避免累计 Z 漂移破坏 ICP 初值。
+            planar_revisit_initialization: true
             frequency_hz: 1.0
             keyframe_distance: 1.0
             keyframe_angle_deg: 15.0
@@ -24,6 +26,9 @@
             maximum_fitness: 0.15
             minimum_overlap: 0.5
             overlap_distance: 0.3
+            # 回环已通过描述子、ICP、重叠率三层校验，允许其修正米级累计漂移。
+            huber_delta: 5.0
+            vertical_sigma: 0.03
 
         common:
             map_frame_id: "omni_map"
@@ -78,3 +83,5 @@
         pcd_save:
             pcd_save_en: true
             interval: -1
+            # FAST-LIO 仍处理全部 5Hz 数据；最终 PCD 每秒选一帧，减少重复点。
+            frame_interval_sec: 1.0

@@ -521,6 +521,8 @@ public:
 
         fast_lio::LoopClosureBackend::Config loop_config;
         loop_config.enabled=this->declare_parameter<bool>("loop_closure.enabled", false);
+        loop_config.planar_revisit_initialization=this->declare_parameter<bool>(
+            "loop_closure.planar_revisit_initialization",false);
         loop_config.frequency_hz=this->declare_parameter<double>("loop_closure.frequency_hz", 1.0);
         loop_config.keyframe_distance=this->declare_parameter<double>("loop_closure.keyframe_distance", 1.0);
         const double keyframe_degrees=this->declare_parameter<double>("loop_closure.keyframe_angle_deg", 15.0);
@@ -532,6 +534,10 @@ public:
         loop_config.maximum_fitness=this->declare_parameter<double>("loop_closure.maximum_fitness", 0.15);
         loop_config.minimum_overlap=this->declare_parameter<double>("loop_closure.minimum_overlap", 0.5);
         loop_config.overlap_distance=this->declare_parameter<double>("loop_closure.overlap_distance", 0.3);
+        loop_config.huber_delta=this->declare_parameter<double>("loop_closure.huber_delta",1.345);
+        loop_config.vertical_sigma=this->declare_parameter<double>("loop_closure.vertical_sigma",0.10);
+        loop_config.export_frame_interval=this->declare_parameter<double>(
+            "pcd_save.frame_interval_sec",0.0);
         loop_config.voxel_size=filter_size_map_min;
         const int candidates=this->declare_parameter<int>("loop_closure.candidates", 5);
         const int preview_points=this->declare_parameter<int>("publish.map_max_points", 300000);

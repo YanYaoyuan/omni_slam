@@ -95,7 +95,9 @@ struct LoopClosureBackend::Impl {
           c.keyframe_seconds>0 && c.voxel_size>0 && c.candidates>0 && c.candidates<=5 &&
           c.maximum_correspondence>0 && c.maximum_fitness>0 && c.minimum_overlap>0 &&
           c.minimum_overlap<=1 && c.overlap_distance>0 && c.minimum_loop_seconds>=0 &&
-          c.descriptor_threshold>0 && c.descriptor_threshold<1))
+          c.descriptor_threshold>0 && c.descriptor_threshold<1 && c.huber_delta>0 &&
+          c.vertical_sigma>0 &&
+          std::isfinite(c.export_frame_interval) && c.export_frame_interval>=0))
       throw std::invalid_argument("invalid background loop configuration");
   }
   ~Impl() {
@@ -164,15 +166,18 @@ struct LoopClosureBackend::Impl {
             if (match.first>config.descriptor_threshold) continue;
             const auto target=downsample(archive.readFrame(pending[j].frame),config.voxel_size);
             Pose guess=pending[j].odom.inverse()*pending[i].odom;
+            // A VBot re-observing the same place should have near-zero relative
+            // height even when its long-loop odometry has accumulated Z drift.
+            if (config.planar_revisit_initialization) guess.translation().z()=0;
             // Scan Context provides yaw; retain odometry roll/pitch and translation.
             const double old_yaw=std::atan2(guess.linear()(1,0),guess.linear()(0,0));
             guess.linear()=Eigen::AngleAxisd(match.second*2*kPi/kSectors-old_yaw,
               Eigen::Vector3d::UnitZ()).toRotationMatrix()*guess.linear();
             Pose measurement;
             if (!align(source,target,guess,&measurement)) continue;
-            gtsam::Vector6 sigmas; sigmas<<.05,.05,.05,.10,.10,.10;
+            gtsam::Vector6 sigmas; sigmas<<.05,.05,.05,.10,.10,config.vertical_sigma;
             const auto noise=gtsam::noiseModel::Robust::Create(
-              gtsam::noiseModel::mEstimator::Huber::Create(1.345),
+              gtsam::noiseModel::mEstimator::Huber::Create(config.huber_delta),
               gtsam::noiseModel::Diagonal::Sigmas(sigmas));
             factors.emplace_shared<gtsam::BetweenFactor<gtsam::Pose3>>(j,i,graphPose(measurement),noise);
             closed=true;
@@ -254,7 +259,8 @@ LoopClosureBackend::Cloud LoopClosureBackend::preview(const Snapshot &s) const {
 }
 bool LoopClosureBackend::save(const std::string &path,std::string *error,const std::function<bool()> &cancel) {
   const auto s=snapshot();
-  return impl_->archive.exportPcd(path,s.keyframes,error,cancel,s.frames.size());
+  return impl_->archive.exportPcd(
+    path,s.keyframes,error,cancel,s.frames.size(),impl_->config.export_frame_interval);
 }
 void LoopClosureBackend::processPending() { impl_->process(); }
 std::string LoopClosureBackend::directory() const { return impl_->archive.directory(); }

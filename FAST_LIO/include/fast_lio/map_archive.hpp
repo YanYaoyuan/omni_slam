@@ -43,7 +43,8 @@ public:
                 std::size_t frame_count = std::numeric_limits<std::size_t>::max()) const;
   bool exportPcd(const std::string &path, const Poses &optimized_keyframes,
                  std::string *error, const std::function<bool()> &cancel = {},
-                 std::size_t frame_count = std::numeric_limits<std::size_t>::max());
+                 std::size_t frame_count = std::numeric_limits<std::size_t>::max(),
+                 double minimum_frame_interval = 0.0);
   std::uint64_t pointCount() const;
   std::string directory() const;
   // Explicit: only the owner may discard a successfully saved session.
