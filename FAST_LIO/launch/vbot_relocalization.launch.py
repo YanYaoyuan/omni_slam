@@ -20,7 +20,7 @@ def generate_launch_description():
         ('initial_yaw', '0.0', 'Initial yaw in the map frame, in radians'),
         ('max_correspondence_distance', '1.0', 'ICP maximum correspondence distance'),
         ('fitness_score_thre', '0.2', 'Maximum accepted ICP fitness score'),
-        ('converged_count_thre', '10', 'Required consecutive accepted ICP results'),
+        ('converged_count_thre', '3', 'Required consecutive accepted ICP results'),
         ('candidate_position_tolerance_m', '0.35',
          'Maximum translation spread of one stable ICP candidate cluster'),
         ('candidate_angle_tolerance_rad', '0.174533',

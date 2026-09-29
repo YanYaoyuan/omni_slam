@@ -14,7 +14,7 @@ S100_IMAGE=${S100_IMAGE:-pc_tros_ubuntu22.04:v1.0.0}
 S100_IMAGE_URL=${S100_IMAGE_URL:-http://archive.d-robotics.cc/TogetheROS/cross_compile_docker/pc_tros_ubuntu22.04_v1.0.0.tar.gz}
 S100_IMAGE_SHA256=${S100_IMAGE_SHA256:-ec065c268782373311421f0bb7f2212bfec6584a7070a9737468055a6bce2c88}
 S100_IMAGE_ARCHIVE=${S100_IMAGE_ARCHIVE:-${IMAGE_CACHE_DIR}/pc_tros_ubuntu22.04_v1.0.0.tar.gz}
-CHECK_ONLY=0
+CHECK_ONLY=0 
 launcher_pid=''
 
 if [[ "${1:-}" == "--check-only" ]]; then

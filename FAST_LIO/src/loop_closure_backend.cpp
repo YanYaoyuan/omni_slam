@@ -91,6 +91,7 @@ struct LoopClosureBackend::Impl {
 
   Impl(const std::string &root, Config c): config(c), archive(root,c.chunk_bytes,c.preview_points),
     graph(graphParameters()) {
+    archive.setTrajectoryExclusion(c.trajectory_exclusion_radius,c.lidar_in_imu);
     if (!(c.frequency_hz>0 && c.frequency_hz<=1 && c.keyframe_distance>0 && c.keyframe_angle>0 &&
           c.keyframe_seconds>0 && c.voxel_size>0 && c.candidates>0 && c.candidates<=5 &&
           c.maximum_correspondence>0 && c.maximum_fitness>0 && c.minimum_overlap>0 &&
@@ -257,10 +258,12 @@ LoopClosureBackend::Snapshot LoopClosureBackend::snapshot() const {
 LoopClosureBackend::Cloud LoopClosureBackend::preview(const Snapshot &s) const {
   return impl_->archive.preview(s.keyframes,s.frames.size());
 }
-bool LoopClosureBackend::save(const std::string &path,std::string *error,const std::function<bool()> &cancel) {
+bool LoopClosureBackend::save(const std::string &path,std::string *error,const std::function<bool()> &cancel, Snapshot *saved_snapshot) {
   const auto s=snapshot();
-  return impl_->archive.exportPcd(
+  const bool saved=impl_->archive.exportPcd(
     path,s.keyframes,error,cancel,s.frames.size(),impl_->config.export_frame_interval);
+  if (saved && saved_snapshot) *saved_snapshot=s;
+  return saved;
 }
 void LoopClosureBackend::processPending() { impl_->process(); }
 std::string LoopClosureBackend::directory() const { return impl_->archive.directory(); }

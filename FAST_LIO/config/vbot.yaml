@@ -55,6 +55,8 @@
             scan_rate: 5
 
         mapping:
+            # 雷达原点沿轨迹扫过的 0.5m 球体，仅剔除建图地图，不过滤实时避障点云。
+            trajectory_exclusion_radius: 0.5
             # FAST-LIO 过程噪声沿用已跑通配置；它不是标定文件中的噪声密度原值。
             acc_cov: 0.1
             gyr_cov: 0.1
@@ -71,7 +73,8 @@
                           0.0027346740, -0.0129649238,  0.9999122123]
 
         publish:
-            map_max_points: 300000
+            mapping_body_path_en: true
+            map_max_points: 30000
             tf_en: false
             path_en: true
             effect_map_en: true

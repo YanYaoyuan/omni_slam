@@ -42,7 +42,7 @@ class Phase0RegressionTests(unittest.TestCase):
 
         save_wrapper = _function_body(source, r"\bbool\s+save_to_pcd\s*\(\s*\)")
         self.assertIn("!mapping_backend_", save_wrapper)
-        self.assertRegex(save_wrapper, r"const bool saved\s*=\s*mapping_backend_->save\(")
+        self.assertRegex(save_wrapper, r"saved\s*=\s*mapping_backend_->save\(")
         self.assertRegex(save_wrapper, r"return\s+saved\s*;")
 
         callback = _function_body(source, r"\bvoid\s+map_save_callback\s*\(")
@@ -281,18 +281,18 @@ class Phase0RegressionTests(unittest.TestCase):
                 self.assertNotIn('lid_topic: "/front_lidar"', config)
                 self.assertNotIn('lid_topic: "/lidar_points"', config)
 
-    def test_prior_map_failure_throws_before_ros_endpoints(self):
+    def test_prior_map_failure_throws_before_sensor_processing(self):
         source = (PACKAGE_ROOT / "src" / "laserMapping.cpp").read_text(
             encoding="utf-8"
         )
-        validation = source.index("// Relocalization must fail before any ROS endpoint")
+        validation = source.index("// Register the one-shot ICP result")
         subscriptions = source.index("/*** ROS subscribe initialization ***/")
         self.assertLess(validation, subscriptions)
         validation_block = source[validation:subscriptions]
         self.assertIn("prior_map_path.empty()", validation_block)
-        # SpatialMap now streams/validates the PCD before endpoints exist;
-        # malformed and empty inputs are covered by its executable tests.
-        self.assertIn("std::make_unique<fast_lio::SpatialMap>", validation_block)
+        # Seed reception may precede map I/O, but sensor processing cannot.
+        self.assertIn('create_subscription<nav_msgs::msg::Odometry>("/icp_result"', validation_block)
+        self.assertIn("extentSafeVoxelFilter", validation_block)
         self.assertIn("throw std::invalid_argument", validation_block)
         self.assertNotIn("catch (", validation_block)
         self.assertNotIn("return;", validation_block)

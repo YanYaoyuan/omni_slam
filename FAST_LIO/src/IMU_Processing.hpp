@@ -356,6 +356,9 @@ void ImuProcess::Process(const MeasureGroup &meas, esekfom::esekf<state_ikfom, 1
   double t1, t2, t3;
   t1 = omp_get_wtime();
 
+  // Output belongs only to this measurement. Empty IMU/initialization must
+  // never leave the previous scan available for a new timestamp's EKF update.
+  cur_pcl_un_->clear();
   if (meas.imu.empty())
   {
     return;

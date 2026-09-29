@@ -33,6 +33,7 @@ public:
   MapArchive(const std::string &parent, std::size_t chunk_bytes = 64U << 20,
              std::size_t preview_points = 300000);
   ~MapArchive();
+  void setTrajectoryExclusion(double radius, const Eigen::Vector3d &lidar_in_imu);
   MapArchive(const MapArchive &) = delete;
   MapArchive &operator=(const MapArchive &) = delete;
   std::size_t append(const Cloud &scan, const Pose &odom_pose, double stamp,

@@ -60,7 +60,7 @@
 #include "fast_lio/extent_safe_voxel_filter.hpp"
 #include "fast_lio/reference_odometry.hpp"
 #include "fast_lio/loop_closure_backend.hpp"
-#include "fast_lio/spatial_map.hpp"
+#include "fast_lio/trajectory_exclusion.hpp"
 #include <future>
 #include <map>
 #include <set>
@@ -505,21 +505,13 @@ public:
         this->get_parameter_or<vector<double>>("mapping.extrinsic_R", extrinR, vector<double>());
         this->get_parameter_or<bool>("locate_in_prior_map", locate_in_prior_map, false);
         this->get_parameter_or<string>("prior_map_path", prior_map_path, "");
-        fast_lio::SpatialMap::Config map_cache_config;
-        map_cache_config.voxel_size=filter_size_map_min;
-        map_cache_config.tile_size=this->declare_parameter<double>("map_cache.tile_size",20.0);
-        prior_radius_=this->declare_parameter<double>("map_cache.active_radius",80.0);
-        const int cache_points=this->declare_parameter<int>("map_cache.max_cached_points",1000000);
-        const int region_points=this->declare_parameter<int>("map_cache.max_region_points",2000000);
-        if (cache_points<0 || region_points<1 || !std::isfinite(prior_radius_) || prior_radius_<=0)
-            throw std::invalid_argument("map cache budgets/radius are invalid");
-        map_cache_config.cache_points=cache_points;
-        map_cache_config.region_points=region_points;
-        prior_point_budget_=region_points;
-        std::string map_cache_directory=this->declare_parameter<string>("map_cache.directory","");
-        if (map_cache_directory.empty()) map_cache_directory=map_parent_directory(prior_map_path)+"/.spatial_cache";
-
+        if (extrinT.size()!=3 || extrinR.size()!=9)
+            throw std::invalid_argument("invalid LiDAR-IMU extrinsic");
         fast_lio::LoopClosureBackend::Config loop_config;
+        const double exclusion_radius=this->declare_parameter<double>("mapping.trajectory_exclusion_radius",0.0);
+        loop_config.trajectory_exclusion_radius=locate_in_prior_map?0.0:exclusion_radius;
+        loop_config.lidar_in_imu=Eigen::Vector3d(extrinT[0],extrinT[1],extrinT[2]);
+        mapping_exclusion_=fast_lio::TrajectoryExclusion(loop_config.trajectory_exclusion_radius);
         loop_config.enabled=this->declare_parameter<bool>("loop_closure.enabled", false);
         loop_config.planar_revisit_initialization=this->declare_parameter<bool>(
             "loop_closure.planar_revisit_initialization",false);
@@ -600,10 +592,14 @@ public:
         memset(point_selected_surf, true, sizeof(point_selected_surf));
         memset(res_last, -1000.0f, sizeof(res_last));
 
-        // Relocalization must fail before any ROS endpoint is advertised when
-        // its prior map is unusable.  Returning from this constructor would
-        // leave a half-initialized node visible in the graph and allow later
-        // callbacks to build an ikd-tree from an empty cloud.
+        // Register the one-shot ICP result before potentially slow map I/O.
+        // The executor only starts after this constructor succeeds; DDS buffers
+        // the seed meanwhile. An invalid map still throws and destroys the node.
+        if (locate_in_prior_map)
+        {
+            sub_init_pose_ = this->create_subscription<nav_msgs::msg::Odometry>("/icp_result", 10, std::bind(&LaserMappingNode::initial_pose_cbk, this, std::placeholders::_1));
+        }
+
         if (locate_in_prior_map)
         {
             if (prior_map_path.empty() || prior_map_path.front() != '/')
@@ -611,14 +607,21 @@ public:
                 RCLCPP_FATAL(this->get_logger(), "prior_map_path must be a non-empty absolute PCD path");
                 throw std::invalid_argument("invalid prior_map_path");
             }
-            RCLCPP_INFO(this->get_logger(), "Indexing prior map: %s", prior_map_path.c_str());
-            spatial_map_=std::make_unique<fast_lio::SpatialMap>(
-                prior_map_path,map_cache_directory,map_cache_config,[] {return !rclcpp::ok();});
-            const auto stats=spatial_map_->stats();
-            RCLCPP_INFO(
-                this->get_logger(),
-                "Prior map indexed: input=%lu filtered=%lu tiles=%zu reused=%d; active radius=%.1f m",
-                stats.input_points,stats.filtered_points,stats.tiles,stats.reused_index,prior_radius_);
+            RCLCPP_INFO(this->get_logger(), "Loading complete prior map: %s", prior_map_path.c_str());
+            PointCloudXYZI raw;
+            if (pcl::io::loadPCDFile(prior_map_path, raw)<0)
+                throw std::runtime_error("cannot read prior PCD");
+            const auto stats=fast_lio::pointcloud::extentSafeVoxelFilter(raw,filter_size_map_min,&prior_map_);
+            if (prior_map_.size()<NUM_MATCH_POINTS)
+                throw std::runtime_error("prior PCD has too few valid points");
+            // raw is released before subscriptions start. The entire filtered
+            // map stays fixed; no disk-region or ikd-tree mutation while moving.
+            PointCloudXYZI preview;
+            const auto stride=std::max<std::size_t>(1,(prior_map_.size()+preview_points-1)/preview_points);
+            for (std::size_t i=0;i<prior_map_.size();i+=stride) preview.push_back(prior_map_[i]);
+            pcl::toROSMsg(preview,prior_preview_);
+            RCLCPP_INFO(this->get_logger(), "Whole prior map loaded: input=%zu filtered=%zu voxel=%.3f m",
+                stats.input_points,prior_map_.size(),filter_size_map_min);
         }
 
         Lidar_T_wrt_IMU << VEC_FROM_ARRAY(extrinT);
@@ -658,11 +661,7 @@ public:
         {
             sub_pcl_pc_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(lid_topic, rclcpp::SensorDataQoS(), std::bind(&LaserMappingNode::standard_pcl_cbk, this, std::placeholders::_1));
         }
-        if (locate_in_prior_map)
-        {
-            sub_init_pose_ = this->create_subscription<nav_msgs::msg::Odometry>("/icp_result", 10, std::bind(&LaserMappingNode::initial_pose_cbk, this, std::placeholders::_1));
-        }
-        sub_imu_ = this->create_subscription<sensor_msgs::msg::Imu>(imu_topic, 10, std::bind(&LaserMappingNode::imu_cbk, this, std::placeholders::_1));
+        sub_imu_ = this->create_subscription<sensor_msgs::msg::Imu>(imu_topic, 1000, std::bind(&LaserMappingNode::imu_cbk, this, std::placeholders::_1));
         pubLaserCloudFull_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/cloud_registered", 20);
         pubLaserCloudFull_body_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/cloud_registered_body", 20);
         pubLaserCloudEffect_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/cloud_effected", 20);
@@ -670,6 +669,9 @@ public:
         pubIkdTree_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/ikd_tree", 20);
         pubOdomAftMapped_ = this->create_publisher<nav_msgs::msg::Odometry>("/Odometry", 20);
         pubPath_ = this->create_publisher<nav_msgs::msg::Path>("/path", 1);
+        mapping_body_path_enabled_=this->declare_parameter<bool>("publish.mapping_body_path_en",false);
+        if (mapping_body_path_enabled_)
+            pubMappingBodyPath_=this->create_publisher<nav_msgs::msg::Path>("/omni/slam/mapping_body_path",1);
         if (publish_tf)
         {
             tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -720,21 +722,34 @@ public:
     }
 
 private:
-    using PriorTile=fast_lio::SpatialMap::Tile;
-    struct PriorRegion {
-        Eigen::Vector3d center;
-        std::vector<PriorTile> keys;
-        std::map<PriorTile,PointCloudXYZI::ConstPtr> added;
-    };
-    std::unique_ptr<fast_lio::SpatialMap> spatial_map_;
-    double prior_radius_{80.0};
-    std::size_t prior_point_budget_{2000000};
-    Eigen::Vector3d prior_center_{Eigen::Vector3d::Zero()};
+    PointCloudXYZI prior_map_;
     Eigen::Isometry3d prior_from_odom_{Eigen::Isometry3d::Identity()};
-    std::future<PriorRegion> prior_load_;
-    std::map<PriorTile,PointCloudXYZI::Ptr> prior_live_tiles_;
     sensor_msgs::msg::PointCloud2 prior_preview_;
     std::unique_ptr<fast_lio::LoopClosureBackend> mapping_backend_;
+    fast_lio::TrajectoryExclusion mapping_exclusion_;
+    Eigen::Vector3d previous_exclusion_center_{Eigen::Vector3d::Zero()};
+    bool have_exclusion_center_{false};
+
+    void update_mapping_exclusion(const Eigen::Vector3d &center) {
+        const double radius=mapping_exclusion_.radius();
+        if (radius<=0) return;
+        const Eigen::Vector3d start=have_exclusion_center_?previous_exclusion_center_:center;
+        mapping_exclusion_.add(center);
+        previous_exclusion_center_=center; have_exclusion_center_=true;
+        if (!ikdtree.Root_Node) return;
+        BoxPointType box;
+        for (int axis=0;axis<3;++axis) {
+            box.vertex_min[axis]=std::min(start[axis],center[axis])-radius;
+            box.vertex_max[axis]=std::max(start[axis],center[axis])+radius;
+        }
+        PointVector candidates,removed;
+        ikdtree.Box_Search(box,candidates);
+        for (const auto &p:candidates)
+            if (fast_lio::TrajectoryExclusion::squaredDistance(V3D(p.x,p.y,p.z),start,center)<=radius*radius+1e-12)
+                removed.push_back(p);
+        if (!removed.empty()) ikdtree.Delete_Points(removed);
+    }
+
     rclcpp::CallbackGroup::SharedPtr preview_group_, save_group_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudFull_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudFull_body_;
@@ -743,6 +758,19 @@ private:
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubIkdTree_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pubOdomAftMapped_;
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pubPath_;
+    rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pubMappingBodyPath_;
+    bool mapping_body_path_enabled_{false};
+
+    fast_lio::MapArchive::Pose body_in_imu() const {
+        auto result=fast_lio::MapArchive::Pose::Identity();
+        if (sensor_frame==base_frame) return result;
+        const auto transform=tf_buffer_->lookupTransform(sensor_frame,base_frame,tf2::TimePointZero).transform;
+        const auto &q=transform.rotation;
+        result.linear()=Eigen::Quaterniond(q.w,q.x,q.y,q.z).normalized().toRotationMatrix();
+        result.translation()=V3D(transform.translation.x,transform.translation.y,transform.translation.z);
+        return result;
+    }
+
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr sub_imu_;
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_pcl_pc_;
 #ifdef USE_LIVOX
@@ -774,60 +802,6 @@ private:
     fast_lio::reference_odometry::Pose reference_pose_to_tracking_;
     fast_lio::reference_odometry::Update latest_reference_update_;
     fast_lio::reference_odometry::SessionTracker reference_odom_tracker_;
-
-    bool update_prior_region()
-    {
-        if (!spatial_map_) return true;
-        const Eigen::Vector3d center=prior_from_odom_*state_point.pos;
-        if (prior_load_.valid() && prior_load_.wait_for(std::chrono::seconds(0))==std::future_status::ready)
-        {
-            auto loaded=prior_load_.get();
-            const std::set<PriorTile> wanted(loaded.keys.begin(),loaded.keys.end());
-            for (auto it=prior_live_tiles_.begin();it!=prior_live_tiles_.end();)
-            {
-                if (!wanted.count(it->first)) {
-                    ikdtree.Delete_Points(it->second->points);
-                    it=prior_live_tiles_.erase(it);
-                } else ++it;
-            }
-            PointVector initial;
-            const bool building=ikdtree.Root_Node==nullptr;
-            const Eigen::Matrix4f to_odom=prior_from_odom_.inverse().matrix().cast<float>();
-            for (const auto &entry:loaded.added)
-            {
-                PointCloudXYZI::Ptr local(new PointCloudXYZI);
-                pcl::transformPointCloud(*entry.second,*local,to_odom);
-                if (building) initial.insert(initial.end(),local->points.begin(),local->points.end());
-                else ikdtree.Add_Points(local->points,false);
-                prior_live_tiles_[entry.first]=local;
-            }
-            if (building) {
-                if (initial.size()<NUM_MATCH_POINTS) throw std::runtime_error("no usable prior map near initial pose");
-                ikdtree.set_downsample_param(filter_size_map_min);
-                ikdtree.Build(initial);
-            }
-            points_cache_collect();
-            prior_center_=loaded.center;
-        }
-        const double margin=std::max(1.0,std::min(20.0,prior_radius_*.125));
-        if (!prior_load_.valid() && (prior_live_tiles_.empty() || (center-prior_center_).lpNorm<Eigen::Infinity>()>margin))
-        {
-            std::set<PriorTile> retained;
-            for (const auto &entry:prior_live_tiles_) retained.insert(entry.first);
-            prior_load_=std::async(std::launch::async,[this,center,retained] {
-                PriorRegion result; result.center=center;
-                result.keys=spatial_map_->tilesFor(center,prior_radius_);
-                std::size_t points=0;
-                for (const auto &key:result.keys) {
-                    points+=spatial_map_->pointCount(key);
-                    if (points>prior_point_budget_) throw std::runtime_error("prior region exceeds configured point budget");
-                    if (!retained.count(key)) result.added.emplace(key,spatial_map_->tile(key));
-                }
-                return result;
-            });
-        }
-        return !prior_live_tiles_.empty();
-    }
 
     static fast_lio::reference_odometry::Pose to_reference_pose(
         const geometry_msgs::msg::Pose & message)
@@ -1346,6 +1320,8 @@ private:
         {
             /* transform to world frame */
             pointBodyToWorld(&(feats_down_body->points[i]), &(feats_down_world->points[i]));
+            const auto &world=feats_down_world->points[i];
+            if (mapping_exclusion_.contains(V3D(world.x,world.y,world.z))) continue;
             /* decide if need add to map */
             if (!Nearest_Points[i].empty() && flg_EKF_inited)
             {
@@ -1392,7 +1368,7 @@ private:
     {
         if (scan_pub_en)
         {
-            PointCloudXYZI::Ptr laserCloudFullRes(dense_pub_en ? feats_undistort : feats_down_body);
+            PointCloudXYZI::Ptr laserCloudFullRes((dense_pub_en || mapping_exclusion_.radius()>0) ? feats_undistort : feats_down_body);
             int size = laserCloudFullRes->points.size();
             PointCloudXYZI::Ptr laserCloudWorld(
                 new PointCloudXYZI(size, 1));
@@ -1488,6 +1464,22 @@ private:
                 optimized_path.poses.push_back(p);
             }
             pubPath_->publish(optimized_path);
+            if (pubMappingBodyPath_) {
+                try {
+                    const auto offset=body_in_imu();
+                    for (std::size_t i=0;i<snapshot.frames.size();++i) {
+                        const auto &frame=snapshot.frames[i];
+                        const auto body=snapshot.keyframes.at(frame.keyframe)*frame.keyframe_from_frame*offset;
+                        auto &p=optimized_path.poses[i].pose;
+                        p.position.x=body.translation().x(); p.position.y=body.translation().y(); p.position.z=body.translation().z();
+                        const Eigen::Quaterniond q(body.linear());
+                        p.orientation.x=q.x(); p.orientation.y=q.y(); p.orientation.z=q.z(); p.orientation.w=q.w();
+                    }
+                    pubMappingBodyPath_->publish(optimized_path);
+                } catch (const std::exception &e) {
+                    RCLCPP_WARN_THROTTLE(this->get_logger(),*this->get_clock(),5000,"Mapping body path unavailable: %s",e.what());
+                }
+            }
         }
     }
 
@@ -1504,7 +1496,24 @@ private:
     {
         if (!mapping_backend_ || !ensure_directory(map_parent_directory(map_file_path))) return false;
         std::string error;
-        const bool saved=mapping_backend_->save(map_file_path,&error);
+        bool saved=false;
+        try {
+            const auto offset=mapping_body_path_enabled_?body_in_imu():fast_lio::MapArchive::Pose::Identity();
+            mapping_backend_->processPending();
+            fast_lio::LoopClosureBackend::Snapshot snapshot;
+            saved=mapping_backend_->save(map_file_path,&error,{},&snapshot);
+            if (saved && mapping_body_path_enabled_) {
+                saved=fast_lio::atomic_replace_file(map_file_path+".body_path.txt",[&](const std::string &temporary) {
+                    std::ofstream output(temporary);
+                    output << "# " << map_frame << ' ' << base_frame << "\n" << std::setprecision(17);
+                    for (const auto &frame:snapshot.frames) {
+                        const auto body=snapshot.keyframes.at(frame.keyframe)*frame.keyframe_from_frame*offset;
+                        output << frame.stamp << ' ' << body.translation().x() << ' ' << body.translation().y() << ' ' << body.translation().z() << '\n';
+                    }
+                    output.flush(); return static_cast<bool>(output);
+                },&error);
+            }
+        } catch (const std::exception &e) {error=e.what(); saved=false;}
         if (!saved) RCLCPP_ERROR(this->get_logger(),"Map export failed: %s",error.c_str());
         return saved;
     }
@@ -1613,14 +1622,6 @@ private:
             RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 3000, "Waiting for initial pose...");
             return;
         }
-        if (locate_in_prior_map)
-        {
-            try { if (!update_prior_region()) return; }
-            catch (const std::exception &e) {
-                RCLCPP_FATAL(this->get_logger(),"Prior map region load failed: %s",e.what());
-                rclcpp::shutdown(); return;
-            }
-        }
         if (sync_packages(Measures))
         {
             if (flg_first_scan)
@@ -1663,6 +1664,15 @@ private:
             /*** downsample the feature points in a scan ***/
             downSizeFilterSurf.setInputCloud(feats_undistort);
             downSizeFilterSurf.filter(*feats_down_body);
+            if (!locate_in_prior_map && mapping_exclusion_.radius()>0) {
+                update_mapping_exclusion(pos_lid);
+                auto &points=feats_down_body->points;
+                points.erase(std::remove_if(points.begin(),points.end(),[&](const PointType &p) {
+                    PointType world; pointBodyToWorld(&p,&world);
+                    return mapping_exclusion_.contains(V3D(world.x,world.y,world.z));
+                }),points.end());
+                feats_down_body->width=points.size(); feats_down_body->height=1;
+            }
             t1 = omp_get_wtime();
             feats_down_size = feats_down_body->points.size();
 
@@ -1750,6 +1760,7 @@ private:
             t3 = omp_get_wtime();
             if (!locate_in_prior_map)
             {
+                update_mapping_exclusion(pos_lid);
                 map_incremental();
                 if (mapping_backend_)
                 {
@@ -1817,9 +1828,8 @@ private:
 
     void map_publish_callback()
     {
-        if (spatial_map_ && pubLaserCloudMap_->get_subscription_count()>0)
+        if (locate_in_prior_map && !prior_preview_.data.empty() && pubLaserCloudMap_->get_subscription_count()>0)
         {
-            if (prior_preview_.data.empty()) pcl::toROSMsg(spatial_map_->preview(),prior_preview_);
             prior_preview_.header.stamp=this->now(); prior_preview_.header.frame_id=map_frame;
             pubLaserCloudMap_->publish(prior_preview_);
         }
@@ -1859,6 +1869,7 @@ private:
 
     void initial_pose_cbk(const nav_msgs::msg::Odometry::SharedPtr msg)
     {
+        if (initial_pose_received) return;
         if (msg->header.frame_id != map_frame || msg->child_frame_id != lidar_frame)
         {
             RCLCPP_ERROR(
@@ -1893,6 +1904,15 @@ private:
         prior_from_odom_.linear()=Eigen::Quaterniond(rotation.w,rotation.x,rotation.y,rotation.z).toRotationMatrix();
         prior_from_odom_.translation()<<initial_pose.pose.pose.position.x,
             initial_pose.pose.pose.position.y,initial_pose.pose.pose.position.z;
+        PointCloudXYZI local;
+        pcl::transformPointCloud(prior_map_,local,prior_from_odom_.inverse().matrix().cast<float>().eval());
+        const auto build_started=std::chrono::steady_clock::now();
+        ikdtree.set_downsample_param(filter_size_map_min);
+        ikdtree.Build(local.points);
+        RCLCPP_INFO(this->get_logger(), "Whole prior tree ready: points=%zu build_ms=%.1f; moving cache disabled",
+            local.size(),std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-build_started).count());
+        // Preview is already serialized; release the extra map-coordinate copy.
+        PointCloudXYZI().swap(prior_map_);
         initial_pose_received = true;
         if (reference_odom_enabled_)
         {
