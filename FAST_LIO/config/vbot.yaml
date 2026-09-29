@@ -3,13 +3,32 @@
         locate_in_prior_map: false
         prior_map_path: ""
         feature_extract_enable: false
-        point_filter_num: 3
+        point_filter_num: 1
         max_iteration: 3
-        filter_size_surf: 0.5
-        filter_size_map: 0.5
+        filter_size_surf: 0.3
+        filter_size_map: 0.3
         cube_side_length: 1000.0
         runtime_pos_log_enable: false
         map_file_path: "./maps/scans.pcd"
+
+        loop_closure:
+            enabled: true
+            # 四足机器人重访同一地点时真实高度差接近 0，避免累计 Z 漂移破坏 ICP 初值。
+            planar_revisit_initialization: true
+            frequency_hz: 1.0
+            keyframe_distance: 1.0
+            keyframe_angle_deg: 15.0
+            keyframe_seconds: 5.0
+            minimum_loop_seconds: 30.0
+            candidates: 5
+            descriptor_threshold: 0.20
+            maximum_correspondence: 1.5
+            maximum_fitness: 0.15
+            minimum_overlap: 0.5
+            overlap_distance: 0.3
+            # 回环已通过描述子、ICP、重叠率三层校验，允许其修正米级累计漂移。
+            huber_delta: 5.0
+            vertical_sigma: 0.03
 
         common:
             map_frame_id: "omni_map"
@@ -29,7 +48,8 @@
             lidar_type: 6
             # 当前 vbot 为 WLR-722 16 线版本；处理器会安全丢弃越界 ring。
             scan_line: 16
-            blind: 0.5
+            # 丢弃距离雷达原点 <= 0.10m 的点；建图与定位输出共享此过滤。
+            blind: 0.10
             # vbot 驱动的 timestamp 字段单位为秒；内部转换为相对毫秒。
             timestamp_unit: 0
             scan_rate: 5
@@ -51,6 +71,7 @@
                           0.0027346740, -0.0129649238,  0.9999122123]
 
         publish:
+            map_max_points: 300000
             tf_en: false
             path_en: true
             effect_map_en: true
@@ -62,3 +83,5 @@
         pcd_save:
             pcd_save_en: true
             interval: -1
+            # FAST-LIO 仍处理全部 5Hz 数据；最终 PCD 每秒选一帧，减少重复点。
+            frame_interval_sec: 1.0

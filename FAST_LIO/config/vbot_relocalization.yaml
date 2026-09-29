@@ -3,10 +3,16 @@
         locate_in_prior_map: true
         prior_map_path: ""
         feature_extract_enable: false
-        point_filter_num: 3
+        point_filter_num: 1
         max_iteration: 3
-        filter_size_surf: 0.5
-        filter_size_map: 0.5
+        filter_size_surf: 0.3
+        filter_size_map: 0.3
+        map_cache:
+            directory: ""
+            tile_size: 20.0
+            active_radius: 80.0
+            max_cached_points: 1000000
+            max_region_points: 2000000
         cube_side_length: 1000.0
         runtime_pos_log_enable: false
         map_file_path: ""
@@ -28,7 +34,8 @@
             # 6 = Vanjee PointCloud2: x/y/z/intensity/ring/timestamp。
             lidar_type: 6
             scan_line: 16
-            blind: 0.5
+            # 丢弃距离雷达原点 <= 0.10m 的点；建图与定位输出共享此过滤。
+            blind: 0.10
             # vbot 驱动的 timestamp 字段单位为秒。
             timestamp_unit: 0
             scan_rate: 5

@@ -10,6 +10,7 @@
 #include <pcl/registration/icp.h>
 #include <pcl/filters/voxel_grid.h>
 #include "fast_lio/extent_safe_voxel_filter.hpp"
+#include "fast_lio/spatial_map.hpp"
 #include <Eigen/Geometry>
 #include <cmath>
 #include <memory>
@@ -103,7 +104,7 @@ public:
 #endif
         pose_sub_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
             "initialpose", 10, std::bind(&ICPNode::pose_callback, this, std::placeholders::_1));
-        map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("prior_map", 10);
+        map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("prior_map", 1);
         transformed_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("transformed_cloud", 10);
         
         // init guess
@@ -128,38 +129,50 @@ public:
             "Relocalization convergence gate: samples=%d position_tolerance=%.3f m angle_tolerance=%.3f rad",
             converged_count_thre, candidate_position_tolerance_m,
             candidate_angle_tolerance_rad);
-        // Load the target point cloud from a PCD file
-        if (pcl::io::loadPCDFile<pcl::PointXYZ>(map_path, *target_cloud_) == -1)
-        {
-            RCLCPP_FATAL(this->get_logger(), "Couldn't read map file: %s", map_path.c_str());
-            throw std::runtime_error("failed to load ICP map");
+        fast_lio::SpatialMap::Config cache_config;
+        cache_config.voxel_size=map_voxel_leaf_size;
+        cache_config.tile_size=this->declare_parameter<double>("map_cache.tile_size",20.0);
+        const int cached=this->declare_parameter<int>("map_cache.max_cached_points",1000000);
+        const int regional=this->declare_parameter<int>("map_cache.max_region_points",2000000);
+        map_radius_=this->declare_parameter<double>("map_cache.active_radius",80.0);
+        if (cached<0 || regional<1 || !std::isfinite(map_radius_) || map_radius_<=0)
+            throw std::invalid_argument("invalid ICP map cache budgets/radius");
+        cache_config.cache_points=cached; cache_config.region_points=regional;
+        auto directory=this->declare_parameter<std::string>("map_cache.directory","");
+        if (directory.empty()) {
+            const auto slash=map_path.find_last_of('/');
+            directory=(slash==std::string::npos?".":map_path.substr(0,slash))+"/.spatial_cache";
         }
-        RCLCPP_INFO(this->get_logger(), "Loaded %d data points from target.pcd", target_cloud_->width * target_cloud_->height);
-
-        // 普通 VoxelGrid 的全局体素索引使用 32 位乘积，少量远距离离群点就会
-        // 让它放弃过滤。使用与 FAST-LIO 相同的 64 位哈希体素实现，保证 ICP
-        // 和持续定位消费完全一致的先验地图分辨率。
-        const auto filter_stats = fast_lio::pointcloud::extentSafeVoxelFilter(
-            *target_cloud_, map_voxel_leaf_size, target_cloud_.get());
-        if (target_cloud_->empty())
-        {
-            RCLCPP_FATAL(this->get_logger(), "Map is empty after extent-safe voxel filtering: %s", map_path.c_str());
-            throw std::runtime_error("filtered ICP map is empty");
-        }
+        spatial_map_=std::make_unique<fast_lio::SpatialMap>(
+            map_path,directory,cache_config,[] {return !rclcpp::ok();});
+        load_target_region();
+        const auto stats=spatial_map_->stats();
         RCLCPP_INFO(
             this->get_logger(),
-            "Target map ready: raw_points=%zu filtered_points=%zu rejected_non_finite=%zu rejected_index_overflow=%zu",
-            filter_stats.input_points, filter_stats.output_points,
-            filter_stats.rejected_non_finite, filter_stats.rejected_index_overflow);
-        // Publish the downsampled target cloud
-
-        pcl::toROSMsg(*target_cloud_, target_cloud_msg);
+            "ICP map ready: indexed=%lu regional=%zu tiles=%zu reused=%d",
+            stats.filtered_points,target_cloud_->size(),stats.tiles,stats.reused_index);
+        pcl::toROSMsg(spatial_map_->preview(), target_cloud_msg);
         target_cloud_msg.header.stamp = this->now();
         target_cloud_msg.header.frame_id = map_frame;
         map_pub_->publish(target_cloud_msg);
+        map_timer_=this->create_wall_timer(std::chrono::seconds(1),[this] {
+            if (map_pub_->get_subscription_count()>0) {
+                target_cloud_msg.header.stamp=this->now(); map_pub_->publish(target_cloud_msg);
+            }
+        });
     }
 
 private:
+    void load_target_region()
+    {
+        const Eigen::Vector3d center=initGuess.block<3,1>(0,3).cast<double>();
+        const auto region=spatial_map_->region(center,map_radius_);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr next(new pcl::PointCloud<pcl::PointXYZ>);
+        next->reserve(region.size());
+        for (const auto &p:region) next->push_back(pcl::PointXYZ(p.x,p.y,p.z));
+        if (next->empty()) throw std::runtime_error("ICP map has no usable points near initial pose");
+        target_cloud_=std::move(next);
+    }
     void filter_input_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr & cloud)
     {
         pcl::PointCloud<pcl::PointXYZ>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZ>);
@@ -278,8 +291,6 @@ private:
         transformed_cloud_msg.header.frame_id = map_frame;
         transformed_cloud_pub_->publish(transformed_cloud_msg);
 
-        target_cloud_msg.header.stamp = this->now();
-        map_pub_->publish(target_cloud_msg);
     }
 
     template<typename StampT>
@@ -469,6 +480,7 @@ private:
         }
         // 操作者更新初值后，旧候选簇已不属于同一次搜索，必须清空。
         convergence_gate_->Reset();
+        load_target_region();
         double r,p,yaw;
         rot_mat.getRPY(r, p, yaw);
         RCLCPP_INFO(this->get_logger(), "Initial guess: \n x: %f, y: %f, z: %f, a: %f", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, yaw);
@@ -485,6 +497,9 @@ private:
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr map_pub_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr transformed_cloud_pub_;
     pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud_{new pcl::PointCloud<pcl::PointXYZ>};
+    std::unique_ptr<fast_lio::SpatialMap> spatial_map_;
+    double map_radius_{80.0};
+    rclcpp::TimerBase::SharedPtr map_timer_;
 
     Eigen::Matrix4f initGuess;
     double initial_x, initial_y, initial_z, initial_a;

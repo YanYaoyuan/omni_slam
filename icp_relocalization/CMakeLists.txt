@@ -90,6 +90,7 @@ ament_target_dependencies(
 )
 target_link_libraries(
   icp_node
+  fast_lio::fastlio_spatial_map
   pcl_common
   pcl_io
   pcl_filters

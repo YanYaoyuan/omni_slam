@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import threading
 from typing import BinaryIO, Callable, Dict, Iterator, Optional, Tuple
 import uuid
 
@@ -97,6 +98,9 @@ class MapStore:
         if not self.root.is_dir():
             raise MapStoreError(f"map root is not a directory: {self.root}")
         self._lock_path = self.root / ".map_store.lock"
+        # 已发布的版本不可变；文件或 manifest 身份变化后必须重新校验。
+        self._verified_files: dict[Path, tuple] = {}
+        self._verify_lock = threading.Lock()
 
     @staticmethod
     def validate_map_id(map_id: str) -> str:
@@ -273,12 +277,30 @@ class MapStore:
         return catalog
 
     def verify(self, asset: MapAsset) -> None:
-        with asset.pcd_path.open("rb") as stream:
-            checksum, size_bytes = _hash_stream(stream)
-        if size_bytes != asset.size_bytes or checksum != asset.checksum:
-            raise MapStoreError(
-                f"map checksum mismatch for {asset.map_id} v{asset.version:06d}"
+        # 列目录不应每次重复读取所有大地图。ctime 同时覆盖同大小改写后恢复
+        # mtime 的情况；首次访问及文件替换、改写后仍执行完整 SHA-256 校验。
+        def identity(stat: os.stat_result) -> tuple:
+            return (
+                stat.st_dev, stat.st_ino, stat.st_size,
+                stat.st_mtime_ns, stat.st_ctime_ns,
+                asset.checksum, asset.size_bytes,
             )
+
+        with self._verify_lock, asset.pcd_path.open("rb") as stream:
+            before = identity(os.fstat(stream.fileno()))
+            if self._verified_files.get(asset.pcd_path) == before:
+                return
+            self._verified_files.pop(asset.pcd_path, None)
+            checksum, size_bytes = _hash_stream(stream)
+            if (
+                size_bytes != asset.size_bytes or checksum != asset.checksum
+                or identity(os.fstat(stream.fileno())) != before
+                or identity(asset.pcd_path.stat()) != before
+            ):
+                raise MapStoreError(
+                    f"map checksum mismatch for {asset.map_id} v{asset.version:06d}"
+                )
+            self._verified_files[asset.pcd_path] = before
 
     def _asset_from_directory(self, map_id: str, directory: Path) -> MapAsset:
         manifest_path = directory / "manifest.json"
