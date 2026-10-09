@@ -28,6 +28,28 @@ class MapStoreTests(unittest.TestCase):
     def tearDown(self):
         self._temporary.cleanup()
 
+    def test_corrected_body_path_is_committed_with_the_same_map_version(self):
+        source = _pcd(self.root / "source.pcd")
+        trajectory = self.root / "source.pcd.body_path.txt"
+        trajectory.write_text("# omni_map omni_base_link\n10 1 2 3\n11 2 2 3\n")
+        store = MapStore(self.root / "maps")
+        asset = store.import_pcd("with-route", source, body_path_source=trajectory)
+        data = trajectory.read_bytes()
+        self.assertEqual((asset.pcd_path.parent / "body_path.txt").read_bytes(), data)
+        manifest = json.loads(asset.manifest_path.read_text())
+        self.assertEqual(manifest["body_path"]["checksum"], hashlib.sha256(data).hexdigest())
+        self.assertEqual(manifest["body_path"]["size_bytes"], len(data))
+
+    def test_stale_body_path_does_not_publish_a_new_map_version(self):
+        source = _pcd(self.root / "source.pcd")
+        trajectory = self.root / "source.pcd.body_path.txt"
+        trajectory.write_text("old trajectory")
+        os.utime(trajectory, ns=(1, 1))
+        store = MapStore(self.root / "maps")
+        with self.assertRaisesRegex(MapStoreError, "predates"):
+            store.import_pcd("stale-route", source, body_path_source=trajectory)
+        self.assertFalse((self.root / "maps/stale-route/current").exists())
+
     def test_import_publishes_versioned_asset_and_manifest(self):
         source = _pcd(self.root / "source.pcd")
         store = MapStore(self.root / "maps")

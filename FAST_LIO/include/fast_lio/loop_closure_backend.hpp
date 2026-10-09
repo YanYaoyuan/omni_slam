@@ -22,6 +22,8 @@ public:
     double huber_delta{1.345};
     double vertical_sigma{0.10};
     double export_frame_interval{0.0};
+    double trajectory_exclusion_radius{0.0};
+    Eigen::Vector3d lidar_in_imu{Eigen::Vector3d::Zero()};
     std::size_t candidates{5}, preview_points{300000}, chunk_bytes{64U << 20};
   };
   struct Snapshot {
@@ -39,7 +41,7 @@ public:
   Snapshot snapshot() const;
   Cloud preview(const Snapshot &snapshot) const;
   bool save(const std::string &path, std::string *error,
-            const std::function<bool()> &cancel = {});
+            const std::function<bool()> &cancel = {}, Snapshot *saved_snapshot = nullptr);
   // Also used to drain the final pending keyframes when ending a mapping session.
   // Serialized with the worker; never called from the LIO callback.
   void processPending();

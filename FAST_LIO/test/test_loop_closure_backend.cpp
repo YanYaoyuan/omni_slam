@@ -115,10 +115,13 @@ TEST_F(LoopTest, SaveUsesOnePoseSnapshotWhileNewScansArrive) {
   Backend backend(root,Backend::Config{},false);
   backend.append(scene(),pose(0),0); backend.processPending();
   bool appended=false; std::string error;
+  Backend::Snapshot saved_snapshot;
   ASSERT_TRUE(backend.save(root+"/map.pcd",&error,[&] {
     if (!appended) { appended=true; backend.append(scene(),pose(2),1); }
     return false;
-  }))<<error;
+  }, &saved_snapshot))<<error;
+  ASSERT_EQ(saved_snapshot.frames.size(),1u);
+  EXPECT_DOUBLE_EQ(saved_snapshot.frames.front().stamp,0);
   Backend::Cloud saved; ASSERT_EQ(pcl::io::loadPCDFile(root+"/map.pcd",saved),0);
   EXPECT_EQ(saved.size(),1800u); EXPECT_EQ(backend.snapshot().frames.size(),2u);
   EXPECT_FALSE(backend.discardSavedChunks());

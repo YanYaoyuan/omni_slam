@@ -119,6 +119,7 @@ class MapStore:
         metadata: Optional[Dict[str, object]] = None,
         publish_current: bool = True,
         cancel_requested: Optional[Callable[[], bool]] = None,
+        body_path_source: Optional[Path] = None,
     ) -> MapAsset:
         """导入、校验并原子发布非空 PCD。
 
@@ -167,6 +168,18 @@ class MapStore:
                     "source_name": source_path.name,
                     "metadata": metadata or {},
                 }
+                if body_path_source is not None:
+                    body_path_source = Path(body_path_source).resolve(strict=True)
+                    if body_path_source.stat().st_mtime_ns < source_path.stat().st_mtime_ns:
+                        raise MapStoreError("body trajectory predates the saved PCD")
+                    body_checksum, body_size = self._copy_and_hash(
+                        body_path_source, staging_directory / "body_path.txt", cancel_requested
+                    )
+                    if body_size <= 0:
+                        raise MapStoreError("saved body trajectory is empty")
+                    manifest["body_path"] = {
+                        "file": "body_path.txt", "checksum": body_checksum, "size_bytes": body_size
+                    }
                 manifest_path = staging_directory / "manifest.json"
                 with manifest_path.open("x", encoding="utf-8") as stream:
                     json.dump(manifest, stream, ensure_ascii=False, sort_keys=True, indent=2)

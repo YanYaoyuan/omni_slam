@@ -203,12 +203,9 @@ def generate_launch_description():
         remappings=[('/Odometry', '/state_estimation')],
         on_exit=Shutdown(reason='Fast-LIO localization exited'))
 
-    delayed_start_lio = TimerAction(
-        period=5.0,
-        actions=[
-            fast_lio_node,
-            TimerAction(period=1.0, actions=[icp_node]),
-        ])
+    # FAST-LIO subscribes to the one-shot seed before map loading. Retain a
+    # short discovery lead for that subscription, without the old 5s idle wait.
+    delayed_start_icp = TimerAction(period=1.0, actions=[icp_node])
 
     ld = LaunchDescription()
     ld.add_action(declare_config_file)
@@ -233,5 +230,6 @@ def generate_launch_description():
     # This synchronous preflight runs before any localization node is started.
     ld.add_action(OpaqueFunction(function=_validate_relocalization_inputs))
     ld.add_action(global_pointcloud_node)
-    ld.add_action(delayed_start_lio)
+    ld.add_action(fast_lio_node)
+    ld.add_action(delayed_start_icp)
     return ld

@@ -630,6 +630,11 @@ class SlamManagerNode(Node):
                 self._map_source_path,
                 calibration_hash=goal_handle.request.calibration_hash,
                 metadata={"mapping_session_id": self._mapping_session_id},
+                body_path_source=(
+                    Path(str(self._map_source_path) + ".body_path.txt")
+                    if Path(str(self._map_source_path) + ".body_path.txt").is_file()
+                    else None
+                ),
                 publish_current=goal_handle.request.make_current,
                 cancel_requested=lambda: goal_handle.is_cancel_requested,
             )
@@ -809,7 +814,13 @@ class SlamManagerNode(Node):
             feedback.state = int(snapshot.state)
             feedback.elapsed_sec = float(elapsed)
             feedback.fitness_score = float(fitness)
-            feedback.message = snapshot.reason_text
+            if self._last_initial_pose is not None:
+                stage = "ICP succeeded; waiting for fresh pose"
+            elif math.isfinite(fitness):
+                stage = "ICP relocalizing"
+            else:
+                stage = "Loading map / preparing ICP"
+            feedback.message = snapshot.reason_text or stage
             goal_handle.publish_feedback(feedback)
             time.sleep(0.1)
         return self._finish_localization_failure(

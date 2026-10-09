@@ -1,4 +1,5 @@
 #include "fast_lio/map_archive.hpp"
+#include "fast_lio/trajectory_exclusion.hpp"
 #include <gtest/gtest.h>
 #include <pcl/io/pcd_io.h>
 #include <fstream>
@@ -120,4 +121,43 @@ TEST_F(ArchiveTest, ConcurrentPreviewOnlySeesCompleteFrameSnapshots) {
   finished.store(true); reader.join();
   EXPECT_EQ(archive.pointCount(), 10000u);
 }
+TEST(TrajectoryExclusion, CurvedThreeDimensionalCapsulesHaveFiniteHeight) {
+  fast_lio::TrajectoryExclusion region(.5);
+  region.add({0,0,0}); region.add({2,0,0}); region.add({2,2,1});
+  EXPECT_TRUE(region.contains({1,.5,0}));
+  EXPECT_FALSE(region.contains({1,.51,0}));
+  EXPECT_FALSE(region.contains({1,0,.51}));
+  EXPECT_TRUE(region.contains({2,1,.5}));
+  EXPECT_FALSE(region.contains({1,1,0}));
+  EXPECT_TRUE(region.contains({2,2,1.5}));
+}
+
+TEST_F(ArchiveTest, ExclusionUsesAllCorrectedLidarPosesAndPreservesRawScans) {
+  Archive archive(root,128,100);
+  archive.setTrajectoryExclusion(.5,Eigen::Vector3d(1,0,0));
+  Archive::Cloud input;
+  for (const auto &xyz:std::vector<Eigen::Vector3d>{{1,0,0},{1,1,0},{1,2,0},{0,0,0},{1,0,1}}) {
+    pcl::PointXYZINormal p{}; p.x=xyz.x(); p.y=xyz.y(); p.z=xyz.z(); input.push_back(p);
+  }
+  archive.append(input,pose(0),0,0,pose(0));
+  auto middle=pose(0); middle.translation().y()=2;
+  archive.append({},middle,.2,1,pose(0)); // not one of the 1 Hz exported frames
+  archive.append({},pose(0),.4,2,pose(0));
+  Archive::Poses corrected{pose(10),pose(10),pose(10)};
+  corrected[1].translation().y()=2;
+  const auto preview=archive.preview(corrected);
+  ASSERT_EQ(preview.size(),2u);
+  EXPECT_EQ(archive.readFrame(0).size(),5u);
+  EXPECT_THROW(archive.setTrajectoryExclusion(0,{}),std::logic_error);
+  std::string error;
+  ASSERT_TRUE(archive.exportPcd(root+"/clean.pcd",corrected,&error,{},3,1.0))<<error;
+  Archive::Cloud loaded;
+  ASSERT_EQ(pcl::io::loadPCDFile(root+"/clean.pcd",loaded),0);
+  ASSERT_EQ(loaded.size(),2u);
+  EXPECT_FLOAT_EQ(loaded[0].x,10);
+  EXPECT_FLOAT_EQ(loaded[1].z,1);
+  // A partial preview must not use future trajectory sections.
+  EXPECT_EQ(archive.preview(corrected,1).size(),4u);
+}
+
 }

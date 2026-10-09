@@ -1,5 +1,7 @@
 #include "fast_lio/map_archive.hpp"
 #include "fast_lio/atomic_file.hpp"
+#include "fast_lio/trajectory_exclusion.hpp"
+#include <iomanip>
 
 #include <algorithm>
 #include <array>
@@ -44,6 +46,8 @@ struct MapArchive::Impl {
   std::size_t points_per_chunk, preview_limit;
   std::uint64_t count{0}, saved_count{0};
   bool saved{false}, discarded{false}, failed{false};
+  double exclusion_radius{0};
+  Eigen::Vector3d lidar_in_imu{Eigen::Vector3d::Zero()};
   Frames frames;
   std::vector<std::string> chunks;
   std::ofstream writer;
@@ -106,6 +110,13 @@ MapArchive::MapArchive(const std::string &parent, std::size_t chunk_bytes, std::
   impl_->root = created;
 }
 MapArchive::~MapArchive() = default;
+void MapArchive::setTrajectoryExclusion(double radius, const Eigen::Vector3d &lidar_in_imu) {
+  TrajectoryExclusion validate(radius);
+  if (!lidar_in_imu.allFinite()) throw std::invalid_argument("non-finite LiDAR extrinsic");
+  std::lock_guard<std::mutex> lock(impl_->mutex);
+  if (!impl_->frames.empty()) throw std::logic_error("configure trajectory exclusion before appending scans");
+  impl_->exclusion_radius=radius; impl_->lidar_in_imu=lidar_in_imu;
+}
 
 std::size_t MapArchive::append(const Cloud &scan, const Pose &pose, double stamp,
                              std::size_t keyframe, const Pose &relative) {
@@ -144,15 +155,21 @@ MapArchive::Cloud MapArchive::readFrame(std::size_t index) const {
 MapArchive::Cloud MapArchive::preview(const Poses &poses, std::size_t frame_count) const {
   std::vector<Impl::Sample> samples;
   Frames snapshot;
+  double radius; Eigen::Vector3d lidar;
   {
     std::lock_guard<std::mutex> lock(impl_->mutex);
     if (impl_->failed) throw std::runtime_error("dense archive write previously failed");
     samples = impl_->samples; snapshot=impl_->frames;
+    radius=impl_->exclusion_radius; lidar=impl_->lidar_in_imu;
   }
+  TrajectoryExclusion exclusion(radius);
+  for (std::size_t i=0;i<std::min(frame_count,snapshot.size());++i)
+    exclusion.add(poseFor(snapshot[i],poses)*lidar);
   Cloud cloud; cloud.reserve(samples.size());
   for (const auto &sample: samples) {
     if (sample.frame >= frame_count) continue;
-    cloud.push_back(unpack(transform(sample.point, poseFor(snapshot.at(sample.frame), poses))));
+    const auto p=transform(sample.point, poseFor(snapshot.at(sample.frame), poses));
+    if (!exclusion.contains(Eigen::Vector3d(p[0],p[1],p[2]))) cloud.push_back(unpack(p));
   }
   return cloud;
 }
@@ -164,6 +181,7 @@ bool MapArchive::exportPcd(const std::string &path, const Poses &poses, std::str
     return false;
   }
   Frames snapshot;
+  double radius; Eigen::Vector3d lidar;
   {
     std::lock_guard<std::mutex> lock(impl_->mutex);
     if (impl_->failed || impl_->discarded || !impl_->count) {
@@ -173,6 +191,7 @@ bool MapArchive::exportPcd(const std::string &path, const Poses &poses, std::str
     const auto n = std::min(frame_count, impl_->frames.size());
     if (!n) { if (error) *error="no committed frames to export"; return false; }
     snapshot.assign(impl_->frames.begin(), impl_->frames.begin()+n);
+    radius=impl_->exclusion_radius; lidar=impl_->lidar_in_imu;
   }
   const std::uint64_t archived = snapshot.back().first_point + snapshot.back().point_count;
   std::vector<std::size_t> selected;
@@ -185,15 +204,21 @@ bool MapArchive::exportPcd(const std::string &path, const Poses &poses, std::str
       last_stamp=snapshot[i].stamp;
     }
   }
+  // All processed poses define the swept volume, including frames not selected
+  // for the 1 Hz dense export. Loop-corrected poses and points share one frame.
+  TrajectoryExclusion exclusion(radius);
+  for (const auto &frame:snapshot) exclusion.add(poseFor(frame,poses)*lidar);
   std::uint64_t total=0;
-  for (const auto index:selected) total+=snapshot[index].point_count;
   bool written = false;
   try {
     written = atomic_replace_file(path, [&](const std::string &temporary) {
       std::ofstream output(temporary, std::ios::binary | std::ios::trunc);
       output << "# .PCD v0.7\nVERSION 0.7\nFIELDS x y z intensity normal_x normal_y normal_z curvature\n"
-        "SIZE 4 4 4 4 4 4 4 4\nTYPE F F F F F F F F\nCOUNT 1 1 1 1 1 1 1 1\nWIDTH " << total <<
-        "\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS " << total << "\nDATA binary\n";
+        "SIZE 4 4 4 4 4 4 4 4\nTYPE F F F F F F F F\nCOUNT 1 1 1 1 1 1 1 1\nWIDTH ";
+      const auto width_position=output.tellp();
+      output << std::setw(20) << 0 << "\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ";
+      const auto count_position=output.tellp();
+      output << std::setw(20) << 0 << "\nDATA binary\n";
       try {
         for (const auto index: selected) {
           const auto &frame=snapshot[index];
@@ -201,14 +226,21 @@ bool MapArchive::exportPcd(const std::string &path, const Poses &poses, std::str
           impl_->read(frame.first_point, frame.point_count, [&](const PackedPoint *p, std::size_t n) {
             if (cancel && cancel()) throw std::runtime_error("map export canceled");
             std::array<PackedPoint, 4096> transformed;
+            std::size_t kept=0;
             for (std::size_t i=0; i<n; ++i) {
-              transformed[i] = transform(p[i], pose);
+              const auto point=transform(p[i],pose);
+              if (!exclusion.contains(Eigen::Vector3d(point[0],point[1],point[2])))
+                transformed[kept++]=point;
             }
-            output.write(reinterpret_cast<const char *>(transformed.data()), n*sizeof(PackedPoint));
+            total+=kept;
+            output.write(reinterpret_cast<const char *>(transformed.data()), kept*sizeof(PackedPoint));
             if (!output) throw std::runtime_error("map export write failed");
           });
         }
         if (cancel && cancel()) throw std::runtime_error("map export canceled");
+        // Fixed-width counts allow one bounded-memory streaming pass.
+        output.seekp(width_position); output << std::setw(20) << total;
+        output.seekp(count_position); output << std::setw(20) << total;
         output.flush();
         return static_cast<bool>(output);
       } catch (const std::exception &e) { if (error) *error=e.what(); return false; }
