@@ -30,19 +30,24 @@ jobs:
     uses: ./.github/workflows/build-x86.yml
     with:
       version: ${{ inputs.version || github.ref_name }}
+    secrets:
+      OMNI_CI_REPO_TOKEN: ${{ secrets.OMNI_CI_REPO_TOKEN }}
 
   orin:
     needs: preflight
     uses: ./.github/workflows/build-orin.yml
     with:
       version: ${{ inputs.version || github.ref_name }}
+    secrets:
+      OMNI_CI_REPO_TOKEN: ${{ secrets.OMNI_CI_REPO_TOKEN }}
 
   s100:
     needs: preflight
     uses: ./.github/workflows/build-s100.yml
     with:
       version: ${{ inputs.version || github.ref_name }}
-    secrets: inherit
+    secrets:
+      OMNI_CI_REPO_TOKEN: ${{ secrets.OMNI_CI_REPO_TOKEN }}
 
   publish:
     if: github.event_name == 'push'
@@ -63,3 +68,4 @@ jobs:
         run: |
           gh release create "${GITHUB_REF_NAME}" release-assets/* \
             --repo "${GITHUB_REPOSITORY}" --generate-notes --verify-tag
+

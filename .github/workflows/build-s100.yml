@@ -16,6 +16,9 @@ on:
         default: main
         type: string
   workflow_call:
+    secrets:
+      OMNI_CI_REPO_TOKEN:
+        required: true
     inputs:
       version:
         required: false
@@ -169,13 +172,16 @@ jobs:
             "dist/${name}"
 
           tar -C dist -czf "dist/${name}.tar.gz" "${name}"
+          (cd dist && sha256sum "${name}.tar.gz" > "${name}.tar.gz.sha256")
           ls -lh "dist/${name}.tar.gz"
 
       - name: Upload S100 artifact
         uses: actions/upload-artifact@v7.0.1
         with:
           name: omni-slam-rdk-s100-aarch64
-          path: dist/*.tar.gz
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
           if-no-files-found: error
           retention-days: 3
 
@@ -195,3 +201,4 @@ jobs:
 
           docker system prune --all --force || true
           df -h
+

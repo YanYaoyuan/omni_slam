@@ -7,6 +7,8 @@ lightweight CI and developer environments as well as through ``colcon test``.
 import ast
 from pathlib import Path
 import re
+import shutil
+import subprocess
 import tempfile
 import unittest
 
@@ -381,5 +383,146 @@ class Phase0RegressionTests(unittest.TestCase):
                 self.assertIn("return code 1", failure_actions[0].kwargs["reason"])
 
 
+class RuntimeBufferRegressionTests(unittest.TestCase):
+    """Execute the actual small C++ blocks with ROS/PCL-free data types."""
+
+    @staticmethod
+    def _run_cpp(body):
+        compiler = shutil.which("g++")
+        if compiler is None:
+            raise unittest.SkipTest("g++ is needed for the C++ regression harness")
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "regression.cpp"
+            binary = Path(directory) / "regression"
+            source.write_text(body, encoding="utf-8")
+            subprocess.run(
+                [compiler, "-std=c++17", "-fsanitize=undefined,bounds",
+                 "-fno-sanitize-recover=all", str(source), "-o", str(binary)],
+                check=True, capture_output=True, text=True,
+            )
+            subprocess.run([str(binary)], check=True, capture_output=True, text=True)
+
+    def test_timing_counters_saturate_before_array_bounds(self):
+        source = (PACKAGE_ROOT / "src/laserMapping.cpp").read_text(encoding="utf-8")
+        callbacks = [
+            _function_body(source, rf"void\s+{name}\s*\(")
+            for name in ("standard_pcl_cbk", "livox_pcl_cbk")
+        ]
+        arrays = re.search(r"double T1\[MAXN\].*?;", source).group()
+        timing_guard = "if (time_log_counter < MAXN)"
+        timing = _function_body(source, re.escape(timing_guard))
+        for callback in callbacks:
+            guard = "if (runtime_pos_log && scan_count < MAXN)"
+            preprocess = _function_body(callback, re.escape(guard))
+            # Neither counter may also be incremented outside its guarded write.
+            self.assertEqual(callback.count("scan_count++"), 1)
+            self.assertEqual(source.count("time_log_counter++"), 1)
+            self._run_cpp(r'''
+#include <cassert>
+#include <vector>
+#define MAXN 4
+#define RCLCPP_WARN(...) ((void)0)
+''' + arrays + r'''
+int scan_count = 0, time_log_counter = 0;
+bool runtime_pos_log = false;
+double omp_get_wtime() { return 2.0; }
+void record_scan() {
+    double preprocess_start_time = 1.0;
+''' + guard + "{" + preprocess + r'''}
+}
+void record_timing() {
+    struct { double lidar_beg_time = 1; } Measures;
+    struct { std::vector<int> points; } cloud;
+    auto feats_undistort = &cloud;
+    double t5=1, t0=0, kdtree_incremental_time=0, kdtree_search_time=0;
+    double kdtree_delete_counter=0, kdtree_delete_time=0, kdtree_size_st=0;
+    double kdtree_size_end=0, aver_time_consu=0, add_point_size=0;
+''' + timing_guard + "{" + timing + r'''}
+}
+int main() {
+    for (int i=0; i<1000000; ++i) record_scan();
+    assert(scan_count == 0);
+    runtime_pos_log = true;
+    for (int i=0; i<1000000; ++i) { record_scan(); record_timing(); }
+    assert(scan_count == MAXN && time_log_counter == MAXN);
+    for (int i=0; i<MAXN; ++i) assert(s_plot11[i] == 1.0 && T1[i] == 1.0);
+}
+''')
+
+    def test_lidar_rollback_discards_pending_timestamps_and_cached_scan(self):
+        source = (PACKAGE_ROOT / "src/laserMapping.cpp").read_text(encoding="utf-8")
+        sync = _function_body(source, r"bool\s+sync_packages\s*\(")
+        for callback_name in ("standard_pcl_cbk", "livox_pcl_cbk"):
+            callback = _function_body(source, rf"void\s+{callback_name}\s*\(")
+            reset = _function_body(
+                callback, r"if\s*\(!is_first_lidar && cur_time < last_timestamp_lidar\)"
+            )
+            self._run_cpp(r'''
+#include <cassert>
+#include <deque>
+#include <iostream>
+#include <memory>
+#include <vector>
+#define RCLCPP_ERROR(...) ((void)0)
+struct Point { double curvature = 100; };
+struct Cloud { std::vector<Point> points = std::vector<Point>(2); };
+struct Imu { struct { double stamp; } header; };
+struct MeasureGroup {
+    std::shared_ptr<Cloud> lidar;
+    double lidar_beg_time=0, lidar_end_time=0;
+    std::vector<std::shared_ptr<Imu>> imu;
+};
+struct Harness {
+    std::deque<std::shared_ptr<Cloud>> lidar_buffer;
+    std::deque<double> time_buffer;
+    std::deque<std::shared_ptr<Imu>> imu_buffer;
+    bool lidar_pushed=false;
+    double lidar_end_time=0, lidar_mean_scantime=0, last_timestamp_imu=0;
+    int scan_num=0;
+    double get_time_sec(double stamp) { return stamp; }
+    void reset() {
+''' + reset + r'''
+    }
+    bool sync_packages(MeasureGroup &meas) {
+''' + sync + r'''
+    }
+};
+int main() {
+    for (bool cached : {false, true}) {
+        Harness h;
+        h.reset();  // Empty queues are safe.
+        MeasureGroup meas;
+        h.lidar_buffer.push_back(std::make_shared<Cloud>());
+        h.time_buffer.push_back(100);
+        h.imu_buffer.push_back(std::make_shared<Imu>(Imu{{100}}));
+        h.last_timestamp_imu=100.05;
+        if (cached) { assert(!h.sync_packages(meas)); assert(h.lidar_pushed); }
+        h.reset();
+        auto fresh=std::make_shared<Cloud>();
+        h.lidar_buffer.push_back(fresh);
+        h.time_buffer.push_back(99);
+        h.last_timestamp_imu=101;
+        assert(h.sync_packages(meas));
+        assert(meas.lidar == fresh && meas.lidar_beg_time == 99);
+        assert(h.lidar_buffer.empty() && h.time_buffer.empty() && !h.lidar_pushed);
+        // Normal synchronization still works after the reset.
+        h.lidar_buffer.push_back(fresh);
+        h.time_buffer.push_back(99.5);
+        assert(h.sync_packages(meas));
+        assert(meas.lidar_beg_time == 99.5);
+        for (double stamp : {98.0, 97.0}) {
+            h.reset();
+            h.lidar_buffer.push_back(fresh);
+            h.time_buffer.push_back(stamp);
+        }
+        assert(h.sync_packages(meas));
+        assert(meas.lidar == fresh && meas.lidar_beg_time == 97.0);
+        assert(h.lidar_buffer.empty() && h.time_buffer.empty());
+    }
+}
+''')
+
+
 if __name__ == "__main__":
     unittest.main()
+

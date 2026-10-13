@@ -13,6 +13,9 @@ on:
         default: main
         type: string
   workflow_call:
+    secrets:
+      OMNI_CI_REPO_TOKEN:
+        required: true
     inputs:
       version:
         description: Artifact version (tag or commit)
@@ -136,6 +139,9 @@ jobs:
       - name: Lint shell scripts
         run: shellcheck scripts/*.sh omni_slam_manager/scripts/omni_slam_ctl
 
+      - name: Test delivery scripts
+        run: python3 .github/ci/test_delivery.py
+
       - name: Build and test
         run: |
           source "/opt/ros/${ROS_DISTRO}/setup.bash"
@@ -170,8 +176,7 @@ jobs:
             "${GITHUB_WORKSPACE}/dist/${name}"
           tar -C "${GITHUB_WORKSPACE}/dist" -czf \
             "${GITHUB_WORKSPACE}/dist/${name}.tar.gz" "${name}"
-          sha256sum "${GITHUB_WORKSPACE}/dist/${name}.tar.gz" > \
-            "${GITHUB_WORKSPACE}/dist/${name}.tar.gz.sha256"
+          (cd "${GITHUB_WORKSPACE}/dist" && sha256sum "${name}.tar.gz" > "${name}.tar.gz.sha256")
 
       - name: Upload x86 runtime
         if: github.event_name != 'pull_request'
@@ -199,3 +204,4 @@ jobs:
             "${GITHUB_WORKSPACE}/install" "${GITHUB_WORKSPACE}/log" \
             /root/.cache/colcon /root/.cache/pip
           df -h
+
