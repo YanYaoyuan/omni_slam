@@ -1,4 +1,7 @@
 #include "fast_lio/loop_closure_backend.hpp"
+#include "fast_lio/atomic_file.hpp"
+#include "fast_lio/extent_safe_voxel_filter.hpp"
+#include "fast_lio/trajectory_exclusion.hpp"
 
 #include <gtsam/nonlinear/ISAM2.h>
 #include <gtsam/geometry/Pose3.h>
@@ -11,8 +14,15 @@
 #include <chrono>
 #include <cmath>
 #include <condition_variable>
+#include <cstdint>
+#include <cstdio>
+#include <fstream>
+#include <iomanip>
 #include <mutex>
 #include <thread>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 namespace fast_lio {
 namespace {
@@ -63,6 +73,33 @@ Cloud::Ptr downsample(const Cloud &cloud, double leaf) {
   filter.setLeafSize(leaf,leaf,leaf);
   Cloud::Ptr result(new Cloud); filter.filter(*result); return result;
 }
+bool writeBinaryPcd(const std::string &path, const Cloud &cloud) {
+  std::ofstream output(path, std::ios::binary | std::ios::trunc);
+  output << "# .PCD v0.7\nVERSION 0.7\nFIELDS x y z intensity normal_x normal_y normal_z curvature\n"
+    "SIZE 4 4 4 4 4 4 4 4\nTYPE F F F F F F F F\nCOUNT 1 1 1 1 1 1 1 1\nWIDTH " << cloud.size()
+    << "\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS " << cloud.size() << "\nDATA binary\n";
+  for (const auto &p: cloud) {
+    const float fields[8]={p.x,p.y,p.z,p.intensity,p.normal_x,p.normal_y,p.normal_z,p.curvature};
+    output.write(reinterpret_cast<const char *>(fields),sizeof(fields));
+  }
+  output.flush();
+  return static_cast<bool>(output);
+}
+// Removes a tree written by exportKeyframes: regular files and plain subdirectories.
+void removeTree(const std::string &path) {
+  DIR *directory=::opendir(path.c_str());
+  if (!directory) { ::unlink(path.c_str()); return; }
+  while (const dirent *entry=::readdir(directory)) {
+    const std::string name=entry->d_name;
+    if (name=="." || name=="..") continue;
+    const std::string child=path+"/"+name;
+    struct stat info{};
+    if (::lstat(child.c_str(),&info)==0 && S_ISDIR(info.st_mode)) removeTree(child);
+    else ::unlink(child.c_str());
+  }
+  ::closedir(directory);
+  ::rmdir(path.c_str());
+}
 }
 
 struct LoopClosureBackend::Impl {
@@ -98,6 +135,7 @@ struct LoopClosureBackend::Impl {
           c.minimum_overlap<=1 && c.overlap_distance>0 && c.minimum_loop_seconds>=0 &&
           c.descriptor_threshold>0 && c.descriptor_threshold<1 && c.huber_delta>0 &&
           c.vertical_sigma>0 &&
+          std::isfinite(c.keyframe_export_voxel) && c.keyframe_export_voxel>=0 &&
           std::isfinite(c.export_frame_interval) && c.export_frame_interval>=0))
       throw std::invalid_argument("invalid background loop configuration");
   }
@@ -264,6 +302,92 @@ bool LoopClosureBackend::save(const std::string &path,std::string *error,const s
     path,s.keyframes,error,cancel,s.frames.size(),impl_->config.export_frame_interval);
   if (saved && saved_snapshot) *saved_snapshot=s;
   return saved;
+}
+bool LoopClosureBackend::exportKeyframes(const std::string &directory,const Snapshot &s,
+                                         std::string *error,const std::function<bool()> &cancel) const {
+  const auto fail=[error](const std::string &message) { if (error) *error=message; return false; };
+  if (directory.empty() || directory.back()=='/') return fail("keyframe export directory is invalid");
+  if (s.frames.empty() || s.keyframes.empty()) return fail("no keyframes to export");
+  Impl::Keyframes keys;
+  { std::lock_guard<std::mutex> lock(impl_->state_mutex); keys=impl_->keys; }
+  if (keys.size()<s.keyframes.size()) return fail("keyframe snapshot does not belong to this session");
+  const auto &config=impl_->config;
+  const std::string stage=directory+".tmp."+std::to_string(static_cast<long long>(::getpid()))+"."+
+    std::to_string(static_cast<long long>(std::chrono::steady_clock::now().time_since_epoch().count()));
+  std::string message;
+  try {
+    if (::mkdir(stage.c_str(),0750)!=0 || ::mkdir((stage+"/scans").c_str(),0750)!=0)
+      throw std::runtime_error("cannot create keyframe staging directory: "+stage);
+    // Same swept volume as the exported PCD, so keyframes rebuild the same map.
+    TrajectoryExclusion exclusion(config.trajectory_exclusion_radius);
+    for (const auto &frame: s.frames)
+      exclusion.add(s.keyframes.at(frame.keyframe)*frame.keyframe_from_frame*config.lidar_in_imu);
+    std::ofstream index(stage+"/keyframes.txt");
+    index << "# HENG_KEYFRAMES_1\n# index stamp x y z qx qy qz qw points\n" << std::setprecision(17);
+    // scan_context.bin: "HENGSC01", uint32 rings, uint32 sectors, uint64 count,
+    // then count row-major rings x sectors float64 matrices (host byte order).
+    std::ofstream descriptors(stage+"/scan_context.bin",std::ios::binary);
+    const char magic[8]={'H','E','N','G','S','C','0','1'};
+    const std::uint32_t shape[2]={kRings,kSectors};
+    const std::uint64_t count=s.keyframes.size();
+    descriptors.write(magic,sizeof(magic));
+    descriptors.write(reinterpret_cast<const char *>(shape),sizeof(shape));
+    descriptors.write(reinterpret_cast<const char *>(&count),sizeof(count));
+    std::size_t next=0;
+    for (std::size_t k=0; k<s.keyframes.size(); ++k) {
+      if (cancel && cancel()) throw std::runtime_error("keyframe export canceled");
+      Cloud scan;
+      for (; next<s.frames.size() && s.frames[next].keyframe==k; ++next) {
+        const auto &frame=s.frames[next];
+        const Pose world=s.keyframes[k]*frame.keyframe_from_frame;
+        for (const auto &p: impl_->archive.readFrame(next)) {
+          const Eigen::Vector3d point(p.x,p.y,p.z);
+          if (exclusion.contains(world*point)) continue;
+          const Eigen::Vector3d local=frame.keyframe_from_frame*point;
+          auto q=p; q.x=local.x(); q.y=local.y(); q.z=local.z();
+          scan.push_back(q);
+        }
+      }
+      if (config.keyframe_export_voxel>0 && !scan.empty())
+        pointcloud::extentSafeVoxelFilter(scan,config.keyframe_export_voxel,&scan);
+      char name[32]; std::snprintf(name,sizeof(name),"%06zu.pcd",k);
+      const std::string file=stage+"/scans/"+name;
+      if (!scan.empty() && (!writeBinaryPcd(file,scan) || !sync_file(file,&message)))
+        throw std::runtime_error("keyframe scan write failed: "+file+" "+message);
+      const auto &pose=s.keyframes[k];
+      const Eigen::Quaterniond q(pose.linear());
+      index << k << ' ' << keys[k].stamp << ' ' << pose.translation().x() << ' '
+            << pose.translation().y() << ' ' << pose.translation().z() << ' ' << q.x() << ' '
+            << q.y() << ' ' << q.z() << ' ' << q.w() << ' ' << scan.size() << '\n';
+      // Identical to the loop detector's descriptor of this keyframe.
+      const auto descriptor=describe(*downsample(impl_->archive.readFrame(keys[k].frame),config.voxel_size));
+      for (int r=0; r<kRings; ++r) for (int c=0; c<kSectors; ++c) {
+        const double value=descriptor(r,c);
+        descriptors.write(reinterpret_cast<const char *>(&value),sizeof(value));
+      }
+    }
+    if (next!=s.frames.size()) throw std::runtime_error("archived frames reference unknown keyframes");
+    index.close(); descriptors.close();
+    if (!index || !descriptors) throw std::runtime_error("keyframe index write failed");
+    if (!sync_file(stage+"/keyframes.txt",&message) || !sync_file(stage+"/scan_context.bin",&message) ||
+        !sync_directory(stage+"/scans",&message) || !sync_directory(stage,&message))
+      throw std::runtime_error(message);
+    const std::string previous=stage+".old";
+    struct stat info{};
+    const bool replace=::lstat(directory.c_str(),&info)==0;
+    if (replace && ::rename(directory.c_str(),previous.c_str())!=0)
+      throw std::runtime_error("cannot move previous keyframe export aside: "+directory);
+    if (::rename(stage.c_str(),directory.c_str())!=0) {
+      if (replace) ::rename(previous.c_str(),directory.c_str());
+      throw std::runtime_error("cannot publish keyframe export: "+directory);
+    }
+    if (replace) removeTree(previous);
+    if (!sync_directory(parent_directory(directory),&message)) return fail(message);
+  } catch (const std::exception &e) {
+    removeTree(stage);
+    return fail(e.what());
+  }
+  return true;
 }
 void LoopClosureBackend::processPending() { impl_->process(); }
 std::string LoopClosureBackend::directory() const { return impl_->archive.directory(); }

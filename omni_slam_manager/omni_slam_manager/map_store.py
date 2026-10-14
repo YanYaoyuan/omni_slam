@@ -43,6 +43,8 @@ class MapAsset:
     manifest_path: Path
     checksum: str
     size_bytes: int
+    # FAST-LIO 关键帧导出（位姿、局部扫描、Scan Context），旧版本地图为 None。
+    keyframes_directory: Optional[Path] = None
 
 
 @dataclass(frozen=True)
@@ -120,6 +122,7 @@ class MapStore:
         publish_current: bool = True,
         cancel_requested: Optional[Callable[[], bool]] = None,
         body_path_source: Optional[Path] = None,
+        keyframes_source: Optional[Path] = None,
     ) -> MapAsset:
         """导入、校验并原子发布非空 PCD。
 
@@ -180,6 +183,13 @@ class MapStore:
                     manifest["body_path"] = {
                         "file": "body_path.txt", "checksum": body_checksum, "size_bytes": body_size
                     }
+                if keyframes_source is not None:
+                    manifest["keyframes"] = self._import_keyframes(
+                        Path(keyframes_source),
+                        source_path,
+                        staging_directory / "keyframes",
+                        cancel_requested,
+                    )
                 manifest_path = staging_directory / "manifest.json"
                 with manifest_path.open("x", encoding="utf-8") as stream:
                     json.dump(manifest, stream, ensure_ascii=False, sort_keys=True, indent=2)
@@ -219,7 +229,30 @@ class MapStore:
                 manifest_path=final_directory / "manifest.json",
                 checksum=checksum,
                 size_bytes=size_bytes,
+                keyframes_directory=(
+                    final_directory / "keyframes" if "keyframes" in manifest else None
+                ),
             )
+
+    def verify_keyframes(self, asset: MapAsset) -> None:
+        """完整校验关键帧导出的每个文件；定位热路径不需要调用。"""
+
+        if asset.keyframes_directory is None:
+            raise MapStoreError(f"map version has no keyframes: {asset.map_id}")
+        try:
+            manifest = json.loads(asset.manifest_path.read_text(encoding="utf-8"))
+            files = manifest["keyframes"]["files"]
+        except (OSError, KeyError, TypeError, json.JSONDecodeError) as error:
+            raise MapStoreError(f"invalid keyframe manifest: {asset.manifest_path}") from error
+        for name, expected in files.items():
+            path = asset.keyframes_directory / name
+            try:
+                with path.open("rb") as stream:
+                    checksum, size_bytes = _hash_stream(stream)
+            except OSError as error:
+                raise MapStoreError(f"keyframe file is unreadable: {path}") from error
+            if checksum != expected.get("checksum") or size_bytes != expected.get("size_bytes"):
+                raise MapStoreError(f"keyframe checksum mismatch: {path}")
 
     def current(self, map_id: str, *, verify: bool = True) -> MapAsset:
         map_id = self.validate_map_id(map_id)
@@ -335,6 +368,7 @@ class MapStore:
             raise MapStoreError(f"manifest checksum fields are invalid: {manifest_path}")
         if not pcd_path.is_file() or pcd_path.stat().st_size <= 0:
             raise MapStoreError(f"map PCD is missing or empty: {pcd_path}")
+        keyframes_directory = directory / "keyframes"
         return MapAsset(
             map_id=map_id,
             version=version,
@@ -343,6 +377,11 @@ class MapStore:
             manifest_path=manifest_path,
             checksum=checksum,
             size_bytes=size_bytes,
+            keyframes_directory=(
+                keyframes_directory
+                if "keyframes" in manifest and keyframes_directory.is_dir()
+                else None
+            ),
         )
 
     @staticmethod
@@ -351,6 +390,49 @@ class MapStore:
     ) -> None:
         if cancel_requested is not None and cancel_requested():
             raise MapStoreImportCancelled("map import canceled before commit")
+
+    @classmethod
+    def _import_keyframes(
+        cls,
+        source: Path,
+        pcd_source: Path,
+        destination: Path,
+        cancel_requested: Optional[Callable[[], bool]],
+    ) -> Dict[str, object]:
+        """复制 FAST-LIO 关键帧导出，返回写入 manifest 的逐文件校验信息。"""
+
+        source = source.resolve(strict=True)
+        index = source / "keyframes.txt"
+        scans = source / "scans"
+        if not source.is_dir() or not index.is_file() or not scans.is_dir():
+            raise MapStoreError(f"keyframe export is incomplete: {source}")
+        # FAST-LIO 在 PCD 之后写关键帧；更旧的 keyframes.txt 属于上一次保存。
+        if index.stat().st_mtime_ns < pcd_source.stat().st_mtime_ns:
+            raise MapStoreError("keyframe export predates the saved PCD")
+        names = ["keyframes.txt", "scan_context.bin"] + sorted(
+            f"scans/{entry.name}" for entry in scans.iterdir() if entry.name.endswith(".pcd")
+        )
+        destination.mkdir(mode=0o750)
+        (destination / "scans").mkdir(mode=0o750)
+        files: Dict[str, object] = {}
+        for name in names:
+            path = source / name
+            if path.is_symlink() or not path.is_file():
+                raise MapStoreError(f"keyframe file is not a regular file: {path}")
+            checksum, size_bytes = cls._copy_and_hash(path, destination / name, cancel_requested)
+            files[name] = {"checksum": checksum, "size_bytes": size_bytes}
+        _fsync_directory(destination / "scans")
+        _fsync_directory(destination)
+        with (destination / "keyframes.txt").open(encoding="utf-8") as stream:
+            count = sum(1 for line in stream if line.strip() and not line.startswith("#"))
+        if count <= 0:
+            raise MapStoreError("keyframe export contains no keyframes")
+        return {
+            "directory": "keyframes",
+            "format": "HENG_KEYFRAMES_1",
+            "count": count,
+            "files": files,
+        }
 
     @staticmethod
     def _copy_and_hash(

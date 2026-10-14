@@ -88,3 +88,7 @@
             interval: -1
             # FAST-LIO 仍处理全部 5Hz 数据；最终 PCD 每秒选一帧，减少重复点。
             frame_interval_sec: 1.0
+            # 同时导出关键帧（优化后位姿 + 全部帧的关键帧局部点云 + Scan Context），
+            # 随地图版本保存，用于地图重建/编辑与全局重定位；定位不加载它们。
+            keyframes_en: true
+            keyframe_voxel_size: 0.1

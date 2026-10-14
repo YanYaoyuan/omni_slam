@@ -50,6 +50,57 @@ class MapStoreTests(unittest.TestCase):
             store.import_pcd("stale-route", source, body_path_source=trajectory)
         self.assertFalse((self.root / "maps/stale-route/current").exists())
 
+    def _keyframes(self, name: str = "source.pcd.keyframes") -> Path:
+        directory = self.root / name
+        (directory / "scans").mkdir(parents=True)
+        (directory / "keyframes.txt").write_text(
+            "# HENG_KEYFRAMES_1\n# index stamp x y z qx qy qz qw points\n"
+            "0 10 0 0 0 0 0 0 1 2\n1 11 1 0 0 0 0 0 1 2\n"
+        )
+        (directory / "scan_context.bin").write_bytes(b"HENGSC01" + bytes(16))
+        (directory / "scans/000000.pcd").write_bytes(b"scan-0")
+        (directory / "scans/000001.pcd").write_bytes(b"scan-1")
+        return directory
+
+    def test_keyframes_are_committed_and_verifiable_with_the_map_version(self):
+        source = _pcd(self.root / "source.pcd")
+        keyframes = self._keyframes()
+        store = MapStore(self.root / "maps")
+        asset = store.import_pcd("with-keyframes", source, keyframes_source=keyframes)
+        self.assertEqual(asset.keyframes_directory, asset.directory / "keyframes")
+        self.assertEqual(
+            (asset.keyframes_directory / "scans/000001.pcd").read_bytes(), b"scan-1"
+        )
+        manifest = json.loads(asset.manifest_path.read_text())
+        self.assertEqual(manifest["keyframes"]["count"], 2)
+        self.assertEqual(
+            sorted(manifest["keyframes"]["files"]),
+            ["keyframes.txt", "scan_context.bin", "scans/000000.pcd", "scans/000001.pcd"],
+        )
+        reloaded = store.current("with-keyframes")
+        self.assertEqual(reloaded.keyframes_directory, asset.keyframes_directory)
+        store.verify_keyframes(reloaded)
+        (asset.keyframes_directory / "scans/000000.pcd").write_bytes(b"scan-X")
+        with self.assertRaisesRegex(MapStoreError, "keyframe checksum mismatch"):
+            store.verify_keyframes(reloaded)
+
+    def test_map_without_keyframes_reports_none(self):
+        store = MapStore(self.root / "maps")
+        asset = store.import_pcd("plain", _pcd(self.root / "source.pcd"))
+        self.assertIsNone(asset.keyframes_directory)
+        self.assertIsNone(store.current("plain").keyframes_directory)
+
+    def test_stale_keyframes_do_not_publish_a_new_map_version(self):
+        source = _pcd(self.root / "source.pcd")
+        keyframes = self._keyframes()
+        os.utime(keyframes / "keyframes.txt", ns=(1, 1))
+        store = MapStore(self.root / "maps")
+        with self.assertRaisesRegex(MapStoreError, "predates"):
+            store.import_pcd("stale-keyframes", source, keyframes_source=keyframes)
+        self.assertFalse((self.root / "maps/stale-keyframes/current").exists())
+        versions = self.root / "maps/stale-keyframes/versions"
+        self.assertEqual(list(versions.iterdir()), [])
+
     def test_import_publishes_versioned_asset_and_manifest(self):
         source = _pcd(self.root / "source.pcd")
         store = MapStore(self.root / "maps")

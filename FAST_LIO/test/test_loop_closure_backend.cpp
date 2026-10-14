@@ -2,6 +2,8 @@
 #include <gtest/gtest.h>
 #include <pcl/io/pcd_io.h>
 #include <filesystem>
+#include <cstdio>
+#include <fstream>
 #include <random>
 
 namespace {
@@ -125,5 +127,46 @@ TEST_F(LoopTest, SaveUsesOnePoseSnapshotWhileNewScansArrive) {
   Backend::Cloud saved; ASSERT_EQ(pcl::io::loadPCDFile(root+"/map.pcd",saved),0);
   EXPECT_EQ(saved.size(),1800u); EXPECT_EQ(backend.snapshot().frames.size(),2u);
   EXPECT_FALSE(backend.discardSavedChunks());
+}
+TEST_F(LoopTest, ExportsKeyframePosesLocalScansAndDescriptors) {
+  Backend backend(root,Backend::Config{},false);
+  for (int i=0;i<8;++i) backend.append(scene(pose(i*.2)),pose(i*.2),i*.2);
+  backend.processPending();
+  Backend::Snapshot saved; std::string error;
+  ASSERT_TRUE(backend.save(root+"/map.pcd",&error,{},&saved))<<error;
+  ASSERT_EQ(saved.keyframes.size(),2u);
+  const auto directory=root+"/map.pcd.keyframes";
+  ASSERT_TRUE(backend.exportKeyframes(directory,saved,&error))<<error;
+  // Re-export replaces the directory and leaves no staging copies behind.
+  ASSERT_TRUE(backend.exportKeyframes(directory,saved,&error))<<error;
+  for (const auto &entry:std::filesystem::directory_iterator(root))
+    EXPECT_EQ(entry.path().filename().string().find("map.pcd.keyframes."),std::string::npos);
+
+  std::ifstream index(directory+"/keyframes.txt"); std::string line;
+  std::getline(index,line); EXPECT_EQ(line,"# HENG_KEYFRAMES_1"); std::getline(index,line);
+  for (std::size_t k=0;k<saved.keyframes.size();++k) {
+    std::size_t id,points; double stamp,x,y,z,qx,qy,qz,qw;
+    ASSERT_TRUE(index>>id>>stamp>>x>>y>>z>>qx>>qy>>qz>>qw>>points);
+    EXPECT_EQ(id,k); EXPECT_DOUBLE_EQ(stamp,k*1.0);
+    EXPECT_NEAR(x,saved.keyframes[k].translation().x(),1e-9);
+    EXPECT_NEAR(std::abs(qw),1.0,1e-6);
+    char name[32]; std::snprintf(name,sizeof(name),"/scans/%06zu.pcd",k);
+    Backend::Cloud cloud;
+    ASSERT_EQ(pcl::io::loadPCDFile(directory+name,cloud),0);
+    ASSERT_EQ(cloud.size(),points); ASSERT_GT(points,0u);
+    // Keyframe-local scans placed by the keyframe pose land back in the scene.
+    for (const auto &p:cloud) {
+      const auto world=saved.keyframes[k]*Eigen::Vector3d(p.x,p.y,p.z);
+      EXPECT_LE(world.head<2>().lpNorm<Eigen::Infinity>(),8.2);
+      EXPECT_GE(world.z(),-1.2); EXPECT_LE(world.z(),3.2);
+    }
+  }
+  std::ifstream descriptors(directory+"/scan_context.bin",std::ios::binary);
+  char magic[8]; std::uint32_t shape[2]; std::uint64_t count=0;
+  descriptors.read(magic,8); descriptors.read(reinterpret_cast<char *>(shape),sizeof(shape));
+  descriptors.read(reinterpret_cast<char *>(&count),sizeof(count));
+  EXPECT_EQ(std::string(magic,8),"HENGSC01"); EXPECT_EQ(count,2u);
+  EXPECT_EQ(std::filesystem::file_size(directory+"/scan_context.bin"),
+            24u+count*shape[0]*shape[1]*sizeof(double));
 }
 }
