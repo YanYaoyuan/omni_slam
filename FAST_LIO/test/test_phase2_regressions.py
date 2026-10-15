@@ -174,3 +174,28 @@ class StateMachineCancelPathRegressionTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IcpResultQualityRegressionTests(unittest.TestCase):
+    """SLAM-03: ICP must not claim perfect confidence or mislabel frames."""
+
+    def setUp(self):
+        icp = REPO_ROOT / "icp_relocalization" / "src" / "icp_node.cpp"
+        if not icp.is_file():
+            self.skipTest("icp_relocalization source not in this layout")
+        self.source = _icp_source()
+
+    def test_result_publishes_cluster_covariance(self):
+        start = self.source.index("void publish_relocalization_result(")
+        end = self.source.index("publisher_->publish(pose_msg);", start)
+        publish = self.source[start:end]
+        self.assertIn("convergence_gate_->Covariance(fitness_score)", publish)
+        self.assertIn("pose_msg.pose.covariance.begin()", publish)
+
+    def test_pointcloud_input_frame_must_match_result_frame(self):
+        start = self.source.index("void cloud_callback(")
+        end = self.source.index("pcl::fromROSMsg(*msg, *input_cloud);", start)
+        guard = self.source[start:end]
+        self.assertIn("msg->header.frame_id != sensor_frame", guard)
+        self.assertIn("convergence_gate_->Reset();", guard)
+        self.assertIn("return;", guard)

@@ -21,6 +21,7 @@
 #include <tf2/transform_datatypes.h>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "icp_relocalization/relocalization_convergence.hpp"
+#include <algorithm>
 #ifdef USE_LIVOX
 #include <livox_ros_driver2/msg/custom_msg.hpp>
 #endif
@@ -319,6 +320,10 @@ private:
         pose_msg.pose.pose.orientation.y = orientation.y();
         pose_msg.pose.pose.orientation.z = orientation.z();
         pose_msg.pose.pose.orientation.w = orientation.w();
+        // An all-zero covariance claims perfect confidence. Publish the stable
+        // cluster's conservative diagonal estimate instead (SLAM-03).
+        const auto covariance = convergence_gate_->Covariance(fitness_score);
+        std::copy(covariance.begin(), covariance.end(), pose_msg.pose.covariance.begin());
         publisher_->publish(pose_msg);
 
         const double yaw = std::atan2(
@@ -332,6 +337,17 @@ private:
 
     void cloud_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
     {
+        // The result is published as T_map_<sensor_frame>; a cloud expressed in
+        // any other frame would be aligned and then mislabelled (SLAM-03).
+        if (msg->header.frame_id != sensor_frame)
+        {
+            convergence_gate_->Reset();
+            RCLCPP_ERROR_THROTTLE(
+                this->get_logger(), *this->get_clock(), 2000,
+                "Rejecting ICP input cloud in frame '%s'; expected '%s'",
+                msg->header.frame_id.c_str(), sensor_frame.c_str());
+            return;
+        }
         // Convert the incoming point cloud to PCL format
         pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromROSMsg(*msg, *input_cloud);
