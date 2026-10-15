@@ -7,6 +7,7 @@ from omni_slam_manager.telemetry_monitor import (
     FitnessTracker,
     PoseJumpTracker,
     PoseSample,
+    PostSaveMotionDetector,
     yaw_from_quaternion,
 )
 
@@ -131,3 +132,66 @@ class FitnessTrackerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class PostSaveMotionDetectorTests(unittest.TestCase):
+    def test_disarmed_detector_never_reports(self):
+        detector = PostSaveMotionDetector()
+        self.assertFalse(detector.observe(_pose(x=100.0)))
+
+    def test_stationary_streaming_after_save_stays_clean(self):
+        detector = PostSaveMotionDetector(position_threshold_m=0.3)
+        detector.arm(_pose())
+        for stamp in range(50):
+            self.assertFalse(detector.observe(_pose(x=0.01, yaw=0.01, stamp=stamp)))
+        self.assertTrue(detector.armed)
+
+    def test_translation_or_rotation_after_save_marks_dirty_once(self):
+        detector = PostSaveMotionDetector(
+            position_threshold_m=0.3, yaw_threshold_rad=math.radians(10.0)
+        )
+        detector.arm(_pose())
+        self.assertTrue(detector.observe(_pose(x=0.31)))
+        self.assertFalse(detector.armed)
+        self.assertFalse(detector.observe(_pose(x=5.0)))
+        detector.arm(_pose(yaw=math.pi - 0.05))
+        self.assertTrue(detector.observe(_pose(yaw=-math.pi + 0.15)))
+
+    def test_missing_or_non_finite_baseline_uses_first_finite_sample(self):
+        detector = PostSaveMotionDetector(position_threshold_m=0.3)
+        detector.arm(_pose(x=math.nan))
+        self.assertFalse(detector.observe(_pose(x=2.0)))
+        self.assertFalse(detector.observe(_pose(x=math.inf)))
+        self.assertTrue(detector.observe(_pose(x=2.5)))
+
+    def test_invalid_thresholds_are_rejected(self):
+        with self.assertRaises(ValueError):
+            PostSaveMotionDetector(position_threshold_m=0.0)
+        with self.assertRaises(ValueError):
+            PostSaveMotionDetector(yaw_threshold_rad=0.0)
+
+
+class ManagerPostSaveDirtyContractTests(unittest.TestCase):
+    """manager_node.py imports rclpy, so check its wiring statically."""
+
+    def setUp(self):
+        from pathlib import Path
+
+        self.source = (
+            Path(__file__).resolve().parents[1]
+            / "omni_slam_manager"
+            / "manager_node.py"
+        ).read_text(encoding="utf-8")
+
+    def test_save_arms_detector_before_requesting_snapshot(self):
+        arm = self.source.index("self._post_save_motion.arm(self._latest_pose)")
+        trigger = self.source.index("self._map_save_client.call_async(Trigger.Request())")
+        self.assertLess(arm, trigger)
+
+    def test_motion_in_map_ready_restores_dirty_and_mapping(self):
+        start = self.source.index("def _odom_callback")
+        end = self.source.index("def _initial_pose_callback", start)
+        callback = self.source[start:end]
+        self.assertIn("SlamState.MAP_READY", callback)
+        self.assertIn("self._post_save_motion.observe(sample)", callback)
+        self.assertIn("self._mapping_dirty = True", callback)
+        self.assertIn("SlamState.MAPPING", callback)
