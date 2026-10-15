@@ -33,6 +33,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 #include <omp.h>
+#include <cstdint>
+#include <vector>
 #include <mutex>
 #include <math.h>
 #include <thread>
@@ -99,7 +101,10 @@ int kdtree_size_st = 0, kdtree_size_end = 0, add_point_size = 0, kdtree_delete_c
 bool runtime_pos_log = false, pcd_save_en = false, time_sync_en = false, extrinsic_est_en = true, path_en = true;
 /**************************/
 
-float res_last[100000] = {0.0};
+// Per-point match state for the current downsampled scan. Sized from
+// feats_down_size every frame; a fixed 100000-element array overflowed on
+// dense LiDARs or small voxel sizes (SLAM-02).
+std::vector<float> res_last;
 float DET_RANGE = 300.0f;
 const float MOV_THRESHOLD = 1.5f;
 double time_diff_lidar_to_imu = 0.0;
@@ -206,7 +211,9 @@ double cube_len = 0, HALF_FOV_COS = 0, FOV_DEG = 0, total_distance = 0, lidar_en
 int effct_feat_num = 0, time_log_counter = 0, scan_count = 0, publish_count = 0;
 int iterCount = 0, feats_down_size = 0, NUM_MAX_ITERATIONS = 0, laserCloudValidNum = 0, pcd_save_interval = -1, pcd_index = 0;
 int imu_init_min_samples = 10;
-bool point_selected_surf[100000] = {0};
+// uint8_t instead of vector<bool>: the OpenMP match loop writes distinct
+// indices concurrently, which vector<bool>'s packed bits do not allow.
+std::vector<std::uint8_t> point_selected_surf;
 bool lidar_pushed, flg_first_scan = true, flg_EKF_inited;
 bool scan_pub_en = false, dense_pub_en = false, scan_body_pub_en = false;
 bool effect_pub_en = false, map_pub_en = false, ikd_tree_pub_en = false;
@@ -266,11 +273,35 @@ string prior_map_path;
 FILE *fp;
 ofstream fout_pre, fout_out, fout_dbg;
 
+// Grow the per-point buffers to cover the current scan. New entries start as
+// "selected" so the first non-converged iteration behaves like the original
+// memset(true) initialisation; existing entries keep their previous-iteration
+// value as FAST-LIO expects.
+void ensure_scan_buffers(int point_count)
+{
+    if (point_count <= 0)
+    {
+        return;
+    }
+    const auto required = static_cast<std::size_t>(point_count);
+    if (point_selected_surf.size() < required)
+    {
+        point_selected_surf.resize(required, 1U);
+    }
+    if (res_last.size() < required)
+    {
+        res_last.resize(required, -1000.0f);
+    }
+}
+
 void h_share_model(state_ikfom &s, esekfom::dyn_share_datastruct<double> &ekfom_data)
 {
     double match_start = omp_get_wtime();
-    laserCloudOri->clear();
-    corr_normvect->clear();
+    ensure_scan_buffers(feats_down_size);
+    // Index-written below; size them to the scan instead of clear() + writing
+    // past size() into spare capacity.
+    laserCloudOri->resize(feats_down_size);
+    corr_normvect->resize(feats_down_size);
     total_residual = 0.0;
 
 /** closest surface search and residual computation **/
@@ -340,6 +371,8 @@ void h_share_model(state_ikfom &s, esekfom::dyn_share_datastruct<double> &ekfom_
             effct_feat_num++;
         }
     }
+    laserCloudOri->resize(effct_feat_num);
+    corr_normvect->resize(effct_feat_num);
 
     if (effct_feat_num < 1)
     {
@@ -585,12 +618,8 @@ public:
 
         _featsArray.reset(new PointCloudXYZI());
 
-        memset(point_selected_surf, true, sizeof(point_selected_surf));
-        memset(res_last, -1000.0f, sizeof(res_last));
         downSizeFilterSurf.setLeafSize(filter_size_surf_min, filter_size_surf_min, filter_size_surf_min);
         downSizeFilterMap.setLeafSize(filter_size_map_min, filter_size_map_min, filter_size_map_min);
-        memset(point_selected_surf, true, sizeof(point_selected_surf));
-        memset(res_last, -1000.0f, sizeof(res_last));
 
         // Register the one-shot ICP result before potentially slow map I/O.
         // The executor only starts after this constructor succeeds; DDS buffers
@@ -1708,6 +1737,7 @@ private:
 
             normvec->resize(feats_down_size);
             feats_down_world->resize(feats_down_size);
+            ensure_scan_buffers(feats_down_size);
 
             V3D ext_euler = SO3ToEuler(state_point.offset_R_L_I);
             fout_pre << setw(20) << Measures.lidar_beg_time - first_lidar_time << " " << euler_cur.transpose() << " " << state_point.pos.transpose() << " " << ext_euler.transpose() << " " << state_point.offset_T_L_I.transpose() << " " << state_point.vel.transpose()
