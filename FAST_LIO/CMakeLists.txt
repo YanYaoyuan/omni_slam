@@ -202,7 +202,7 @@ install(TARGETS fastlio_mapping
 install(TARGETS fastlio_map_archive fastlio_loop_backend fastlio_spatial_map EXPORT fastlio_map_archiveTargets
   ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
 ament_export_targets(fastlio_map_archiveTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(Eigen3 PCL GTSAM OpenSSL)
+ament_export_dependencies(Eigen3 GTSAM OpenSSL)
 
 install(
   DIRECTORY config launch rviz
@@ -252,4 +252,4 @@ endif()
 install(DIRECTORY include/fast_lio/ DESTINATION include/${PROJECT_NAME}/fast_lio)
 ament_export_include_directories(include/${PROJECT_NAME})
 
-ament_package()
+ament_package(CONFIG_EXTRAS cmake/fast_lio-extras.cmake)

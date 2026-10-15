@@ -163,11 +163,10 @@ hash and the optional `body_path`. The identity tuple `map_id/map_version/map_ch
 
 ## 8. Known gaps and documentation/code discrepancies
 
-1. **The loop-closure backend exists.** `omni_navi/docs/ARCHITECTURE.md` §3.1/§6 and
-   `MODULE_GAP_ANALYSIS.md` still say "关键帧、回环检测、位姿图和全局地图优化后端尚缺" (keyframe,
-   loop-closure, pose-graph and global map optimisation backends are missing). Since `ea48572`
-   (2026-09-24), offline/background loop closure with an iSAM2 pose graph is implemented for exported maps.
-   Live correction of localization is still missing.
+1. **Loop closure is offline only.** Since `ea48572` (2026-09-24), background loop closure with an
+   iSAM2 pose graph is implemented for exported maps (C10); `omni_navi` architecture docs were corrected
+   on 2026-10-15. Live correction of localization (C15) is still missing. On RDK S100, GTSAM 4.2.0 is
+   cross-compiled into the sysroot's `/usr` by `scripts/build_s100_cross.sh`.
 2. SLAM reason codes are 1001–1203. The `omni_robot_interfaces` README reserves 2000–2999 for SLAM.
 3. `SlamStatus` is still owned by `omni_tf_manager` (V1 exception).
 4. Quality gating of localization happens in `icp_node`. It publishes `icp_result` only after the
