@@ -499,6 +499,61 @@ test -f /opt/ros/humble/lib/libpcl_ros_tf.a
 file /opt/ros/humble/lib/libpcd_to_pointcloud_lib.so \
   | grep -Eq 'ARM aarch64|ARM64'
 
+echo "=== Cross-compile GTSAM into the S100 system directory ==="
+# fast_lio's loop-closure backend needs GTSAM >= 4.2, which the D-Robotics
+# sysroot does not ship. Build the same release as ros-humble-gtsam (x86) with
+# prefix /usr into usr_s100, the board's /usr. Boost 1.74, Eigen 3 and TBB
+# already come from the pinned sysroot.
+gtsam_version=4.2.0
+gtsam_sha256=8b44d6b98a3b608664d1c9a7c1383a406550499d894533bb0183e6cf487e6457
+gtsam_config=../sysroot_docker/usr_s100/lib/cmake/GTSAM/GTSAMConfig.cmake
+if [[ ! -f "${gtsam_config}" ]]; then
+  gtsam_cache=/mnt/s100-cross/cache/gtsam
+  gtsam_archive=${gtsam_cache}/gtsam-${gtsam_version}.tar.gz
+  gtsam_work=/tmp/s100-gtsam
+  mkdir -p "${gtsam_cache}"
+  if [[ ! -f "${gtsam_archive}" ]]; then
+    curl --fail --location --retry 5 --retry-all-errors \
+      --output "${gtsam_archive}.partial" \
+      "https://github.com/borglab/gtsam/archive/refs/tags/${gtsam_version}.tar.gz"
+    mv "${gtsam_archive}.partial" "${gtsam_archive}"
+  fi
+  echo "${gtsam_sha256}  ${gtsam_archive}" | sha256sum --check
+  rm -rf "${gtsam_work}"
+  mkdir -p "${gtsam_work}"
+  tar -xzf "${gtsam_archive}" -C "${gtsam_work}"
+
+  # The toolchain file resolves the sysroot through sysroot_docker/usr, which
+  # robot_dev_config/build.sh normally creates (and removes first) itself.
+  ln -sfn "$(realpath ../sysroot_docker)/usr_s100" ../sysroot_docker/usr
+
+  CROSS_COMPILE=/usr/bin/aarch64-linux-gnu- cmake \
+    -S "${gtsam_work}/gtsam-${gtsam_version}" \
+    -B "${gtsam_work}/build" \
+    -DCMAKE_TOOLCHAIN_FILE="$(pwd)/robot_dev_config/aarch64_toolchainfile.cmake" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF \
+    -DGTSAM_USE_SYSTEM_EIGEN=ON \
+    -DGTSAM_WITH_TBB=ON \
+    -DGTSAM_BUILD_TESTS=OFF \
+    -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF \
+    -DGTSAM_BUILD_UNSTABLE=OFF \
+    -DGTSAM_BUILD_PYTHON=OFF \
+    -DGTSAM_INSTALL_CPPUNITLITE=OFF
+  CROSS_COMPILE=/usr/bin/aarch64-linux-gnu- \
+    cmake --build "${gtsam_work}/build" --parallel "$(nproc)"
+  DESTDIR="${gtsam_work}/stage" cmake --install "${gtsam_work}/build"
+  cp -a "${gtsam_work}/stage/usr/." ../sysroot_docker/usr_s100/
+  rm -rf "${gtsam_work}"
+fi
+test -f "${gtsam_config}"
+grep -q "${gtsam_version}" ../sysroot_docker/usr_s100/lib/cmake/GTSAM/GTSAMConfigVersion.cmake
+gtsam_library=$(find -L ../sysroot_docker/usr_s100/lib -maxdepth 1 \
+  -name 'libgtsam.so.*' -type f -print -quit)
+test -n "${gtsam_library}"
+file "${gtsam_library}" | grep -Eq 'ARM aarch64|ARM64'
+
 echo "=== Activate ROS 2 build environment ==="
 set +u
 source /opt/ros/humble/setup.bash
