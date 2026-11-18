@@ -1,0 +1,127 @@
+{
+  "description": "Existing experiment outputs; previews only. GIF speed is relative to already accelerated source video, not processing throughput.",
+  "ffmpeg_version": "ffmpeg version 4.4.2-0ubuntu0.22.04.1 Copyright (c) 2000-2021 the FFmpeg developers",
+  "assets": [
+    {
+      "name": "garage_mapping.gif",
+      "source": "docs/reports/semantic_mapping_video_2026-11-06/livo_semantic_experiment_1080p.mp4",
+      "kind": "gif",
+      "speed": 6,
+      "source_replay_speed": 5,
+      "width": 720,
+      "fps": 5,
+      "source_sha256": "4249b5958ed230d2c49fda80e83e81719d9d672a557dec035c150b6d095fb328",
+      "output_sha256": "8b8da6dfbc3069edb43c77ea81f3533e35868a63b89981e032ebd7a0a21168ce",
+      "output_bytes": 7110280,
+      "output_probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 720,
+            "height": 406,
+            "nb_read_frames": "98"
+          }
+        ],
+        "format": {
+          "duration": "19.600000",
+          "size": "7110280"
+        }
+      }
+    },
+    {
+      "name": "outdoor_objects_ground.gif",
+      "source": "docs/reports/boxes_ground_2026-11-06/boxes_ground_1080p.mp4",
+      "kind": "gif",
+      "speed": 8,
+      "source_replay_speed": 10,
+      "width": 720,
+      "fps": 5,
+      "source_sha256": "4a1e33bc8e16b8796d8e93c50e4af1443566a3c0873433c24a36714716a250fe",
+      "output_sha256": "244228e582c548163c805b0b77254bc524056cfe91de2b15cec44e2e80a762fc",
+      "output_bytes": 11198822,
+      "output_probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 720,
+            "height": 406,
+            "nb_read_frames": "103"
+          }
+        ],
+        "format": {
+          "duration": "20.600000",
+          "size": "11198822"
+        }
+      }
+    },
+    {
+      "name": "garage_vehicle_objects.png",
+      "source": "docs/paper/visibility_revision/latex/figures/current/robot_vehicles.png",
+      "kind": "image",
+      "filters": "crop=1050:435:1050:465",
+      "description": "Lower-right Ours candidate panel, unchanged predicted vehicle instances; no robot GT.",
+      "source_sha256": "af8f2dcc2d630c7b739d0c368d1fc7a6dbf7b9a396835b785498c56f64e7fae9",
+      "output_sha256": "51ea8955f925a0930ba4eaeacc0c47e1104a2138561072e49b411a7311c5affa",
+      "output_bytes": 71673,
+      "output_probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1050,
+            "height": 435,
+            "nb_read_frames": "1"
+          }
+        ],
+        "format": {
+          "size": "71673"
+        }
+      }
+    },
+    {
+      "name": "global_semantic_ground.png",
+      "source": "output/presentations/omni_slam_20261118_v2/maps/global_semantic_ground.png",
+      "kind": "image",
+      "filters": "scale=1600:-2:flags=lanczos",
+      "description": "Xinjinqiao offline global semantic and ground map; existing presentation figure.",
+      "source_sha256": "83a3f6d06f75f2b73990c8e9afe5e8ba7292cfca99a1a469cc3b73b714c2f726",
+      "output_sha256": "8f0bfae8cf5263a2fd0570374f0c3f2bd70e34aa196a710755bc0788157d1a6f",
+      "output_bytes": 760200,
+      "output_probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1600,
+            "height": 924,
+            "nb_read_frames": "1"
+          }
+        ],
+        "format": {
+          "size": "760200"
+        }
+      }
+    },
+    {
+      "name": "object_query_3d.png",
+      "source": "docs/reports/boxes_ground_2026-11-06/viewer_door.png",
+      "kind": "image",
+      "filters": "scale=1280:-2:flags=lanczos",
+      "description": "Existing viewer screenshot: door observations, 3D boxes, coordinates and image evidence.",
+      "source_sha256": "895446967d3bda626c2d4ba2b18454d0f18c5f610731310fde3b05be58743d7a",
+      "output_sha256": "782b469903a3fb12e28a8b89af7d66ff9f83ab3028df1f8c02fd3db315ab50bb",
+      "output_bytes": 278072,
+      "output_probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1280,
+            "height": 686,
+            "nb_read_frames": "1"
+          }
+        ],
+        "format": {
+          "size": "278072"
+        }
+      }
+    }
+  ]
+}
