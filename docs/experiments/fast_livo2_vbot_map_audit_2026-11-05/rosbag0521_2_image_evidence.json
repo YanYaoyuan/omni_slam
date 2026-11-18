@@ -1,0 +1,18 @@
+[
+  {
+    "event": 1,
+    "side": "reference",
+    "target_stamp_s": 1779359702.800127,
+    "image_stamp_ns": 1779359702805060352,
+    "offset_ms": 4.933376,
+    "bounded_seek_succeeded": true
+  },
+  {
+    "event": 1,
+    "side": "revisit",
+    "target_stamp_s": 1779359872.801154,
+    "image_stamp_ns": 1779359872806423040,
+    "offset_ms": 5.269248,
+    "bounded_seek_succeeded": true
+  }
+]

@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-16",
+  "task": "Redesign page-2 architecture",
+  "pages": 24,
+  "figure_count": 22,
+  "visually_reviewed_changed_pages": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "pixel_identical_previously_reviewed_pages": [
+    1,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+  ],
+  "other_scientific_asset_hashes_verified": 61,
+  "all_text_within_page_bounds": true,
+  "no_clipping_or_overlap_observed": true,
+  "no_new_experiments": true,
+  "source": "figures/current/architecture_manifest.json",
+  "pdf_sha256": "393c8100744539d9107b5784dfd05187f684384d33480085060c9302e08bc213",
+  "render_fix": "Use vector point markers to avoid a single-color raster palette rendering error in PDF.",
+  "known_tex_warnings": [
+    "1.5974pt output-routine vertical overflow at main/supplement transition; reviewed without visible clipping.",
+    "Caption hypcap and underfull box warnings; no undefined references or horizontal overflow."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-11",
+  "sources": {
+    "/media/user/50D2BD30D2BD1AE4/WorkSpace/omni_slam_benchmarks/OVO_Replica_full/office_0/raw/rgb_0.png": "e54655cc02ee3c9238f457534965f6f8991a7cae15111e8fe9a95adea805d60f",
+    "/media/user/50D2BD30D2BD1AE4/WorkSpace/omni_slam_benchmarks/SharedFrontEnd_20261110/full/office_0/frames/0000.npz": "cd9047b9f71704f9162d7a96b5f243d7beca95639ba3d95f06de73bde3614851",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/expanded_semantic_20261109/conceptgraphs_evaluation/evaluation/office_0/reference.npz": "56e8878c86b2e0d5b69581e1d76919cb7fef2ed549dbfc5e41bc981acef0367c",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/shared_frontend_20261110/evaluation/full/office_0/cg_guarded__all_views_mean_things.npz": "fcb59c41aca17e47618e87b56cfca69e4b08eb4dd5f7d887a8b7e0710c40d1d0",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/shared_frontend_20261110/summary.json": "97da0d916a7bea80bd0a993e602585251fe30e7abee096cda6c8ef3be46187a7",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/shared_frontend_20261110/protocol_backends.json": "de1df235feb519d776e1a990c3f5180338d6ed1bd246f727ff875fd8662212c7",
+    "/home/user/work/bgyfw/omni_code/omni_slam/docs/paper/figures/build_current_baseline.py": "ac64c95c77f02b644817f5b0dea4a56851048f564203571ef191163aad3a3ebd"
+  },
+  "artifacts": {
+    "/home/user/work/bgyfw/omni_code/omni_slam/docs/paper/figures/omni_slam_current_baseline.png": "06513970f91dd79630e33661917cf1747b7664bcb492530bf112ef7ffcb2e58c",
+    "/home/user/work/bgyfw/omni_code/omni_slam/docs/paper/figures/omni_slam_current_baseline.svg": "3fc74ab0648978e33f2911694c0238734c297584f21245ee54867da23b74869b",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/pdf/omni_slam_current_baseline.pdf": "8e5e014605bf28a5eb205b7489f1c45bd9e1feb3e643ff5ef136b0702f1bac28"
+  },
+  "scope": "Existing results only; no inference or new benchmark. Map panel is predicted labels transferred to the fixed observed evaluation geometry, without GT label coloring."
+}

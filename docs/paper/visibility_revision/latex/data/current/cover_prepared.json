@@ -1,0 +1,43 @@
+{
+  "complete": true,
+  "results": {
+    "kitti360_0009": {
+      "atoms": 42955,
+      "geometric_components": 2067,
+      "birth_eligible_components": 259,
+      "accepted": {
+        "single": 46,
+        "cover": 46
+      },
+      "multi_only_components": 0,
+      "region_frames_multi_better": 33,
+      "multi_mask_region_frames": 33,
+      "independent_union_checks": 778,
+      "seconds": 7.481911841023248
+    },
+    "kitti360_0010": {
+      "atoms": 15091,
+      "geometric_components": 1443,
+      "birth_eligible_components": 56,
+      "accepted": {
+        "single": 5,
+        "cover": 5
+      },
+      "multi_only_components": 0,
+      "region_frames_multi_better": 12,
+      "multi_mask_region_frames": 12,
+      "independent_union_checks": 136,
+      "seconds": 3.6020814669900574
+    }
+  },
+  "files": {
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/cover/prepared/kitti360_0009/components.npz": "4757b97491f2e5940e82a757c0c383c7fe755738b6cb79fac94f517c1aaff090",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/cover/prepared/kitti360_0009/run.json": "b681f0e8187508825f6a52e7ad0d49df2c508071256f0865cf204a616639cfc9",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/cover/prepared/kitti360_0009/explanations.json": "e2efdce12414aaa6e3866c2f0a97e25cb81a4b28e414e85f792af74497ffc0c9",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/cover/prepared/kitti360_0010/components.npz": "88b6c88ee7c797fc5368508ace7b47e6395797a46939c378c39fb7b13b81239c",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/cover/prepared/kitti360_0010/run.json": "c482e9fa1e0be502db4e756294def9013a736e43506d00a664f0f89a06d82132",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/cover/prepared/kitti360_0010/explanations.json": "73235dc0ecce0bcb5e818c4d4ff38330a7494be535bd92362acaa591c700de9f"
+  },
+  "gt_read": false,
+  "protocol_sha256": "d06628400c774eff0b52ae802f99b160c5a04c700414fc6f1d7d70f2f48a168f"
+}

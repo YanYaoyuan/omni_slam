@@ -1,0 +1,9 @@
+{
+  "layout": "Venue-neutral A4 research manuscript",
+  "document_class": "article",
+  "style": "omni_paper.sty",
+  "conference_style_loaded": false,
+  "combined_entry": "main.tex",
+  "page_numbering": "Continuous across manuscript, references, and supplement",
+  "bibliography_style": "ieeenat_fullname.bst (unchanged bibliography formatter)"
+}

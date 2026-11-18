@@ -1,0 +1,224 @@
+{
+  "complete": true,
+  "source_sha256": "d95a097f2278af3665488e9416b0ac737b77d69cab3f3110b29b8edc3ca2e2b5",
+  "verified_hashes": {
+    "/home/user/work/bgyfw/omni_code/omni_slam/scripts/benchmarks/evaluate_revision_assessment.py": "b6c6a95c35dd7046d6f85b2492c99efa011c81e1422d936c3af0dab032374a8a",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_prepare/evalInstanceLevelSemanticLabeling.py": "a0cf25f1019bf4df9ab496aca8b16a9a35793cb25780788393c94ab8703b932e",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_prepare/labels.py": "5fd33f3742fff242d01bcecb77d9f25c0db9646938ca2265911647f52eb82e86",
+    "/home/user/work/bgyfw/omni_code/omni_slam/scripts/benchmarks/evaluate_kitti360_development.py": "7b0c121850548d0ca4fe8d45a1b215684c8632cd417418266848eded1d329dc1",
+    "/home/user/work/bgyfw/omni_code/omni_slam/omni_semantic_map/omni_semantic_map/kitti360_evaluation.py": "ad19884a56b6a53473610723bea3d0a9234bc2416969f1cd417458fbd9232fb4",
+    "/home/user/work/bgyfw/omni_code/omni_slam/omni_semantic_map/omni_semantic_map/kitti360_reference_identity.py": "74175c09843bab7cf97f553d69e2b5e26e26a4edc17d2a17950093d348f72cde",
+    "/home/user/work/bgyfw/omni_code/omni_slam/scripts/benchmarks/run_discovery_query_benchmark.py": "e4c229820e88951b42b54cb768696548a9e94c1d590096990cf3787e05c62271",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps_complete.json": "e142cd9a5f4849726f7c54da75ae9e45bacc7f392df15854debc3c1201e2ecc7",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/strong_baseline/run.json": "d2c4996ab335bf33db3e62b0c85e8c67d1a7d79e6e2c887efa5133864cda3d9b",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/strong_baseline/geometry.npz": "8f0d5475b1628f3eb9cd411c1814e735fd03f446ad8d7e4a244516019065eb13",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/strong_baseline/classification.json": "e7469ef18b54eb84603d02d95869c40f1f4d9a840ef062e6e7cac55dfef823f1",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/unconditional/run.json": "0757b6c6e5f9dd021e7c99fa884751c57a70ade5fc0e0ba0776cd8fedff72ef7",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/unconditional/geometry.npz": "766790837fc7a5899208664633cdfb0d1a67e261909276ec28630a821b3ff0c3",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/unconditional/classification.json": "9af7bb6a11973c076404c58fb91f345e45c9f25099da2f43c724b57824b6fc09",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/history_only/run.json": "ba33d9325c441646969eb4f96a3f6bd312942d354a3ef56c493ac328c6500c31",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/history_only/geometry.npz": "b263d72f52b20a2d672fa8a8990081d7686b438e8432660eb86ff857df3a2181",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/history_only/classification.json": "9af7bb6a11973c076404c58fb91f345e45c9f25099da2f43c724b57824b6fc09",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/full_authorization/run.json": "f9a4fda6954e09dff6a5617f1b4068899646d972c139fb36652fae235a897e58",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/full_authorization/geometry.npz": "8f4c52004e499223380d48e6fe156bb9f459858f881f9be08a66994b51cb8f80",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/full_authorization/classification.json": "9af7bb6a11973c076404c58fb91f345e45c9f25099da2f43c724b57824b6fc09",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/strong_baseline/run.json": "8a643e43f8d5695f43bdbdb749c096bbcbf13f5b226c7dda9ec821a0bba3f594",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/strong_baseline/geometry.npz": "889e526faa503ab94547e59bcce8f05a544b5f0221ca06e85f884eb1e3a15d96",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/strong_baseline/classification.json": "ad9eb6a8789b05ff86aa277112044d34c8435bcf41b917690ddb0ad029310d72",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/unconditional/run.json": "336b3c24873c52b72f15a9ad89a40c96022dd5591c534f9142995928346823a7",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/unconditional/geometry.npz": "a07ab983eeb5bcf7547e238f33aec0ce240a71dd0a9bc54c237f725be2ff2ea6",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/unconditional/classification.json": "929a9bb5586e542498c5db1cb03c1c23877a6295ae2fc6200835b02d091c185e",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/history_only/run.json": "db958724801ddf77432610bcff801cf6952a0a002ffbbe2b6c2ac251f576a5da",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/history_only/geometry.npz": "14283164cd597e9d71b9a2fb7d68650e2d5c3befe52c6fa2376c2aaf11bf4ba7",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/history_only/classification.json": "929a9bb5586e542498c5db1cb03c1c23877a6295ae2fc6200835b02d091c185e",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/full_authorization/run.json": "62359e3ddcbdd41c75652099766d55f6cab95538bd00741fdefe03d69be27906",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/full_authorization/geometry.npz": "d6e39d5733b3ac1acbc4e254950c48c7d454c51ecfc2d7dbeb9de61337a5924f",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0010/full_authorization/classification.json": "929a9bb5586e542498c5db1cb03c1c23877a6295ae2fc6200835b02d091c185e",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_reserved_v4/data/opaque_references/data_3d_semantics/train/2013_05_28_drive_0009_sync/static/0000000778_0000001026.ply": "c63df223923318fda6ffb32418e376685ba63a16fbe2590764f24cba69b271fd",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/prepared/kitti360_0009/jobs/2013_05_28_drive_0009_sync.json": "8f7e159ae1f70131bcb8a7164abe3701674cc6fec29ef2f7b1b2f59eb9f7eabb",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_reserved_v4/data/opaque_references/data_3d_semantics/train/2013_05_28_drive_0010_sync/static/0000001872_0000002033.ply": "9bda7ea8bb0a80d4ab901ccc57eba9070241cda1806b35fb3615f5b192648c9b",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/prepared/kitti360_0010/jobs/2013_05_28_drive_0010_sync.json": "95a2175f2ae7dbe3edd3b044b3c3c1dd7809ea9f636cb64d6bdcf9ae1affd2e6",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/protocol.json": "2970ae5bb96ec905648ad95ffbf3d5d39233418050e0bb7c25d3467c1015b0b8",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/delivery_audit.json": "38ac3b7aacade76588c602277b6b175f4d2fb81a592153491568c7ee69297469",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_factorial_v1/prediction_audit.json": "60a533ef732c38271f7c1674e24b596d63aff1114f243b479cf6f663ca0fb24f",
+    "/home/user/work/bgyfw/omni_code/omni_slam/scripts/benchmarks/run_revision_authorization.py": "e727f91dce2ceafc3ec881b0be15d896998142299c40665bfa4fbdc56838112a",
+    "/home/user/work/bgyfw/omni_code/omni_slam/omni_semantic_map/omni_semantic_map/revision_authorization.py": "2212f13bd2bcc008fa150ecd2e5c13bb00f6ea7a56efae5f0d2d47f27926c779",
+    "/home/user/work/bgyfw/omni_code/omni_slam/omni_semantic_map/omni_semantic_map/batch_stable_transport.py": "3b2a4dd396c6863529a66c26a79db2002b17a85257cfd1ce1f8b4b8c31d9732d",
+    "/home/user/work/bgyfw/omni_code/omni_slam/omni_semantic_map/omni_semantic_map/batch_stable_transport.cpp": "d3af2dc0e76bf678659ae263940f5995c402d58a7bea5b0b00a455ad61a15130",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/kitti360_0010_rgb_2033.png": "b35da05ad330befc1bfaa496cd030f4e6f15fd7da4cbbed8140a6bbb10660dca",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/kitti360_0009_rgb_903.png": "ebd981d2108fe8f18d8cca93a7911f49425f43dc4f803f43d875ebcff81426fd",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/kitti360_0010_rgb_1872.png": "74206ef0634c37a198d8b07c18c13275afb95b0a0a8aed4d8fca58aa0c2ab91b",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/kitti360_0010_rgb_1957.png": "82392d87d1b0d8b1f47a0991cff7baded715dfaaf6c2884a1117f61a81138246",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/kitti360_0009_maps.png": "e9c3f03d791d84cb9ee4fc5187a084a292026f0ee06860cead55bef5c23f47ef",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/kitti360_0010_maps.png": "a181e70a6345a871e11280f76a5937bc6b057c36143a8229de9f558ae0b85c62",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/kitti360_0009_rgb_778.png": "5dc6c79e7378cfd99b4e2fdfbc3d8c6c0bf1856f29f1e999e1dc3688a90e4bf6",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/scores.png": "046d49a626b63b1432210404cb1d5d1380d659fb6429cb5945a1706f874c62f6",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/kitti360_0009_rgb_1026.png": "df3a4cd65ca55084ecfa6b4776836c5e04e18956b8a3c06e84d8aab559d2f6ae",
+    "/home/user/work/bgyfw/omni_code/omni_slam/output/revision_assessment_v1/index.html": "beee16017bc14d1ba5619d3a147f5ba11bf7109c851b672ccacf97e7e2770ec4",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/batch_transport_robot_v1/final_maps/rosbag2245/ours_frame/geometry.npz": "0496d9085522884a4a26246ba9d81eb27bb39d52b672584ccf0467eef97681f3",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/batch_transport_robot_v1/final_maps/rosbag2245/ours_frame/classification.json": "2679766d0745b6f8f8c0857e7adf675074eef2c242e77737b46e79818d284842",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/cover/maps/rosbag2245/cover_history/geometry.npz": "55dd0c0c678f10b93b17be0ed195b7c03789a149042d141c653f36eaefe80ff0",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/cover/maps/rosbag2245/cover_history/classification.json": "36c7637dfbd35a0dc6a5095f7e0b4aec865cce89e25b62e1f7990d4bc60aeee4",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_factorial_v1/maps/rosbag2245/authorized_history_only/geometry.npz": "d9c9b17ae6947be1a43c357497fde84fdc176655c1ea656968aeb54756e8ab6c",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_factorial_v1/maps/rosbag2245/authorized_history_only/classification.json": "36c7637dfbd35a0dc6a5095f7e0b4aec865cce89e25b62e1f7990d4bc60aeee4",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/authorization/maps/rosbag2245/ours/geometry.npz": "1c7eaf0ba867be0d5c3884cd4fe3cde8344a67e2e29c7ab75f54940cf037ae09",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/authorization/maps/rosbag2245/ours/classification.json": "36c7637dfbd35a0dc6a5095f7e0b4aec865cce89e25b62e1f7990d4bc60aeee4"
+  },
+  "saved_score_replays": 24,
+  "per_object_method_replays": 628,
+  "pairwise_reference_label_changes": {
+    "kitti360_0009": {
+      "strong_baseline__vs__unconditional": 68197,
+      "strong_baseline__vs__history_only": 57850,
+      "strong_baseline__vs__full_authorization": 39652,
+      "unconditional__vs__history_only": 10347,
+      "unconditional__vs__full_authorization": 30729,
+      "history_only__vs__full_authorization": 20382
+    },
+    "kitti360_0010": {
+      "strong_baseline__vs__unconditional": 10651,
+      "strong_baseline__vs__history_only": 7224,
+      "strong_baseline__vs__full_authorization": 5112,
+      "unconditional__vs__history_only": 3427,
+      "unconditional__vs__full_authorization": 6388,
+      "history_only__vs__full_authorization": 2961
+    }
+  },
+  "per_class_primary": {
+    "kitti360_0009": {
+      "strong_baseline": {
+        "building": {
+          "ap": 0.007845253611382644,
+          "ap50%": 0.02788774845226458,
+          "ap25%": 0.30239972840779294
+        },
+        "car": {
+          "ap": 0.45411445645651877,
+          "ap50%": 0.6411802569034535,
+          "ap25%": 0.6411802569034535
+        }
+      },
+      "unconditional": {
+        "building": {
+          "ap": 0.012338464473189332,
+          "ap50%": 0.05047232706151112,
+          "ap25%": 0.25719361810443403
+        },
+        "car": {
+          "ap": 0.44125500553464525,
+          "ap50%": 0.6411802569034535,
+          "ap25%": 0.6411802569034535
+        }
+      },
+      "history_only": {
+        "building": {
+          "ap": 0.011048970180848739,
+          "ap50%": 0.0388668784304458,
+          "ap25%": 0.25719361810443403
+        },
+        "car": {
+          "ap": 0.44125500553464525,
+          "ap50%": 0.6411802569034535,
+          "ap25%": 0.6411802569034535
+        }
+      },
+      "full_authorization": {
+        "building": {
+          "ap": 0.01298875855327468,
+          "ap50%": 0.04519183773216031,
+          "ap25%": 0.33137955234729427
+        },
+        "car": {
+          "ap": 0.4535451360104419,
+          "ap50%": 0.6411802569034535,
+          "ap25%": 0.6411802569034535
+        }
+      }
+    },
+    "kitti360_0010": {
+      "strong_baseline": {
+        "building": {
+          "ap": 0.16666666666666666,
+          "ap50%": 0.25,
+          "ap25%": 0.5
+        },
+        "car": {
+          "ap": 0.0617283950617284,
+          "ap50%": 0.1111111111111111,
+          "ap25%": 0.1111111111111111
+        }
+      },
+      "unconditional": {
+        "building": {
+          "ap": 0.16666666666666666,
+          "ap50%": 0.25,
+          "ap25%": 0.5
+        },
+        "car": {
+          "ap": 0.0617283950617284,
+          "ap50%": 0.1111111111111111,
+          "ap25%": 0.1111111111111111
+        }
+      },
+      "history_only": {
+        "building": {
+          "ap": 0.19444444444444445,
+          "ap50%": 0.5,
+          "ap25%": 0.5
+        },
+        "car": {
+          "ap": 0.0617283950617284,
+          "ap50%": 0.1111111111111111,
+          "ap25%": 0.1111111111111111
+        }
+      },
+      "full_authorization": {
+        "building": {
+          "ap": 0.2222222222222222,
+          "ap50%": 0.5,
+          "ap25%": 0.5
+        },
+        "car": {
+          "ap": 0.0617283950617284,
+          "ap50%": 0.1111111111111111,
+          "ap25%": 0.1111111111111111
+        }
+      }
+    }
+  },
+  "primary_means": {
+    "strong_baseline": 0.1725886929490741,
+    "unconditional": 0.17049713293405744,
+    "history_only": 0.1771192038054167,
+    "full_authorization": 0.18762112796191682
+  },
+  "raw_match_changes": [
+    {
+      "key": "kitti360_0009",
+      "gained": [
+        2168
+      ],
+      "lost": []
+    },
+    {
+      "key": "kitti360_0010",
+      "gained": [
+        2086
+      ],
+      "lost": []
+    }
+  ],
+  "prospective_gate_recomputed": true,
+  "original_failed_development_gate_preserved": true,
+  "robot_maps_verified": 4,
+  "robot_semantic_accuracy_available": false,
+  "linked_assets_exist": true,
+  "visual_review": {
+    "completed": true,
+    "images": 9,
+    "findings": "Readable labels and common map coordinates; six fixed first/median/last RGB views. 0010 first view has no colored predictions; retained as observed, not replaced. Overlays are measured-source projections, not dense masks or GT."
+  },
+  "no_new_model_inference": true,
+  "no_new_maps": true,
+  "goal_scope": "New mechanism implemented, same-version robot comparison and prospective assessment delivered; does not assert universal novelty, official leaderboard score or publication readiness."
+}

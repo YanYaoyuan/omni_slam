@@ -1,0 +1,44 @@
+{
+  "roabag2336": {
+    "no_exposure_60s": 23.78261009331746,
+    "inverse_60s": 23.736895262822145,
+    "bootstrap_conservative_60s": 63.14970886749073,
+    "bootstrap_5hz_60s": 62.40880469017504,
+    "full_candidate_first_60s": 20.988360319043732
+  },
+  "rosbag0521_2": {
+    "no_exposure_60s": 22.39426275935514,
+    "inverse_60s": 22.535848391491413,
+    "bootstrap_conservative_60s": 21.704686371993727,
+    "bootstrap_5hz_60s": 41.90844804055058,
+    "full_candidate_first_60s": 21.395393940274094
+  },
+  "rosbag2245": {
+    "no_exposure_60s": 25.249431570910385,
+    "inverse_60s": 25.40140971815103,
+    "bootstrap_conservative_60s": 22.04665611981151,
+    "bootstrap_5hz_60s": 22.950197911791953,
+    "full_candidate_first_60s": 24.264464506120046
+  },
+  "rosbag2_20260415_174148": {
+    "no_exposure_60s": 893.9217169039296,
+    "inverse_60s": 4615.556945009858,
+    "bootstrap_conservative_60s": 450.8561074052581,
+    "bootstrap_5hz_60s": 482.6998053496957,
+    "full_candidate_first_60s": 35.97877640209136
+  },
+  "20260414_4": {
+    "no_exposure_60s": 3084.113966916164,
+    "inverse_60s": 6383.131674381979,
+    "bootstrap_conservative_60s": 201.9736728849847,
+    "bootstrap_5hz_60s": 124.63703150656777,
+    "full_candidate_first_60s": 38.471430606450134
+  },
+  "rosbag2_20260415_162852": {
+    "no_exposure_60s": 24.530177559414547,
+    "inverse_60s": 1256.7988823554479,
+    "bootstrap_conservative_60s": 15.930635407044608,
+    "bootstrap_5hz_60s": 262.49563673947864,
+    "full_candidate_first_60s": 25.19436683720612
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "frame": "offline_livo_map",
+  "map_revision": "6d1315fcfa844b356e61eae6833b3c9841e92c4eb667a52b7cb6376102495ed5",
+  "query": "car_0001",
+  "objects": [
+    {
+      "id": "car_0001",
+      "label": "car",
+      "position": [
+        -3.497201128612428,
+        1.725470821644537,
+        0.3595727691678805
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00005.jpg",
+      "observation_count": 10,
+      "position_spread_p90_m": 0.09165961627795001,
+      "confirmed": true
+    }
+  ]
+}

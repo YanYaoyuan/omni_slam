@@ -1,0 +1,38 @@
+[
+  {
+    "bag": "20260414_4",
+    "points": 2760287,
+    "finite_xyz_rgb": true,
+    "colored_fraction": 0.1365329040059965
+  },
+  {
+    "bag": "roabag2336",
+    "points": 178179,
+    "finite_xyz_rgb": true,
+    "colored_fraction": 0.04927067724030329
+  },
+  {
+    "bag": "rosbag0521_2",
+    "points": 199488,
+    "finite_xyz_rgb": true,
+    "colored_fraction": 0.03456348251523901
+  },
+  {
+    "bag": "rosbag2245",
+    "points": 565579,
+    "finite_xyz_rgb": true,
+    "colored_fraction": 0.05687799582374876
+  },
+  {
+    "bag": "rosbag2_20260415_162852",
+    "points": 3063078,
+    "finite_xyz_rgb": true,
+    "colored_fraction": 0.14984731045046845
+  },
+  {
+    "bag": "rosbag2_20260415_174148",
+    "points": 2147554,
+    "finite_xyz_rgb": true,
+    "colored_fraction": 0.13679143807326846
+  }
+]

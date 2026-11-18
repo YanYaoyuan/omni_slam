@@ -1,0 +1,3043 @@
+{
+  "complete": true,
+  "results": {
+    "kitti360_0009": [
+      {
+        "gt_id": 2028,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 42,
+            "best_iou": 0.8731495293925433
+          },
+          "unconditional": {
+            "object_id": 42,
+            "best_iou": 0.8753695917235709
+          },
+          "history_only": {
+            "object_id": 42,
+            "best_iou": 0.8753695917235709
+          },
+          "full_authorization": {
+            "object_id": 42,
+            "best_iou": 0.8733046701586099
+          },
+          "witness_history": {
+            "object_id": 42,
+            "best_iou": 0.8733046701586099
+          },
+          "witness_no_history": {
+            "object_id": 42,
+            "best_iou": 0.8733046701586099
+          },
+          "nearest_witness_history": {
+            "object_id": 42,
+            "best_iou": 0.8733046701586099
+          },
+          "ours_no_history": {
+            "object_id": 42,
+            "best_iou": 0.8733046701586099
+          },
+          "ours_unconditional_history": {
+            "object_id": 42,
+            "best_iou": 0.8733046701586099
+          }
+        }
+      },
+      {
+        "gt_id": 2162,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 25,
+            "best_iou": 0.18310135687236379
+          },
+          "unconditional": {
+            "object_id": 25,
+            "best_iou": 0.19054169217070066
+          },
+          "history_only": {
+            "object_id": 25,
+            "best_iou": 0.19054169217070066
+          },
+          "full_authorization": {
+            "object_id": 25,
+            "best_iou": 0.18516359419176504
+          },
+          "witness_history": {
+            "object_id": 25,
+            "best_iou": 0.18516359419176504
+          },
+          "witness_no_history": {
+            "object_id": 25,
+            "best_iou": 0.18516359419176504
+          },
+          "nearest_witness_history": {
+            "object_id": 25,
+            "best_iou": 0.18516359419176504
+          },
+          "ours_no_history": {
+            "object_id": 25,
+            "best_iou": 0.18516359419176504
+          },
+          "ours_unconditional_history": {
+            "object_id": 25,
+            "best_iou": 0.18516359419176504
+          }
+        }
+      },
+      {
+        "gt_id": 2164,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 27,
+            "best_iou": 0.018335027347822126
+          },
+          "unconditional": {
+            "object_id": 27,
+            "best_iou": 0.5345528282718697
+          },
+          "history_only": {
+            "object_id": 27,
+            "best_iou": 0.3800051364653074
+          },
+          "full_authorization": {
+            "object_id": 27,
+            "best_iou": 0.28642087600856825
+          },
+          "witness_history": {
+            "object_id": 27,
+            "best_iou": 0.28642087600856825
+          },
+          "witness_no_history": {
+            "object_id": 27,
+            "best_iou": 0.2513110620449509
+          },
+          "nearest_witness_history": {
+            "object_id": 27,
+            "best_iou": 0.28642087600856825
+          },
+          "ours_no_history": {
+            "object_id": 27,
+            "best_iou": 0.2513110620449509
+          },
+          "ours_unconditional_history": {
+            "object_id": 27,
+            "best_iou": 0.44088346684260166
+          }
+        }
+      },
+      {
+        "gt_id": 2168,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 17,
+            "best_iou": 0.48327106481687643
+          },
+          "unconditional": {
+            "object_id": 17,
+            "best_iou": 0.6423138040245168
+          },
+          "history_only": {
+            "object_id": 17,
+            "best_iou": 0.6435398817325594
+          },
+          "full_authorization": {
+            "object_id": 17,
+            "best_iou": 0.628125805665716
+          },
+          "witness_history": {
+            "object_id": 17,
+            "best_iou": 0.628125805665716
+          },
+          "witness_no_history": {
+            "object_id": 17,
+            "best_iou": 0.5176651266727867
+          },
+          "nearest_witness_history": {
+            "object_id": 17,
+            "best_iou": 0.628125805665716
+          },
+          "ours_no_history": {
+            "object_id": 17,
+            "best_iou": 0.5176651266727867
+          },
+          "ours_unconditional_history": {
+            "object_id": 17,
+            "best_iou": 0.626882723276609
+          }
+        }
+      },
+      {
+        "gt_id": 2169,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 15,
+            "best_iou": 0.30492770307006273
+          },
+          "unconditional": {
+            "object_id": 15,
+            "best_iou": 0.31024256543928186
+          },
+          "history_only": {
+            "object_id": 15,
+            "best_iou": 0.31024256543928186
+          },
+          "full_authorization": {
+            "object_id": 15,
+            "best_iou": 0.30606734819802256
+          },
+          "witness_history": {
+            "object_id": 15,
+            "best_iou": 0.30606734819802256
+          },
+          "witness_no_history": {
+            "object_id": 15,
+            "best_iou": 0.30606734819802256
+          },
+          "nearest_witness_history": {
+            "object_id": 15,
+            "best_iou": 0.30606734819802256
+          },
+          "ours_no_history": {
+            "object_id": 15,
+            "best_iou": 0.30606734819802256
+          },
+          "ours_unconditional_history": {
+            "object_id": 15,
+            "best_iou": 0.30606734819802256
+          }
+        }
+      },
+      {
+        "gt_id": 2426,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 35,
+            "best_iou": 0.16937112772147503
+          },
+          "unconditional": {
+            "object_id": 35,
+            "best_iou": 0.17142679157206117
+          },
+          "history_only": {
+            "object_id": 35,
+            "best_iou": 0.17142679157206117
+          },
+          "full_authorization": {
+            "object_id": 35,
+            "best_iou": 0.1884669390494129
+          },
+          "witness_history": {
+            "object_id": 35,
+            "best_iou": 0.17018066118952982
+          },
+          "witness_no_history": {
+            "object_id": 35,
+            "best_iou": 0.17018066118952982
+          },
+          "nearest_witness_history": {
+            "object_id": 35,
+            "best_iou": 0.1884669390494129
+          },
+          "ours_no_history": {
+            "object_id": 35,
+            "best_iou": 0.1884669390494129
+          },
+          "ours_unconditional_history": {
+            "object_id": 35,
+            "best_iou": 0.1884669390494129
+          }
+        }
+      },
+      {
+        "gt_id": 2428,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 2430,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 41,
+            "best_iou": 0.5244067549009415
+          },
+          "unconditional": {
+            "object_id": 41,
+            "best_iou": 0.5125163400567027
+          },
+          "history_only": {
+            "object_id": 41,
+            "best_iou": 0.5338926789241706
+          },
+          "full_authorization": {
+            "object_id": 41,
+            "best_iou": 0.5308674398534238
+          },
+          "witness_history": {
+            "object_id": 41,
+            "best_iou": 0.5308674398534238
+          },
+          "witness_no_history": {
+            "object_id": 41,
+            "best_iou": 0.5308674398534238
+          },
+          "nearest_witness_history": {
+            "object_id": 41,
+            "best_iou": 0.5308674398534238
+          },
+          "ours_no_history": {
+            "object_id": 41,
+            "best_iou": 0.5308674398534238
+          },
+          "ours_unconditional_history": {
+            "object_id": 41,
+            "best_iou": 0.5094689053459712
+          }
+        }
+      },
+      {
+        "gt_id": 2465,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 2466,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.32155790637176507
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.3129488851753785
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.3129488851753785
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.32038870425316696
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.32038870425316696
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.32038870425316696
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.32038870425316696
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.32038870425316696
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.32038870425316696
+          }
+        }
+      },
+      {
+        "gt_id": 2467,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.3073120879771148
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.3121830441407952
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.3121830441407952
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.3066834480396844
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.3066834480396844
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.3066834480396844
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.3066834480396844
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.3066834480396844
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.3066834480396844
+          }
+        }
+      },
+      {
+        "gt_id": 2468,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 14,
+            "best_iou": 0.3277712992372641
+          },
+          "unconditional": {
+            "object_id": 14,
+            "best_iou": 0.25464307092730626
+          },
+          "history_only": {
+            "object_id": 14,
+            "best_iou": 0.29175741274985584
+          },
+          "full_authorization": {
+            "object_id": 14,
+            "best_iou": 0.36171845994706714
+          },
+          "witness_history": {
+            "object_id": 14,
+            "best_iou": 0.2758570449565226
+          },
+          "witness_no_history": {
+            "object_id": 14,
+            "best_iou": 0.2758570449565226
+          },
+          "nearest_witness_history": {
+            "object_id": 14,
+            "best_iou": 0.36171845994706714
+          },
+          "ours_no_history": {
+            "object_id": 14,
+            "best_iou": 0.36171845994706714
+          },
+          "ours_unconditional_history": {
+            "object_id": 14,
+            "best_iou": 0.31853553975950044
+          }
+        }
+      },
+      {
+        "gt_id": 2469,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 14,
+            "best_iou": 0.0003480255945012017
+          },
+          "history_only": {
+            "object_id": 14,
+            "best_iou": 0.00032869759606523805
+          },
+          "full_authorization": {
+            "object_id": 14,
+            "best_iou": 3.215535417875947e-05
+          },
+          "witness_history": {
+            "object_id": 14,
+            "best_iou": 3.641359590056021e-05
+          },
+          "witness_no_history": {
+            "object_id": 14,
+            "best_iou": 3.641359590056021e-05
+          },
+          "nearest_witness_history": {
+            "object_id": 14,
+            "best_iou": 3.215535417875947e-05
+          },
+          "ours_no_history": {
+            "object_id": 14,
+            "best_iou": 3.215535417875947e-05
+          },
+          "ours_unconditional_history": {
+            "object_id": 14,
+            "best_iou": 3.4167053142222664e-05
+          }
+        }
+      },
+      {
+        "gt_id": 2470,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 15,
+            "best_iou": 0.00035604182870384044
+          },
+          "unconditional": {
+            "object_id": 15,
+            "best_iou": 0.0003548757488369764
+          },
+          "history_only": {
+            "object_id": 15,
+            "best_iou": 0.0003548757488369764
+          },
+          "full_authorization": {
+            "object_id": 15,
+            "best_iou": 0.0003557911457943531
+          },
+          "witness_history": {
+            "object_id": 15,
+            "best_iou": 0.0003557911457943531
+          },
+          "witness_no_history": {
+            "object_id": 15,
+            "best_iou": 0.0003557911457943531
+          },
+          "nearest_witness_history": {
+            "object_id": 15,
+            "best_iou": 0.0003557911457943531
+          },
+          "ours_no_history": {
+            "object_id": 15,
+            "best_iou": 0.0003557911457943531
+          },
+          "ours_unconditional_history": {
+            "object_id": 15,
+            "best_iou": 0.0003557911457943531
+          }
+        }
+      },
+      {
+        "gt_id": 2471,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 15,
+            "best_iou": 0.1024808471921447
+          },
+          "unconditional": {
+            "object_id": 15,
+            "best_iou": 0.10224850593552051
+          },
+          "history_only": {
+            "object_id": 15,
+            "best_iou": 0.10224850593552051
+          },
+          "full_authorization": {
+            "object_id": 15,
+            "best_iou": 0.10243093827703655
+          },
+          "witness_history": {
+            "object_id": 15,
+            "best_iou": 0.10243093827703655
+          },
+          "witness_no_history": {
+            "object_id": 15,
+            "best_iou": 0.10243093827703655
+          },
+          "nearest_witness_history": {
+            "object_id": 15,
+            "best_iou": 0.10243093827703655
+          },
+          "ours_no_history": {
+            "object_id": 15,
+            "best_iou": 0.10243093827703655
+          },
+          "ours_unconditional_history": {
+            "object_id": 15,
+            "best_iou": 0.10243093827703655
+          }
+        }
+      },
+      {
+        "gt_id": 2472,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 4,
+            "best_iou": 0.4428430403192964
+          },
+          "unconditional": {
+            "object_id": 4,
+            "best_iou": 0.4487377059406434
+          },
+          "history_only": {
+            "object_id": 4,
+            "best_iou": 0.4487377059406434
+          },
+          "full_authorization": {
+            "object_id": 4,
+            "best_iou": 0.4484992254961505
+          },
+          "witness_history": {
+            "object_id": 4,
+            "best_iou": 0.4484992254961505
+          },
+          "witness_no_history": {
+            "object_id": 4,
+            "best_iou": 0.4484992254961505
+          },
+          "nearest_witness_history": {
+            "object_id": 4,
+            "best_iou": 0.4484992254961505
+          },
+          "ours_no_history": {
+            "object_id": 4,
+            "best_iou": 0.4484992254961505
+          },
+          "ours_unconditional_history": {
+            "object_id": 4,
+            "best_iou": 0.4484992254961505
+          }
+        }
+      },
+      {
+        "gt_id": 2478,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 2482,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 12,
+            "best_iou": 0.646724424242939
+          },
+          "unconditional": {
+            "object_id": 12,
+            "best_iou": 0.6215666163114181
+          },
+          "history_only": {
+            "object_id": 12,
+            "best_iou": 0.6215666163114181
+          },
+          "full_authorization": {
+            "object_id": 12,
+            "best_iou": 0.6288086259901463
+          },
+          "witness_history": {
+            "object_id": 12,
+            "best_iou": 0.6288086259901463
+          },
+          "witness_no_history": {
+            "object_id": 12,
+            "best_iou": 0.6288086259901463
+          },
+          "nearest_witness_history": {
+            "object_id": 12,
+            "best_iou": 0.6288086259901463
+          },
+          "ours_no_history": {
+            "object_id": 12,
+            "best_iou": 0.6288086259901463
+          },
+          "ours_unconditional_history": {
+            "object_id": 12,
+            "best_iou": 0.6288086259901463
+          }
+        }
+      },
+      {
+        "gt_id": 2483,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 24,
+            "best_iou": 0.4807646699487381
+          },
+          "unconditional": {
+            "object_id": 24,
+            "best_iou": 0.48666427844436805
+          },
+          "history_only": {
+            "object_id": 24,
+            "best_iou": 0.48666427844436805
+          },
+          "full_authorization": {
+            "object_id": 24,
+            "best_iou": 0.48331583132422845
+          },
+          "witness_history": {
+            "object_id": 24,
+            "best_iou": 0.48331583132422845
+          },
+          "witness_no_history": {
+            "object_id": 24,
+            "best_iou": 0.48331583132422845
+          },
+          "nearest_witness_history": {
+            "object_id": 24,
+            "best_iou": 0.48331583132422845
+          },
+          "ours_no_history": {
+            "object_id": 24,
+            "best_iou": 0.48331583132422845
+          },
+          "ours_unconditional_history": {
+            "object_id": 24,
+            "best_iou": 0.48331583132422845
+          }
+        }
+      },
+      {
+        "gt_id": 2484,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 34,
+            "best_iou": 0.6101202786466221
+          },
+          "unconditional": {
+            "object_id": 34,
+            "best_iou": 0.608864842358187
+          },
+          "history_only": {
+            "object_id": 34,
+            "best_iou": 0.6076987414483359
+          },
+          "full_authorization": {
+            "object_id": 34,
+            "best_iou": 0.6090951862200701
+          },
+          "witness_history": {
+            "object_id": 34,
+            "best_iou": 0.6091073141713861
+          },
+          "witness_no_history": {
+            "object_id": 34,
+            "best_iou": 0.6091073141713861
+          },
+          "nearest_witness_history": {
+            "object_id": 34,
+            "best_iou": 0.6090346885627111
+          },
+          "ours_no_history": {
+            "object_id": 34,
+            "best_iou": 0.6090951862200701
+          },
+          "ours_unconditional_history": {
+            "object_id": 34,
+            "best_iou": 0.6104393732566795
+          }
+        }
+      },
+      {
+        "gt_id": 2485,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 2486,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 48,
+            "best_iou": 0.25443630830962843
+          },
+          "unconditional": {
+            "object_id": 48,
+            "best_iou": 0.41784130601929903
+          },
+          "history_only": {
+            "object_id": 48,
+            "best_iou": 0.41784130601929903
+          },
+          "full_authorization": {
+            "object_id": 48,
+            "best_iou": 0.4066214681761321
+          },
+          "witness_history": {
+            "object_id": 48,
+            "best_iou": 0.4066214681761321
+          },
+          "witness_no_history": {
+            "object_id": 48,
+            "best_iou": 0.346215560634815
+          },
+          "nearest_witness_history": {
+            "object_id": 48,
+            "best_iou": 0.4066214681761321
+          },
+          "ours_no_history": {
+            "object_id": 48,
+            "best_iou": 0.346215560634815
+          },
+          "ours_unconditional_history": {
+            "object_id": 48,
+            "best_iou": 0.4066214681761321
+          }
+        }
+      },
+      {
+        "gt_id": 2487,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13045,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13046,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.8236928303306584
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.8106467691229257
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.8106467691229257
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.8198114366414159
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.8198114366414159
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.8198114366414159
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.8198114366414159
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.8198114366414159
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.8198114366414159
+          }
+        }
+      },
+      {
+        "gt_id": 13049,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 7,
+            "best_iou": 0.9081603604338946
+          },
+          "unconditional": {
+            "object_id": 7,
+            "best_iou": 0.8989094017847814
+          },
+          "history_only": {
+            "object_id": 7,
+            "best_iou": 0.8979008004302104
+          },
+          "full_authorization": {
+            "object_id": 7,
+            "best_iou": 0.8994436719267058
+          },
+          "witness_history": {
+            "object_id": 7,
+            "best_iou": 0.8994436719267058
+          },
+          "witness_no_history": {
+            "object_id": 7,
+            "best_iou": 0.8994436719267058
+          },
+          "nearest_witness_history": {
+            "object_id": 7,
+            "best_iou": 0.8994436719267058
+          },
+          "ours_no_history": {
+            "object_id": 7,
+            "best_iou": 0.8994436719267058
+          },
+          "ours_unconditional_history": {
+            "object_id": 7,
+            "best_iou": 0.9041729075786143
+          }
+        }
+      },
+      {
+        "gt_id": 13050,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 13,
+            "best_iou": 0.8331566406172203
+          },
+          "unconditional": {
+            "object_id": 13,
+            "best_iou": 0.7617185153750344
+          },
+          "history_only": {
+            "object_id": 13,
+            "best_iou": 0.7598407007752708
+          },
+          "full_authorization": {
+            "object_id": 13,
+            "best_iou": 0.8349959985870798
+          },
+          "witness_history": {
+            "object_id": 13,
+            "best_iou": 0.8349959985870798
+          },
+          "witness_no_history": {
+            "object_id": 13,
+            "best_iou": 0.8349959985870798
+          },
+          "nearest_witness_history": {
+            "object_id": 13,
+            "best_iou": 0.8349959985870798
+          },
+          "ours_no_history": {
+            "object_id": 13,
+            "best_iou": 0.8349959985870798
+          },
+          "ours_unconditional_history": {
+            "object_id": 13,
+            "best_iou": 0.8458075338551647
+          }
+        }
+      },
+      {
+        "gt_id": 13051,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 10,
+            "best_iou": 0.8308494383169154
+          },
+          "unconditional": {
+            "object_id": 10,
+            "best_iou": 0.8357964506589649
+          },
+          "history_only": {
+            "object_id": 10,
+            "best_iou": 0.831222550731331
+          },
+          "full_authorization": {
+            "object_id": 10,
+            "best_iou": 0.8295011330139164
+          },
+          "witness_history": {
+            "object_id": 10,
+            "best_iou": 0.8295011330139164
+          },
+          "witness_no_history": {
+            "object_id": 10,
+            "best_iou": 0.8295011330139164
+          },
+          "nearest_witness_history": {
+            "object_id": 10,
+            "best_iou": 0.8295011330139164
+          },
+          "ours_no_history": {
+            "object_id": 10,
+            "best_iou": 0.8295011330139164
+          },
+          "ours_unconditional_history": {
+            "object_id": 10,
+            "best_iou": 0.8350335497233716
+          }
+        }
+      },
+      {
+        "gt_id": 13052,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 11,
+            "best_iou": 0.767149698892336
+          },
+          "unconditional": {
+            "object_id": 11,
+            "best_iou": 0.7340473805559324
+          },
+          "history_only": {
+            "object_id": 11,
+            "best_iou": 0.7340473805559324
+          },
+          "full_authorization": {
+            "object_id": 11,
+            "best_iou": 0.7542335888220418
+          },
+          "witness_history": {
+            "object_id": 11,
+            "best_iou": 0.7542335888220418
+          },
+          "witness_no_history": {
+            "object_id": 11,
+            "best_iou": 0.7542335888220418
+          },
+          "nearest_witness_history": {
+            "object_id": 11,
+            "best_iou": 0.7542335888220418
+          },
+          "ours_no_history": {
+            "object_id": 11,
+            "best_iou": 0.7542335888220418
+          },
+          "ours_unconditional_history": {
+            "object_id": 11,
+            "best_iou": 0.7542335888220418
+          }
+        }
+      },
+      {
+        "gt_id": 13053,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 16,
+            "best_iou": 0.7982149332787176
+          },
+          "unconditional": {
+            "object_id": 16,
+            "best_iou": 0.8058323020957769
+          },
+          "history_only": {
+            "object_id": 16,
+            "best_iou": 0.8058323020957769
+          },
+          "full_authorization": {
+            "object_id": 16,
+            "best_iou": 0.8184167315373437
+          },
+          "witness_history": {
+            "object_id": 16,
+            "best_iou": 0.8184167315373437
+          },
+          "witness_no_history": {
+            "object_id": 16,
+            "best_iou": 0.8184167315373437
+          },
+          "nearest_witness_history": {
+            "object_id": 16,
+            "best_iou": 0.8184167315373437
+          },
+          "ours_no_history": {
+            "object_id": 16,
+            "best_iou": 0.8184167315373437
+          },
+          "ours_unconditional_history": {
+            "object_id": 16,
+            "best_iou": 0.8184167315373437
+          }
+        }
+      },
+      {
+        "gt_id": 13054,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 18,
+            "best_iou": 0.7501059185744613
+          },
+          "unconditional": {
+            "object_id": 18,
+            "best_iou": 0.7600950664979977
+          },
+          "history_only": {
+            "object_id": 18,
+            "best_iou": 0.7600950664979977
+          },
+          "full_authorization": {
+            "object_id": 18,
+            "best_iou": 0.7568941222235324
+          },
+          "witness_history": {
+            "object_id": 18,
+            "best_iou": 0.7568941222235324
+          },
+          "witness_no_history": {
+            "object_id": 18,
+            "best_iou": 0.7568941222235324
+          },
+          "nearest_witness_history": {
+            "object_id": 18,
+            "best_iou": 0.7568941222235324
+          },
+          "ours_no_history": {
+            "object_id": 18,
+            "best_iou": 0.7568941222235324
+          },
+          "ours_unconditional_history": {
+            "object_id": 18,
+            "best_iou": 0.7568941222235324
+          }
+        }
+      },
+      {
+        "gt_id": 13055,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 19,
+            "best_iou": 0.8373571378023933
+          },
+          "unconditional": {
+            "object_id": 19,
+            "best_iou": 0.810009163414661
+          },
+          "history_only": {
+            "object_id": 19,
+            "best_iou": 0.8082116415199502
+          },
+          "full_authorization": {
+            "object_id": 19,
+            "best_iou": 0.8269830385518832
+          },
+          "witness_history": {
+            "object_id": 19,
+            "best_iou": 0.8269830385518832
+          },
+          "witness_no_history": {
+            "object_id": 19,
+            "best_iou": 0.8269830385518832
+          },
+          "nearest_witness_history": {
+            "object_id": 19,
+            "best_iou": 0.8269830385518832
+          },
+          "ours_no_history": {
+            "object_id": 19,
+            "best_iou": 0.8269830385518832
+          },
+          "ours_unconditional_history": {
+            "object_id": 19,
+            "best_iou": 0.8362730408965908
+          }
+        }
+      },
+      {
+        "gt_id": 13056,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 22,
+            "best_iou": 0.8031801902588287
+          },
+          "unconditional": {
+            "object_id": 22,
+            "best_iou": 0.822142616120283
+          },
+          "history_only": {
+            "object_id": 22,
+            "best_iou": 0.8189599150125564
+          },
+          "full_authorization": {
+            "object_id": 22,
+            "best_iou": 0.8031801902588287
+          },
+          "witness_history": {
+            "object_id": 22,
+            "best_iou": 0.8031801902588287
+          },
+          "witness_no_history": {
+            "object_id": 22,
+            "best_iou": 0.8031801902588287
+          },
+          "nearest_witness_history": {
+            "object_id": 22,
+            "best_iou": 0.8031801902588287
+          },
+          "ours_no_history": {
+            "object_id": 22,
+            "best_iou": 0.8031801902588287
+          },
+          "ours_unconditional_history": {
+            "object_id": 22,
+            "best_iou": 0.8186339785986855
+          }
+        }
+      },
+      {
+        "gt_id": 13057,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 26,
+            "best_iou": 0.8550658866921812
+          },
+          "unconditional": {
+            "object_id": 26,
+            "best_iou": 0.8550658866921812
+          },
+          "history_only": {
+            "object_id": 26,
+            "best_iou": 0.8550658866921812
+          },
+          "full_authorization": {
+            "object_id": 26,
+            "best_iou": 0.8550658866921812
+          },
+          "witness_history": {
+            "object_id": 26,
+            "best_iou": 0.8550658866921812
+          },
+          "witness_no_history": {
+            "object_id": 26,
+            "best_iou": 0.8550658866921812
+          },
+          "nearest_witness_history": {
+            "object_id": 26,
+            "best_iou": 0.8550658866921812
+          },
+          "ours_no_history": {
+            "object_id": 26,
+            "best_iou": 0.8550658866921812
+          },
+          "ours_unconditional_history": {
+            "object_id": 26,
+            "best_iou": 0.8550658866921812
+          }
+        }
+      },
+      {
+        "gt_id": 13058,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 28,
+            "best_iou": 0.1746131990412053
+          },
+          "unconditional": {
+            "object_id": 28,
+            "best_iou": 0.23896358690680525
+          },
+          "history_only": {
+            "object_id": 28,
+            "best_iou": 0.16655099179753094
+          },
+          "full_authorization": {
+            "object_id": 28,
+            "best_iou": 0.17405878109478476
+          },
+          "witness_history": {
+            "object_id": 28,
+            "best_iou": 0.17405878109478476
+          },
+          "witness_no_history": {
+            "object_id": 28,
+            "best_iou": 0.17405878109478476
+          },
+          "nearest_witness_history": {
+            "object_id": 28,
+            "best_iou": 0.17405878109478476
+          },
+          "ours_no_history": {
+            "object_id": 28,
+            "best_iou": 0.17405878109478476
+          },
+          "ours_unconditional_history": {
+            "object_id": 28,
+            "best_iou": 0.25661582190357973
+          }
+        }
+      },
+      {
+        "gt_id": 13059,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 23,
+            "best_iou": 0.8203883538122232
+          },
+          "unconditional": {
+            "object_id": 23,
+            "best_iou": 0.7940415577030975
+          },
+          "history_only": {
+            "object_id": 23,
+            "best_iou": 0.7940415577030975
+          },
+          "full_authorization": {
+            "object_id": 23,
+            "best_iou": 0.8100853953527387
+          },
+          "witness_history": {
+            "object_id": 23,
+            "best_iou": 0.8100853953527387
+          },
+          "witness_no_history": {
+            "object_id": 23,
+            "best_iou": 0.8100853953527387
+          },
+          "nearest_witness_history": {
+            "object_id": 23,
+            "best_iou": 0.8100853953527387
+          },
+          "ours_no_history": {
+            "object_id": 23,
+            "best_iou": 0.8100853953527387
+          },
+          "ours_unconditional_history": {
+            "object_id": 23,
+            "best_iou": 0.8100853953527387
+          }
+        }
+      },
+      {
+        "gt_id": 13060,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 31,
+            "best_iou": 0.8380070190927886
+          },
+          "unconditional": {
+            "object_id": 31,
+            "best_iou": 0.8192323844581592
+          },
+          "history_only": {
+            "object_id": 31,
+            "best_iou": 0.8192323844581592
+          },
+          "full_authorization": {
+            "object_id": 31,
+            "best_iou": 0.8365192653215026
+          },
+          "witness_history": {
+            "object_id": 31,
+            "best_iou": 0.8365192653215026
+          },
+          "witness_no_history": {
+            "object_id": 31,
+            "best_iou": 0.8365192653215026
+          },
+          "nearest_witness_history": {
+            "object_id": 31,
+            "best_iou": 0.8365192653215026
+          },
+          "ours_no_history": {
+            "object_id": 31,
+            "best_iou": 0.8365192653215026
+          },
+          "ours_unconditional_history": {
+            "object_id": 31,
+            "best_iou": 0.8365192653215026
+          }
+        }
+      },
+      {
+        "gt_id": 13061,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 30,
+            "best_iou": 0.8548420236539005
+          },
+          "unconditional": {
+            "object_id": 30,
+            "best_iou": 0.8335454453022748
+          },
+          "history_only": {
+            "object_id": 30,
+            "best_iou": 0.8335454453022748
+          },
+          "full_authorization": {
+            "object_id": 30,
+            "best_iou": 0.8455728115056327
+          },
+          "witness_history": {
+            "object_id": 30,
+            "best_iou": 0.8455728115056327
+          },
+          "witness_no_history": {
+            "object_id": 30,
+            "best_iou": 0.8455728115056327
+          },
+          "nearest_witness_history": {
+            "object_id": 30,
+            "best_iou": 0.8455728115056327
+          },
+          "ours_no_history": {
+            "object_id": 30,
+            "best_iou": 0.8455728115056327
+          },
+          "ours_unconditional_history": {
+            "object_id": 30,
+            "best_iou": 0.8455728115056327
+          }
+        }
+      },
+      {
+        "gt_id": 13062,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 39,
+            "best_iou": 0.8655256743965123
+          },
+          "unconditional": {
+            "object_id": 39,
+            "best_iou": 0.8305040972232083
+          },
+          "history_only": {
+            "object_id": 39,
+            "best_iou": 0.8305040972232083
+          },
+          "full_authorization": {
+            "object_id": 39,
+            "best_iou": 0.8635334662457521
+          },
+          "witness_history": {
+            "object_id": 39,
+            "best_iou": 0.8635334662457521
+          },
+          "witness_no_history": {
+            "object_id": 39,
+            "best_iou": 0.8635334662457521
+          },
+          "nearest_witness_history": {
+            "object_id": 39,
+            "best_iou": 0.8635334662457521
+          },
+          "ours_no_history": {
+            "object_id": 39,
+            "best_iou": 0.8635334662457521
+          },
+          "ours_unconditional_history": {
+            "object_id": 39,
+            "best_iou": 0.8635334662457521
+          }
+        }
+      },
+      {
+        "gt_id": 13063,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 40,
+            "best_iou": 0.8774830683776296
+          },
+          "unconditional": {
+            "object_id": 40,
+            "best_iou": 0.8930349931931183
+          },
+          "history_only": {
+            "object_id": 40,
+            "best_iou": 0.8930349931931183
+          },
+          "full_authorization": {
+            "object_id": 40,
+            "best_iou": 0.8676478886143434
+          },
+          "witness_history": {
+            "object_id": 40,
+            "best_iou": 0.8676478886143434
+          },
+          "witness_no_history": {
+            "object_id": 40,
+            "best_iou": 0.8676478886143434
+          },
+          "nearest_witness_history": {
+            "object_id": 40,
+            "best_iou": 0.8676478886143434
+          },
+          "ours_no_history": {
+            "object_id": 40,
+            "best_iou": 0.8676478886143434
+          },
+          "ours_unconditional_history": {
+            "object_id": 40,
+            "best_iou": 0.8676478886143434
+          }
+        }
+      },
+      {
+        "gt_id": 13064,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13065,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 33,
+            "best_iou": 0.7585459289208983
+          },
+          "unconditional": {
+            "object_id": 33,
+            "best_iou": 0.7505697273612627
+          },
+          "history_only": {
+            "object_id": 33,
+            "best_iou": 0.7505697273612627
+          },
+          "full_authorization": {
+            "object_id": 33,
+            "best_iou": 0.7516487915379185
+          },
+          "witness_history": {
+            "object_id": 33,
+            "best_iou": 0.7516487915379185
+          },
+          "witness_no_history": {
+            "object_id": 33,
+            "best_iou": 0.7516487915379185
+          },
+          "nearest_witness_history": {
+            "object_id": 33,
+            "best_iou": 0.7516487915379185
+          },
+          "ours_no_history": {
+            "object_id": 33,
+            "best_iou": 0.7516487915379185
+          },
+          "ours_unconditional_history": {
+            "object_id": 33,
+            "best_iou": 0.7516487915379185
+          }
+        }
+      },
+      {
+        "gt_id": 13066,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 37,
+            "best_iou": 0.7300440400664223
+          },
+          "unconditional": {
+            "object_id": 37,
+            "best_iou": 0.7241297578461942
+          },
+          "history_only": {
+            "object_id": 37,
+            "best_iou": 0.7241297578461942
+          },
+          "full_authorization": {
+            "object_id": 37,
+            "best_iou": 0.7278714698507683
+          },
+          "witness_history": {
+            "object_id": 37,
+            "best_iou": 0.7278714698507683
+          },
+          "witness_no_history": {
+            "object_id": 37,
+            "best_iou": 0.7278714698507683
+          },
+          "nearest_witness_history": {
+            "object_id": 37,
+            "best_iou": 0.7278714698507683
+          },
+          "ours_no_history": {
+            "object_id": 37,
+            "best_iou": 0.7278714698507683
+          },
+          "ours_unconditional_history": {
+            "object_id": 37,
+            "best_iou": 0.7278714698507683
+          }
+        }
+      },
+      {
+        "gt_id": 13067,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13068,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13069,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13070,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 21,
+            "best_iou": 0.7771473913102824
+          },
+          "unconditional": {
+            "object_id": 21,
+            "best_iou": 0.7588088215710993
+          },
+          "history_only": {
+            "object_id": 21,
+            "best_iou": 0.7588088215710993
+          },
+          "full_authorization": {
+            "object_id": 21,
+            "best_iou": 0.7661530737743829
+          },
+          "witness_history": {
+            "object_id": 21,
+            "best_iou": 0.7661530737743829
+          },
+          "witness_no_history": {
+            "object_id": 21,
+            "best_iou": 0.7661530737743829
+          },
+          "nearest_witness_history": {
+            "object_id": 21,
+            "best_iou": 0.7661530737743829
+          },
+          "ours_no_history": {
+            "object_id": 21,
+            "best_iou": 0.7661530737743829
+          },
+          "ours_unconditional_history": {
+            "object_id": 21,
+            "best_iou": 0.7661530737743829
+          }
+        }
+      },
+      {
+        "gt_id": 13071,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 20,
+            "best_iou": 0.8426722284146735
+          },
+          "unconditional": {
+            "object_id": 20,
+            "best_iou": 0.8326512709305274
+          },
+          "history_only": {
+            "object_id": 20,
+            "best_iou": 0.8326512709305274
+          },
+          "full_authorization": {
+            "object_id": 20,
+            "best_iou": 0.8330590250682524
+          },
+          "witness_history": {
+            "object_id": 20,
+            "best_iou": 0.8330590250682524
+          },
+          "witness_no_history": {
+            "object_id": 20,
+            "best_iou": 0.8330590250682524
+          },
+          "nearest_witness_history": {
+            "object_id": 20,
+            "best_iou": 0.8330590250682524
+          },
+          "ours_no_history": {
+            "object_id": 20,
+            "best_iou": 0.8330590250682524
+          },
+          "ours_unconditional_history": {
+            "object_id": 20,
+            "best_iou": 0.8330590250682524
+          }
+        }
+      },
+      {
+        "gt_id": 13072,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 6,
+            "best_iou": 0.8736057748124693
+          },
+          "unconditional": {
+            "object_id": 6,
+            "best_iou": 0.8414220626638889
+          },
+          "history_only": {
+            "object_id": 6,
+            "best_iou": 0.8414220626638889
+          },
+          "full_authorization": {
+            "object_id": 6,
+            "best_iou": 0.8517885946990665
+          },
+          "witness_history": {
+            "object_id": 6,
+            "best_iou": 0.8517885946990665
+          },
+          "witness_no_history": {
+            "object_id": 6,
+            "best_iou": 0.8517885946990665
+          },
+          "nearest_witness_history": {
+            "object_id": 6,
+            "best_iou": 0.8517885946990665
+          },
+          "ours_no_history": {
+            "object_id": 6,
+            "best_iou": 0.8517885946990665
+          },
+          "ours_unconditional_history": {
+            "object_id": 6,
+            "best_iou": 0.8517885946990665
+          }
+        }
+      },
+      {
+        "gt_id": 13073,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 5,
+            "best_iou": 0.8349773769138507
+          },
+          "unconditional": {
+            "object_id": 5,
+            "best_iou": 0.8073563678432414
+          },
+          "history_only": {
+            "object_id": 5,
+            "best_iou": 0.8073563678432414
+          },
+          "full_authorization": {
+            "object_id": 5,
+            "best_iou": 0.8158563788922298
+          },
+          "witness_history": {
+            "object_id": 5,
+            "best_iou": 0.8158563788922298
+          },
+          "witness_no_history": {
+            "object_id": 5,
+            "best_iou": 0.8158563788922298
+          },
+          "nearest_witness_history": {
+            "object_id": 5,
+            "best_iou": 0.8158563788922298
+          },
+          "ours_no_history": {
+            "object_id": 5,
+            "best_iou": 0.8158563788922298
+          },
+          "ours_unconditional_history": {
+            "object_id": 5,
+            "best_iou": 0.8158563788922298
+          }
+        }
+      },
+      {
+        "gt_id": 13074,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 3,
+            "best_iou": 0.8501466890820466
+          },
+          "unconditional": {
+            "object_id": 3,
+            "best_iou": 0.8331523241457142
+          },
+          "history_only": {
+            "object_id": 3,
+            "best_iou": 0.8331523241457142
+          },
+          "full_authorization": {
+            "object_id": 3,
+            "best_iou": 0.8501466890820466
+          },
+          "witness_history": {
+            "object_id": 3,
+            "best_iou": 0.8501466890820466
+          },
+          "witness_no_history": {
+            "object_id": 3,
+            "best_iou": 0.8501466890820466
+          },
+          "nearest_witness_history": {
+            "object_id": 3,
+            "best_iou": 0.8501466890820466
+          },
+          "ours_no_history": {
+            "object_id": 3,
+            "best_iou": 0.8501466890820466
+          },
+          "ours_unconditional_history": {
+            "object_id": 3,
+            "best_iou": 0.8501466890820466
+          }
+        }
+      },
+      {
+        "gt_id": 13075,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 32,
+            "best_iou": 0.7503452021096327
+          },
+          "unconditional": {
+            "object_id": 32,
+            "best_iou": 0.720134073108876
+          },
+          "history_only": {
+            "object_id": 32,
+            "best_iou": 0.720134073108876
+          },
+          "full_authorization": {
+            "object_id": 32,
+            "best_iou": 0.7354182695732394
+          },
+          "witness_history": {
+            "object_id": 32,
+            "best_iou": 0.7354182695732394
+          },
+          "witness_no_history": {
+            "object_id": 32,
+            "best_iou": 0.7354182695732394
+          },
+          "nearest_witness_history": {
+            "object_id": 32,
+            "best_iou": 0.7354182695732394
+          },
+          "ours_no_history": {
+            "object_id": 32,
+            "best_iou": 0.7354182695732394
+          },
+          "ours_unconditional_history": {
+            "object_id": 32,
+            "best_iou": 0.7354182695732394
+          }
+        }
+      },
+      {
+        "gt_id": 13076,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13077,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 8,
+            "best_iou": 0.846791059397268
+          },
+          "unconditional": {
+            "object_id": 8,
+            "best_iou": 0.8358015552198395
+          },
+          "history_only": {
+            "object_id": 8,
+            "best_iou": 0.8358015552198395
+          },
+          "full_authorization": {
+            "object_id": 8,
+            "best_iou": 0.8369417819562598
+          },
+          "witness_history": {
+            "object_id": 8,
+            "best_iou": 0.8369417819562598
+          },
+          "witness_no_history": {
+            "object_id": 8,
+            "best_iou": 0.8369417819562598
+          },
+          "nearest_witness_history": {
+            "object_id": 8,
+            "best_iou": 0.8369417819562598
+          },
+          "ours_no_history": {
+            "object_id": 8,
+            "best_iou": 0.8369417819562598
+          },
+          "ours_unconditional_history": {
+            "object_id": 8,
+            "best_iou": 0.8369417819562598
+          }
+        }
+      },
+      {
+        "gt_id": 13078,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13079,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13092,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 38,
+            "best_iou": 0.6635523934606099
+          },
+          "unconditional": {
+            "object_id": 38,
+            "best_iou": 0.6629578014342502
+          },
+          "history_only": {
+            "object_id": 38,
+            "best_iou": 0.6629578014342502
+          },
+          "full_authorization": {
+            "object_id": 38,
+            "best_iou": 0.6635523934606099
+          },
+          "witness_history": {
+            "object_id": 38,
+            "best_iou": 0.6635523934606099
+          },
+          "witness_no_history": {
+            "object_id": 38,
+            "best_iou": 0.6635523934606099
+          },
+          "nearest_witness_history": {
+            "object_id": 38,
+            "best_iou": 0.6635523934606099
+          },
+          "ours_no_history": {
+            "object_id": 38,
+            "best_iou": 0.6635523934606099
+          },
+          "ours_unconditional_history": {
+            "object_id": 38,
+            "best_iou": 0.6635523934606099
+          }
+        }
+      },
+      {
+        "gt_id": 13093,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 44,
+            "best_iou": 0.7351020385763638
+          },
+          "unconditional": {
+            "object_id": 44,
+            "best_iou": 0.7322890992309686
+          },
+          "history_only": {
+            "object_id": 44,
+            "best_iou": 0.7322890992309686
+          },
+          "full_authorization": {
+            "object_id": 44,
+            "best_iou": 0.7317184305264467
+          },
+          "witness_history": {
+            "object_id": 44,
+            "best_iou": 0.7317184305264467
+          },
+          "witness_no_history": {
+            "object_id": 44,
+            "best_iou": 0.7317184305264467
+          },
+          "nearest_witness_history": {
+            "object_id": 44,
+            "best_iou": 0.7317184305264467
+          },
+          "ours_no_history": {
+            "object_id": 44,
+            "best_iou": 0.7317184305264467
+          },
+          "ours_unconditional_history": {
+            "object_id": 44,
+            "best_iou": 0.7317184305264467
+          }
+        }
+      },
+      {
+        "gt_id": 13094,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13320,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13321,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13333,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      }
+    ],
+    "kitti360_0010": [
+      {
+        "gt_id": 2086,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 3,
+            "best_iou": 0.4998356243498102
+          },
+          "unconditional": {
+            "object_id": 3,
+            "best_iou": 0.3434424980848785
+          },
+          "history_only": {
+            "object_id": 3,
+            "best_iou": 0.5062680211317668
+          },
+          "full_authorization": {
+            "object_id": 3,
+            "best_iou": 0.5576437390555575
+          },
+          "witness_history": {
+            "object_id": 3,
+            "best_iou": 0.5026512060341126
+          },
+          "witness_no_history": {
+            "object_id": 3,
+            "best_iou": 0.5026512060341126
+          },
+          "nearest_witness_history": {
+            "object_id": 3,
+            "best_iou": 0.5576437390555575
+          },
+          "ours_no_history": {
+            "object_id": 3,
+            "best_iou": 0.5576437390555575
+          },
+          "ours_unconditional_history": {
+            "object_id": 3,
+            "best_iou": 0.3931718888229148
+          }
+        }
+      },
+      {
+        "gt_id": 2087,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 2088,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 1,
+            "best_iou": 0.7564633466471127
+          },
+          "unconditional": {
+            "object_id": 1,
+            "best_iou": 0.7612878127316977
+          },
+          "history_only": {
+            "object_id": 1,
+            "best_iou": 0.7612878127316977
+          },
+          "full_authorization": {
+            "object_id": 1,
+            "best_iou": 0.7602860179364157
+          },
+          "witness_history": {
+            "object_id": 1,
+            "best_iou": 0.7602860179364157
+          },
+          "witness_no_history": {
+            "object_id": 1,
+            "best_iou": 0.7602860179364157
+          },
+          "nearest_witness_history": {
+            "object_id": 1,
+            "best_iou": 0.7602860179364157
+          },
+          "ours_no_history": {
+            "object_id": 1,
+            "best_iou": 0.7602860179364157
+          },
+          "ours_unconditional_history": {
+            "object_id": 1,
+            "best_iou": 0.7602860179364157
+          }
+        }
+      },
+      {
+        "gt_id": 13305,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13306,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13308,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13309,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13311,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.7284388187096708
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.7284388187096708
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.7284388187096708
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.7284388187096708
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.7284388187096708
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.7284388187096708
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.7284388187096708
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.7284388187096708
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.7284388187096708
+          }
+        }
+      },
+      {
+        "gt_id": 13312,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13313,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13315,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      },
+      {
+        "gt_id": 13316,
+        "methods": {
+          "strong_baseline": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "unconditional": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "history_only": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "full_authorization": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "witness_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "nearest_witness_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_no_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          },
+          "ours_unconditional_history": {
+            "object_id": 2,
+            "best_iou": 0.0
+          }
+        }
+      }
+    ]
+  }
+}

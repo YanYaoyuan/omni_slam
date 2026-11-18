@@ -1,0 +1,41 @@
+{
+  "complete": true,
+  "files": {
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/maps/kitti360_0009/run.json": "ea78ea0fd5410ea63da76afe4ff85f06587ac46f0dadc750ba532350e0734e91",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/maps/kitti360_0009/native_supports.npz": "6bf339c5b275e95105b43b2b9a3602659ce4baa7833a9c0dcb07f5590062c8e3",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/maps/kitti360_0009/geometry.npz": "fc6c25fb7ef16bfabf9540aaea25f2b846783c5193ba1f8cb300a4d77fb690c1",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/maps/kitti360_0009/classification.json": "b7c178d1eecab54057b12fbbdf6f22fb7e5846e2c6eaeeddb6bc498d4a627288",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/maps/kitti360_0010/run.json": "62a7a8301e542ca5c5deb77054d1443bd7bb22444c57965f88317209a98a5acc",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/maps/kitti360_0010/native_supports.npz": "5fd879a495e85f600789c2bb69c21799a1c1d6921279361f9163c4b4fbf2f685",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/maps/kitti360_0010/geometry.npz": "22159f520832cb0f35441a0d843c36f1d2ac9490b93bc6e41d221a7f96dd031e",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/maps/kitti360_0010/classification.json": "9c02414f0636f962b83b7f1feb45132469b194fe9edc7168562cafcf7c458067"
+  },
+  "results": {
+    "kitti360_0009": {
+      "input_sources": 3408382,
+      "frames": 50,
+      "input_masks": 2723,
+      "rejected_masks": 14,
+      "clusters": 2542,
+      "objects": 98,
+      "graph_s": 2.2789817169541493,
+      "postprocess_s": 0.23844284901861101,
+      "total_s": 3.3354240889893845,
+      "peak_driver_rss_bytes": 1465638912
+    },
+    "kitti360_0010": {
+      "input_sources": 2599203,
+      "frames": 34,
+      "input_masks": 702,
+      "rejected_masks": 2,
+      "clusters": 662,
+      "objects": 23,
+      "graph_s": 0.14833074493799359,
+      "postprocess_s": 0.0851926599862054,
+      "total_s": 1.5705939689651132,
+      "peak_driver_rss_bytes": 1465638912
+    }
+  },
+  "reference_labels_read": false,
+  "protocol_sha256": "e9089ca548a9d4d9bb35977bcc838aa28f94ec874676ad1c176b33e4bb28f73c"
+}

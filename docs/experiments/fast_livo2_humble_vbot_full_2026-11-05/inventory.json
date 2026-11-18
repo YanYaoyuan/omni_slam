@@ -1,0 +1,2136 @@
+[
+  {
+    "path": "/home/user/vbot/data/roabag2336/rosbag2_20260521_233041_0.mcap",
+    "name": "roabag2336",
+    "duration_s": 187.446105425,
+    "first_record_ns": 1779377442939505750,
+    "last_record_ns": 1779377630385611175,
+    "size_bytes": 532462375,
+    "topics": {
+      "/tf_static": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 77
+      },
+      "/tf": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 938
+      },
+      "/stereo_right/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 38
+      },
+      "/stereo_left/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 38
+      },
+      "/slam/status": {
+        "type": "slam_msgs/msg/SlamStatus",
+        "count": 938
+      },
+      "/stereo/left/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 5624
+      },
+      "/pct_path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 720
+      },
+      "/dog_2Dmap_occupancy": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 582
+      },
+      "/dog_output_global_path_unfinished": {
+        "type": "nav_msgs/msg/Path",
+        "count": 1262
+      },
+      "/image_left_raw/h265_undistort": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 5623
+      },
+      "/stereo/right/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 5623
+      },
+      "/lidar_imu": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 37486
+      },
+      "/dog_output_local_path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 1261
+      },
+      "/semantic_map": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 0
+      },
+      "/grid_map": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 0
+      },
+      "/gnss/fix": {
+        "type": "sensor_msgs/msg/NavSatFix",
+        "count": 187
+      },
+      "/image_left_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 5621
+      },
+      "/lidar_points": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 937
+      },
+      "/imu_raw": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 93688
+      },
+      "/odometry": {
+        "type": "nav_msgs/msg/Odometry",
+        "count": 937
+      },
+      "/image_right_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 5621
+      },
+      "/path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 94
+      }
+    },
+    "calibration": {
+      "width": 1920,
+      "height": 1080,
+      "K": [
+        805.299072265625,
+        0.0,
+        959.1966552734375,
+        0.0,
+        805.8798828125,
+        538.8123779296875,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "D": [
+        7.998585224151611,
+        3.083042860031128,
+        -8.164579776348546e-05,
+        0.0001791279937606305,
+        0.07636485248804092,
+        8.388995170593262,
+        5.921084403991699,
+        0.5596563816070557
+      ],
+      "model": "rational_polynomial",
+      "transforms": {
+        "stereo_left": [
+          [
+            0.004191981197259775,
+            -0.02468102824458185,
+            0.9996865879556613,
+            0.24471889523405452
+          ],
+          [
+            -0.9999764174640439,
+            0.0053347642918529226,
+            0.004324905285284952,
+            0.034999920538423004
+          ],
+          [
+            -0.005439835421971406,
+            -0.9996811427323917,
+            -0.0246580829717426,
+            0.13352849660228427
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "stereo_right": [
+          [
+            -0.004509607007277122,
+            -0.02955072992917529,
+            0.9995531090468845,
+            0.2443247992674951
+          ],
+          [
+            -0.99996580244192,
+            0.007062647104909642,
+            -0.004302669236503298,
+            -0.033828257692075564
+          ],
+          [
+            -0.006932343855230894,
+            -0.9995383301187226,
+            -0.029581569129246504,
+            0.13362487823880237
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "infrared": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.21835
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "body_imu": [
+          [
+            0.0,
+            1.0000000000000002,
+            0.0,
+            -0.07192
+          ],
+          [
+            -1.0000000000000002,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0000000000000002,
+            0.04999
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar_imu": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.18544
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.01699
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.18129
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "anchor": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.23494
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.20652
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_pitch": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.13052
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_yaw": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "calibration_status": "ok"
+  },
+  {
+    "path": "/home/user/vbot/data/rosbag0521_2/rosbag2_20260521_183432_0.mcap",
+    "name": "rosbag0521_2",
+    "duration_s": 237.35476895,
+    "first_record_ns": 1779359673577418800,
+    "last_record_ns": 1779359910932187750,
+    "size_bytes": 545178265,
+    "topics": {
+      "/stereo/right/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 7121
+      },
+      "/stereo/left/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 7121
+      },
+      "/imu_raw": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 118644
+      },
+      "/lidar_points": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 1187
+      },
+      "/image_right_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 7120
+      },
+      "/lidar_imu": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 47432
+      },
+      "/image_left_raw/h265_undistort": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 7121
+      },
+      "/image_left_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 7121
+      },
+      "/gnss/fix": {
+        "type": "sensor_msgs/msg/NavSatFix",
+        "count": 237
+      },
+      "/tf_static": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 88
+      },
+      "/slam/status": {
+        "type": "slam_msgs/msg/SlamStatus",
+        "count": 1119
+      },
+      "/path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 111
+      },
+      "/odometry": {
+        "type": "nav_msgs/msg/Odometry",
+        "count": 1119
+      },
+      "/semantic_map": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 0
+      },
+      "/grid_map": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 0
+      },
+      "/tf": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 1119
+      },
+      "/stereo_left/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 43
+      },
+      "/stereo_right/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 43
+      }
+    },
+    "calibration": {
+      "width": 1920,
+      "height": 1080,
+      "K": [
+        805.299072265625,
+        0.0,
+        959.1966552734375,
+        0.0,
+        805.8798828125,
+        538.8123779296875,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "D": [
+        7.998585224151611,
+        3.083042860031128,
+        -8.164579776348546e-05,
+        0.0001791279937606305,
+        0.07636485248804092,
+        8.388995170593262,
+        5.921084403991699,
+        0.5596563816070557
+      ],
+      "model": "rational_polynomial",
+      "transforms": {
+        "stereo_left": [
+          [
+            0.004191981197259775,
+            -0.02468102824458185,
+            0.9996865879556613,
+            0.24471889523405452
+          ],
+          [
+            -0.9999764174640439,
+            0.0053347642918529226,
+            0.004324905285284952,
+            0.034999920538423004
+          ],
+          [
+            -0.005439835421971406,
+            -0.9996811427323917,
+            -0.0246580829717426,
+            0.13352849660228427
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "stereo_right": [
+          [
+            -0.004509607007277122,
+            -0.02955072992917529,
+            0.9995531090468845,
+            0.2443247992674951
+          ],
+          [
+            -0.99996580244192,
+            0.007062647104909642,
+            -0.004302669236503298,
+            -0.033828257692075564
+          ],
+          [
+            -0.006932343855230894,
+            -0.9995383301187226,
+            -0.029581569129246504,
+            0.13362487823880237
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "infrared": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.21835
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "body_imu": [
+          [
+            0.0,
+            1.0000000000000002,
+            0.0,
+            -0.07192
+          ],
+          [
+            -1.0000000000000002,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0000000000000002,
+            0.04999
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar_imu": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.18544
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.01699
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.18129
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "anchor": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.23494
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.20652
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_pitch": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.13052
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_yaw": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "calibration_status": "ok"
+  },
+  {
+    "path": "/home/user/vbot/data/rosbag2245/rosbag2_20260521_223309_0.mcap",
+    "name": "rosbag2245",
+    "duration_s": 589.054926425,
+    "first_record_ns": 1779373989863654875,
+    "last_record_ns": 1779374578918581300,
+    "size_bytes": 1355464874,
+    "topics": {
+      "/stereo/right/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 17672
+      },
+      "/stereo/left/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 17672
+      },
+      "/imu_raw": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 294450
+      },
+      "/lidar_points": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 2945
+      },
+      "/image_right_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 17673
+      },
+      "/lidar_imu": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 117722
+      },
+      "/image_left_raw/h265_undistort": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 17672
+      },
+      "/image_left_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 17673
+      },
+      "/gnss/fix": {
+        "type": "sensor_msgs/msg/NavSatFix",
+        "count": 589
+      },
+      "/tf_static": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 232
+      },
+      "/slam/status": {
+        "type": "slam_msgs/msg/SlamStatus",
+        "count": 2906
+      },
+      "/path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 290
+      },
+      "/odometry": {
+        "type": "nav_msgs/msg/Odometry",
+        "count": 2906
+      },
+      "/semantic_map": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 0
+      },
+      "/grid_map": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 0
+      },
+      "/tf": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 2906
+      },
+      "/stereo_left/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 115
+      },
+      "/stereo_right/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 115
+      }
+    },
+    "calibration": {
+      "width": 1920,
+      "height": 1080,
+      "K": [
+        805.299072265625,
+        0.0,
+        959.1966552734375,
+        0.0,
+        805.8798828125,
+        538.8123779296875,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "D": [
+        7.998585224151611,
+        3.083042860031128,
+        -8.164579776348546e-05,
+        0.0001791279937606305,
+        0.07636485248804092,
+        8.388995170593262,
+        5.921084403991699,
+        0.5596563816070557
+      ],
+      "model": "rational_polynomial",
+      "transforms": {
+        "stereo_left": [
+          [
+            0.004191981197259775,
+            -0.02468102824458185,
+            0.9996865879556613,
+            0.24471889523405452
+          ],
+          [
+            -0.9999764174640439,
+            0.0053347642918529226,
+            0.004324905285284952,
+            0.034999920538423004
+          ],
+          [
+            -0.005439835421971406,
+            -0.9996811427323917,
+            -0.0246580829717426,
+            0.13352849660228427
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "stereo_right": [
+          [
+            -0.004509607007277122,
+            -0.02955072992917529,
+            0.9995531090468845,
+            0.2443247992674951
+          ],
+          [
+            -0.99996580244192,
+            0.007062647104909642,
+            -0.004302669236503298,
+            -0.033828257692075564
+          ],
+          [
+            -0.006932343855230894,
+            -0.9995383301187226,
+            -0.029581569129246504,
+            0.13362487823880237
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "infrared": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.21835
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "body_imu": [
+          [
+            0.0,
+            1.0000000000000002,
+            0.0,
+            -0.07192
+          ],
+          [
+            -1.0000000000000002,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0000000000000002,
+            0.04999
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar_imu": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.18544
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.01699
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.18129
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "anchor": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.23494
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.20652
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_pitch": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.13052
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_yaw": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "calibration_status": "ok"
+  },
+  {
+    "path": "/home/user/vbot/data/rosbag2_20260415_162852/rosbag2_20260415_162852_0.mcap",
+    "name": "rosbag2_20260415_162852",
+    "duration_s": 1641.941447675,
+    "first_record_ns": 1776241733205700850,
+    "last_record_ns": 1776243375147148525,
+    "size_bytes": 4640514367,
+    "topics": {
+      "/tf_static": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 660
+      },
+      "/tf": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 8210
+      },
+      "/stereo_right/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 329
+      },
+      "/stereo_left/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 329
+      },
+      "/slam/status": {
+        "type": "slam_msgs/msg/SlamStatus",
+        "count": 8210
+      },
+      "/stereo/left/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 49251
+      },
+      "/pct_path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 7562
+      },
+      "/dog_2Dmap_occupancy": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 6290
+      },
+      "/dog_output_global_path_unfinished": {
+        "type": "nav_msgs/msg/Path",
+        "count": 10460
+      },
+      "/image_left_raw/h265_undistort": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 49250
+      },
+      "/stereo/right/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 49250
+      },
+      "/lidar_imu": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 328072
+      },
+      "/dog_output_local_path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 11202
+      },
+      "/semantic_map": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 0
+      },
+      "/grid_map": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 0
+      },
+      "/gnss/fix": {
+        "type": "sensor_msgs/msg/NavSatFix",
+        "count": 1642
+      },
+      "/image_left_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 49250
+      },
+      "/lidar_points": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 8210
+      },
+      "/imu_raw": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 820714
+      },
+      "/odometry": {
+        "type": "nav_msgs/msg/Odometry",
+        "count": 8210
+      },
+      "/image_right_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 49249
+      },
+      "/path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 821
+      }
+    },
+    "calibration": {
+      "width": 1920,
+      "height": 1080,
+      "K": [
+        805.299072265625,
+        0.0,
+        959.1966552734375,
+        0.0,
+        805.8798828125,
+        538.8123779296875,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "D": [
+        7.998585224151611,
+        3.083042860031128,
+        -8.164579776348546e-05,
+        0.0001791279937606305,
+        0.07636485248804092,
+        8.388995170593262,
+        5.921084403991699,
+        0.5596563816070557
+      ],
+      "model": "rational_polynomial",
+      "transforms": {
+        "stereo_left": [
+          [
+            0.004191981197259775,
+            -0.02468102824458185,
+            0.9996865879556613,
+            0.24471889523405452
+          ],
+          [
+            -0.9999764174640439,
+            0.0053347642918529226,
+            0.004324905285284952,
+            0.034999920538423004
+          ],
+          [
+            -0.005439835421971406,
+            -0.9996811427323917,
+            -0.0246580829717426,
+            0.13352849660228427
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "stereo_right": [
+          [
+            -0.004509607007277122,
+            -0.02955072992917529,
+            0.9995531090468845,
+            0.2443247992674951
+          ],
+          [
+            -0.99996580244192,
+            0.007062647104909642,
+            -0.004302669236503298,
+            -0.033828257692075564
+          ],
+          [
+            -0.006932343855230894,
+            -0.9995383301187226,
+            -0.029581569129246504,
+            0.13362487823880237
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "infrared": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.21835
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "body_imu": [
+          [
+            0.0,
+            1.0000000000000002,
+            0.0,
+            -0.07192
+          ],
+          [
+            -1.0000000000000002,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0000000000000002,
+            0.04999
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar_imu": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.18544
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.01699
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.18129
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "anchor": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.23494
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.20652
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_pitch": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.13052
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_yaw": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "calibration_status": "ok"
+  },
+  {
+    "path": "/home/user/vbot/data/rosbag2_20260415_174148/rosbag2_20260415_174148_0.mcap",
+    "name": "rosbag2_20260415_174148",
+    "duration_s": 1134.192893375,
+    "first_record_ns": 1776246109618756550,
+    "last_record_ns": 1776247243811649925,
+    "size_bytes": 3268362596,
+    "topics": {
+      "/tf_static": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 455
+      },
+      "/tf": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 5671
+      },
+      "/stereo_right/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 227
+      },
+      "/stereo_left/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 227
+      },
+      "/slam/status": {
+        "type": "slam_msgs/msg/SlamStatus",
+        "count": 5671
+      },
+      "/stereo/left/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 33952
+      },
+      "/pct_path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 5245
+      },
+      "/dog_2Dmap_occupancy": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 6255
+      },
+      "/dog_output_global_path_unfinished": {
+        "type": "nav_msgs/msg/Path",
+        "count": 11506
+      },
+      "/image_left_raw/h265_undistort": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 33946
+      },
+      "/stereo/right/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 33951
+      },
+      "/lidar_imu": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 226612
+      },
+      "/dog_output_local_path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 12392
+      },
+      "/semantic_map": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 0
+      },
+      "/grid_map": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 0
+      },
+      "/gnss/fix": {
+        "type": "sensor_msgs/msg/NavSatFix",
+        "count": 1134
+      },
+      "/image_left_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 33945
+      },
+      "/lidar_points": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 5671
+      },
+      "/imu_raw": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 566885
+      },
+      "/odometry": {
+        "type": "nav_msgs/msg/Odometry",
+        "count": 5671
+      },
+      "/image_right_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 33945
+      },
+      "/path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 567
+      }
+    },
+    "calibration": {
+      "width": 1920,
+      "height": 1080,
+      "K": [
+        805.299072265625,
+        0.0,
+        959.1966552734375,
+        0.0,
+        805.8798828125,
+        538.8123779296875,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "D": [
+        7.998585224151611,
+        3.083042860031128,
+        -8.164579776348546e-05,
+        0.0001791279937606305,
+        0.07636485248804092,
+        8.388995170593262,
+        5.921084403991699,
+        0.5596563816070557
+      ],
+      "model": "rational_polynomial",
+      "transforms": {
+        "stereo_left": [
+          [
+            0.004191981197259775,
+            -0.02468102824458185,
+            0.9996865879556613,
+            0.24471889523405452
+          ],
+          [
+            -0.9999764174640439,
+            0.0053347642918529226,
+            0.004324905285284952,
+            0.034999920538423004
+          ],
+          [
+            -0.005439835421971406,
+            -0.9996811427323917,
+            -0.0246580829717426,
+            0.13352849660228427
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "stereo_right": [
+          [
+            -0.004509607007277122,
+            -0.02955072992917529,
+            0.9995531090468845,
+            0.2443247992674951
+          ],
+          [
+            -0.99996580244192,
+            0.007062647104909642,
+            -0.004302669236503298,
+            -0.033828257692075564
+          ],
+          [
+            -0.006932343855230894,
+            -0.9995383301187226,
+            -0.029581569129246504,
+            0.13362487823880237
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "infrared": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.21835
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "body_imu": [
+          [
+            0.0,
+            1.0000000000000002,
+            0.0,
+            -0.07192
+          ],
+          [
+            -1.0000000000000002,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0000000000000002,
+            0.04999
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar_imu": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.18544
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.01699
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.18129
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "anchor": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.23494
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.20652
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_pitch": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.13052
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_yaw": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "calibration_status": "ok"
+  },
+  {
+    "path": "/home/user/vbot/data/20260414/4/rosbag2_20260414_164641_0.mcap",
+    "name": "20260414_4",
+    "duration_s": 1455.097454475,
+    "first_record_ns": 1776156401916274000,
+    "last_record_ns": 1776157857013728475,
+    "size_bytes": 4188775562,
+    "topics": {
+      "/tf_static": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 584
+      },
+      "/tf": {
+        "type": "tf2_msgs/msg/TFMessage",
+        "count": 7278
+      },
+      "/stereo_right/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 291
+      },
+      "/stereo_left/camera_info": {
+        "type": "sensor_msgs/msg/CameraInfo",
+        "count": 291
+      },
+      "/slam/status": {
+        "type": "slam_msgs/msg/SlamStatus",
+        "count": 7277
+      },
+      "/stereo/left/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 43654
+      },
+      "/pct_path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 6548
+      },
+      "/dog_2Dmap_occupancy": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 5201
+      },
+      "/dog_output_global_path_unfinished": {
+        "type": "nav_msgs/msg/Path",
+        "count": 9644
+      },
+      "/image_left_raw/h265_undistort": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 43653
+      },
+      "/stereo/right/isp_status": {
+        "type": "camera_msgs/msg/Isp2AStatus",
+        "count": 43653
+      },
+      "/lidar_imu": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 290816
+      },
+      "/dog_output_local_path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 9831
+      },
+      "/semantic_map": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 0
+      },
+      "/grid_map": {
+        "type": "nav_msgs/msg/OccupancyGrid",
+        "count": 0
+      },
+      "/gnss/fix": {
+        "type": "sensor_msgs/msg/NavSatFix",
+        "count": 1456
+      },
+      "/image_left_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 43652
+      },
+      "/lidar_points": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "count": 7275
+      },
+      "/imu_raw": {
+        "type": "sensor_msgs/msg/Imu",
+        "count": 727344
+      },
+      "/odometry": {
+        "type": "nav_msgs/msg/Odometry",
+        "count": 7276
+      },
+      "/image_right_raw/h265": {
+        "type": "foxglove_msgs/msg/CompressedVideo",
+        "count": 43652
+      },
+      "/path": {
+        "type": "nav_msgs/msg/Path",
+        "count": 728
+      }
+    },
+    "calibration": {
+      "width": 1920,
+      "height": 1080,
+      "K": [
+        805.299072265625,
+        0.0,
+        959.1966552734375,
+        0.0,
+        805.8798828125,
+        538.8123779296875,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "D": [
+        7.998585224151611,
+        3.083042860031128,
+        -8.164579776348546e-05,
+        0.0001791279937606305,
+        0.07636485248804092,
+        8.388995170593262,
+        5.921084403991699,
+        0.5596563816070557
+      ],
+      "model": "rational_polynomial",
+      "transforms": {
+        "stereo_left": [
+          [
+            0.004191981197259775,
+            -0.02468102824458185,
+            0.9996865879556613,
+            0.24471889523405452
+          ],
+          [
+            -0.9999764174640439,
+            0.0053347642918529226,
+            0.004324905285284952,
+            0.034999920538423004
+          ],
+          [
+            -0.005439835421971406,
+            -0.9996811427323917,
+            -0.0246580829717426,
+            0.13352849660228427
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "stereo_right": [
+          [
+            -0.004509607007277122,
+            -0.02955072992917529,
+            0.9995531090468845,
+            0.2443247992674951
+          ],
+          [
+            -0.99996580244192,
+            0.007062647104909642,
+            -0.004302669236503298,
+            -0.033828257692075564
+          ],
+          [
+            -0.006932343855230894,
+            -0.9995383301187226,
+            -0.029581569129246504,
+            0.13362487823880237
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "infrared": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.21835
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "body_imu": [
+          [
+            0.0,
+            1.0000000000000002,
+            0.0,
+            -0.07192
+          ],
+          [
+            -1.0000000000000002,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0000000000000002,
+            0.04999
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "lidar_imu": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.18544
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.01699
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.18129
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "anchor": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.23494
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.20652
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_pitch": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.13052
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "head_yaw": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.17288
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "calibration_status": "ok"
+  }
+]

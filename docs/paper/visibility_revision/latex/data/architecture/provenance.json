@@ -1,0 +1,28 @@
+{
+  "scene": "KITTI-360 0009",
+  "rgb_frame": 903,
+  "xy_crop": [
+    [
+      -117,
+      31
+    ],
+    [
+      -99,
+      57
+    ]
+  ],
+  "selection": "Illustrative region around previously analyzed building 2168, selected after scoring; not a random sample. RGB shows the same sequence, not a projection of this crop.",
+  "prior_points_in_crop": 60336,
+  "revised_points_in_crop": 67795,
+  "new_points_in_crop": 7459,
+  "relabeled_old_points_in_crop": 8745,
+  "source_hashes": {
+    "build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/strong_baseline/geometry.npz": "8f0d5475b1628f3eb9cd411c1814e735fd03f446ad8d7e4a244516019065eb13",
+    "build/benchmarks/revision_assessment_v1/comparison_maps/kitti360_0009/full_authorization/geometry.npz": "8f4c52004e499223380d48e6fe156bb9f459858f881f9be08a66994b51cb8f80"
+  },
+  "no_new_inference": true,
+  "schematic_panels": [
+    "joint mask views and removed view",
+    "local identity graph and two frame-group seeds"
+  ]
+}

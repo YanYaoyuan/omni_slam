@@ -1,0 +1,13 @@
+\subsection{Earlier indoor evidence: fixed-identity V1}
+The earlier V1 study used SceneNN~\cite{scenenn} sequences 052, 054, 057, and 061, fixed before their RGB processing and scoring. Each has 400 sampled geometry frames and 200 semantic frames, given poses, SAM2.1 masks~\cite{sam2}, and SigLIP descriptors. V1 removes contradicted source points without changing IDs, observation ownership, descriptors, or poses. Its complete method and selection history appear in Appendix~\ref{app:v1}.
+
+Table~\ref{tab:v1-main} retains the original seven-method comparison. Exclusive nearest-source assignment within 5\,cm is scored on a fixed observed-valid domain using class-agnostic instance PQ with strict IoU $>0.5$. V1 improves the strong baseline in all four scenes: mean PQ rises from 32.376 to 33.218, while all 66 existing matches remain and no new matches appear. SOR has a slightly higher mean, 33.268. Thus this study supports refinement of existing geometry, not recall recovery or universal superiority over geometric filtering.
+
+Across 221 reference instances, best-object IoU improves for 100, declines for 27, and is unchanged for 94. These are descriptive, correlated within-scene outcomes. A no-depth ablation reduces V1's mean by 0.454 points, while requiring three refutations reduces it by 0.136 points. Residual contamination without contrary mask evidence and nearest-point reassignment explain the threshold-sensitive SOR advantage in 057. This provides a concrete motivation for examining richer revision decisions, but the newer outdoor study changes backbone, modality, and metric: it is not a controlled V1-to-current accuracy comparison.
+
+\begin{table*}[t]
+\centering\small
+\input{tables/v1/main}
+\caption{Retained V1 study: observed-domain instance PQ ($\times100$) on SceneNN. The shaded row is V1, not current \ours. C: inherited CG denoise/filter/merge; M: native MaskClustering splitting/filtering/suppression; S: SOR; V: visibility-rule variant. C and M differ; S/V start from the identical finalized strong-baseline map without rerunning its merge. External methods are shared-input adaptations, not original full-pipeline reproductions. Bold identifies per-column maxima.}
+\label{tab:v1-main}
+\end{table*}

@@ -1,0 +1,146 @@
+{
+  "complete": true,
+  "new_maps": 10,
+  "reference_labels_read_by_map_stage": false,
+  "protocol_sha256": "98589923a84086e1de22dbfc905d16a57c4e0c42aee68eea2abdd44de4233e7e",
+  "files": {
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/witness_history/run.json": "f5285a360c1bcd0ddec7c340f4d0e72252e7de088db59564d2153d6ecd9b1385",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/witness_history/geometry.npz": "fd1c0501c3404148827ea93066fcdaaaa01646f19756251b61f154911e48da0f",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/witness_history/classification.json": "9af7bb6a11973c076404c58fb91f345e45c9f25099da2f43c724b57824b6fc09",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/witness_no_history/run.json": "910258909db0b7e0d463c2deeba8b21f33f2d0b98c5896b347ccef5b0a55c2dd",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/witness_no_history/geometry.npz": "333a7f0b5bfb327d4059789a248022ff95d063286d6d5fb6eb730b6c2e9d77d4",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/witness_no_history/classification.json": "9af7bb6a11973c076404c58fb91f345e45c9f25099da2f43c724b57824b6fc09",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/nearest_witness_history/run.json": "73acde2599cfb72421cce718f6eca2df624aec89ec123fc2fe6047ce2f62e94d",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/nearest_witness_history/geometry.npz": "02fdaf550402e57b2d5aaec67b65389534788ce7b608b27cc6648fa8bf82a2c6",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/nearest_witness_history/classification.json": "9af7bb6a11973c076404c58fb91f345e45c9f25099da2f43c724b57824b6fc09",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/ours_no_history/run.json": "386e2d24e4c61e53647f01f8fd7fbb6aa3e48fd49b2b4406c2d362d92cc66dd2",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/ours_no_history/geometry.npz": "29f64a958a240a45e8a949d1446d5fe337a9ffce6fbe15907f0fe42689c52974",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/ours_no_history/classification.json": "9af7bb6a11973c076404c58fb91f345e45c9f25099da2f43c724b57824b6fc09",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/ours_unconditional_history/run.json": "d31ce6f6b630cfe156e8b73d5f2217065aba7a2ff541461f719de596ac479e66",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/ours_unconditional_history/geometry.npz": "44c9324bf4893b408af874472c21f41e878c00b35a6fc4afdfec221f7a2ff945",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0009/ours_unconditional_history/classification.json": "9af7bb6a11973c076404c58fb91f345e45c9f25099da2f43c724b57824b6fc09",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/witness_history/run.json": "91c2e72a3aac3e8959b9b1bb267843ff5c8ccbc14b9de8e2fac46e9af4db6818",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/witness_history/geometry.npz": "7bec8d91b43bbb944a4a7567b69c259c7fb6ba268b6c7f1ccfe02743d5434d9c",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/witness_history/classification.json": "929a9bb5586e542498c5db1cb03c1c23877a6295ae2fc6200835b02d091c185e",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/witness_no_history/run.json": "2ff80c39a3e9d51fff280b47bc67fd7f483d4e78f00978f399354e45eac71869",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/witness_no_history/geometry.npz": "7bec8d91b43bbb944a4a7567b69c259c7fb6ba268b6c7f1ccfe02743d5434d9c",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/witness_no_history/classification.json": "929a9bb5586e542498c5db1cb03c1c23877a6295ae2fc6200835b02d091c185e",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/nearest_witness_history/run.json": "af58bdfe74dd00eeb90abb96bd5765751da9d2cada1afabe744432bde9ea94d6",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/nearest_witness_history/geometry.npz": "d6e39d5733b3ac1acbc4e254950c48c7d454c51ecfc2d7dbeb9de61337a5924f",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/nearest_witness_history/classification.json": "929a9bb5586e542498c5db1cb03c1c23877a6295ae2fc6200835b02d091c185e",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/ours_no_history/run.json": "7f582b3ad7dbe6d517c04199ea5e5c4b52fcbadc718275404df25ce057fc66ba",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/ours_no_history/geometry.npz": "d6e39d5733b3ac1acbc4e254950c48c7d454c51ecfc2d7dbeb9de61337a5924f",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/ours_no_history/classification.json": "929a9bb5586e542498c5db1cb03c1c23877a6295ae2fc6200835b02d091c185e",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/ours_unconditional_history/run.json": "1370536c99e8a34b6f11dffd649517e2bedb076e25b5c7619f829164e4050a9c",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/ours_unconditional_history/geometry.npz": "e7365781cd05cfe3bd60c4a9d104937abe90b07a2eaf7b29939b89742e527bbd",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_causal_revision_20261117/maps/kitti360_0010/ours_unconditional_history/classification.json": "929a9bb5586e542498c5db1cb03c1c23877a6295ae2fc6200835b02d091c185e"
+  },
+  "results": {
+    "kitti360_0009": {
+      "profile": {
+        "nearest_cached_decision_s": 0.0004414800787344575,
+        "graph_certificate_compute_s": 0.11766038101632148,
+        "pair_evidence_compute_s": 0.00017993804067373276,
+        "cached_original_raw_evidence_prepare_s": 5.200945834978484,
+        "graph_nodes": 42955,
+        "graph_directed_edges": 457332,
+        "seed_rows": 61886,
+        "identity_pairs": 9
+      },
+      "methods": {
+        "witness_history": {
+          "points": 465732,
+          "added_points": 42438,
+          "old_id_edits": 12855,
+          "assembly_compute_s": 0.0016535079339519143,
+          "export_s": 0.28981980006210506
+        },
+        "witness_no_history": {
+          "points": 465732,
+          "added_points": 42438,
+          "old_id_edits": 0,
+          "assembly_compute_s": 0.027471591951325536,
+          "export_s": 0.28651026904117316
+        },
+        "nearest_witness_history": {
+          "points": 465732,
+          "added_points": 42438,
+          "old_id_edits": 12855,
+          "assembly_compute_s": 0.009070546948350966,
+          "export_s": 0.285272712004371
+        },
+        "ours_no_history": {
+          "points": 465697,
+          "added_points": 42403,
+          "old_id_edits": 0,
+          "assembly_compute_s": 0.0025353950913995504,
+          "export_s": 0.289488306036219
+        },
+        "ours_unconditional_history": {
+          "points": 465697,
+          "added_points": 42403,
+          "old_id_edits": 26788,
+          "assembly_compute_s": 0.0031252840999513865,
+          "export_s": 0.28952849097549915
+        }
+      },
+      "driver_peak_rss_bytes": 208027648,
+      "driver_wall_s": 2.620902394060977
+    },
+    "kitti360_0010": {
+      "profile": {
+        "nearest_cached_decision_s": 0.00013712793588638306,
+        "graph_certificate_compute_s": 0.01733367796987295,
+        "pair_evidence_compute_s": 1.0919757187366486e-06,
+        "cached_original_raw_evidence_prepare_s": 2.322626151959412,
+        "graph_nodes": 15091,
+        "graph_directed_edges": 129426,
+        "seed_rows": 11665,
+        "identity_pairs": 0
+      },
+      "methods": {
+        "witness_history": {
+          "points": 146247,
+          "added_points": 9715,
+          "old_id_edits": 0,
+          "assembly_compute_s": 0.0004386339569464326,
+          "export_s": 0.088857113965787
+        },
+        "witness_no_history": {
+          "points": 146247,
+          "added_points": 9715,
+          "old_id_edits": 0,
+          "assembly_compute_s": 0.00039106502663344145,
+          "export_s": 0.08774833101779222
+        },
+        "nearest_witness_history": {
+          "points": 146247,
+          "added_points": 9715,
+          "old_id_edits": 0,
+          "assembly_compute_s": 0.0004192480118945241,
+          "export_s": 0.08802957902662456
+        },
+        "ours_no_history": {
+          "points": 146247,
+          "added_points": 9715,
+          "old_id_edits": 0,
+          "assembly_compute_s": 0.00038195704109966755,
+          "export_s": 0.08859541197307408
+        },
+        "ours_unconditional_history": {
+          "points": 146247,
+          "added_points": 9715,
+          "old_id_edits": 3427,
+          "assembly_compute_s": 0.0002754280576482415,
+          "export_s": 0.08868176396936178
+        }
+      },
+      "driver_peak_rss_bytes": 208027648,
+      "driver_wall_s": 0.568477606982924
+    }
+  },
+  "host": {
+    "platform": "Linux-6.8.0-111-generic-x86_64-with-glibc2.35",
+    "processor": "x86_64"
+  }
+}

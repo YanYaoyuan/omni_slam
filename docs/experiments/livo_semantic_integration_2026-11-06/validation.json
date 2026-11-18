@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "queryable_records": 31,
+  "complete_keyframe_sample_coverage": 182,
+  "evidence_files_exist": true,
+  "acquisition_offset_limit_ms": 40,
+  "per_frame_one_to_one": true,
+  "saved_map_points": 35242,
+  "saved_map_checksum_matches": true,
+  "broken_links": [],
+  "reprojection": {
+    "status": "pass",
+    "object_ids_preserved": 206,
+    "max_roundtrip_error_m": 0.0,
+    "median_before_after_shift_m": 0.4690012652014369,
+    "max_before_after_shift_m": 2.198890751288667,
+    "mismatched_epochs_rejected": true,
+    "installed_query_pass": true
+  },
+  "qualitative_review": "Viewed all queryable records first/last crops and highlighted long revisit. Same-vehicle splitting observed (car_0001 / car_0206); no identity ground-truth precision claimed."
+}

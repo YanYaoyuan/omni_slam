@@ -1,0 +1,46 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{omni_paper}[2026/11/13 Venue-neutral research manuscript]
+\RequirePackage[T1]{fontenc}
+\RequirePackage{times}
+\RequirePackage{xcolor}
+\RequirePackage[numbers,sort&compress]{natbib}
+\RequirePackage[font=small,labelfont=bf,labelsep=period]{caption}
+\RequirePackage{enumitem}
+\setlength{\textwidth}{174mm}
+\setlength{\textheight}{251mm}
+\setlength{\oddsidemargin}{\dimexpr18mm-1in\relax}
+\setlength{\evensidemargin}{\oddsidemargin}
+\setlength{\topmargin}{\dimexpr20mm-1in-\headheight-\headsep\relax}
+\setlength{\columnsep}{7mm}
+\setlength{\footskip}{11mm}
+\setlength{\parindent}{1em}
+\setlength{\bibsep}{2pt}
+\setlength{\textfloatsep}{13pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{15pt plus 2pt minus 2pt}
+\setlist[enumerate]{leftmargin=*,topsep=4pt,itemsep=3pt,parsep=0pt}
+\pagestyle{plain}
+\raggedbottom
+\makeatletter
+\renewcommand{\maketitle}{%
+  \twocolumn[{\begin{center}
+  {\fontsize{21}{24}\selectfont\bfseries\@title\par}
+  \ifx\@author\@empty\else
+    \vspace{9pt}
+    {\fontsize{12}{15}\selectfont
+      \begin{tabular}[t]{c}\@author\end{tabular}\par}
+  \fi
+  \end{center}\vspace{14pt}}]%
+}
+\renewcommand{\section}{\@startsection{section}{1}{\z@}%
+  {-2.2ex plus -.5ex minus -.2ex}{1ex plus .2ex}%
+  {\normalfont\fontsize{12.5}{14.5}\selectfont\bfseries\raggedright}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+  {-1.8ex plus -.5ex minus -.2ex}{.7ex plus .2ex}%
+  {\normalfont\fontsize{10.5}{12}\selectfont\bfseries\raggedright}}
+\setlength{\@fpsep}{18pt}
+\setlength{\@dblfpsep}{18pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\setlength{\@dblfpbot}{0pt plus 1fil}
+\setlength{\@fptop}{0pt}
+\setlength{\@dblfptop}{0pt}
+\makeatother

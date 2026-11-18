@@ -1,0 +1,72 @@
+{
+  "bag": "roabag2336",
+  "configuration_equal_except_camera_enable_and_output": true,
+  "identical_state_epochs": true,
+  "native_poses_per_mode": 935,
+  "backend_sha256": {
+    "optimize_keyframe_map.py": "54be85195133569af2fc2f7342e349afe90678ae931c8e94e156c42f2803bd82",
+    "revisit_geometry.py": "1d23c504932a27af29ec6037677778d36b48e535a84b9c2bf7e7721c45ba7a5f"
+  },
+  "sources": {
+    "LIO": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/map_audit_20261105/lio_full/roabag2336/lio",
+    "LIVO": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/z_20261105/si_full/roabag2336/livo"
+  },
+  "map_results": {
+    "LIO": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/map_audit_20261105/split_maps/LIO/roabag2336/result.json",
+    "LIVO": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/map_audit_20261105/split_maps/LIVO/roabag2336/result.json"
+  },
+  "accepted_edges": {
+    "LIO": 0,
+    "LIVO": 0
+  },
+  "excluded_training_scan_epochs": 0,
+  "eligible_reserved_lio_scans": 57,
+  "visit_events_union": 0,
+  "events": [],
+  "surfaces": {
+    "ground": {
+      "patches": 0,
+      "variants": {}
+    },
+    "vertical_plane": {
+      "patches": 0,
+      "variants": {}
+    }
+  },
+  "trajectory_metrics": {
+    "LIO_before": {
+      "path_m": 84.50534946971678,
+      "speed_p99_m_s": 0.7036154340751559,
+      "end_height_change_m": -0.001314342919308517
+    },
+    "LIO_after": {
+      "path_m": 84.50534946971736,
+      "speed_p99_m_s": 0.7036154340751559,
+      "end_height_change_m": -0.001314342919308517
+    },
+    "LIVO_before": {
+      "path_m": 84.51078013239184,
+      "speed_p99_m_s": 0.707621640864838,
+      "end_height_change_m": -0.052761427638
+    },
+    "LIVO_after": {
+      "path_m": 84.51078013239184,
+      "speed_p99_m_s": 0.707621640864838,
+      "end_height_change_m": -0.052761427638
+    }
+  },
+  "protocol": {
+    "event_window_s": 15,
+    "reserved_window_s": 35,
+    "reserved_max_distance_m": 8,
+    "reserved_max_scans_per_side": 5,
+    "loop_measurement_stability_m": 0.3,
+    "loop_measurement_stability_deg": 3,
+    "plane_cell_m": 3,
+    "ground_reference_plane": "target-only RANSAC; threshold .06 m, at least 40 points, at most 3 planes; gravity normal is not forced",
+    "fixed_pair_radius_m": 0.25,
+    "anchor_selection": "maximize minimum reserved scan count, then minimize time extent; no residual-based selection",
+    "loop_fit_half_period_s": 2.0
+  },
+  "note": "Same reserved LIO scan points for all four map variants, excluded from both graphs' fitted loop submaps. Plane fitting/correspondence selection occurs once. No external truth; low overlap or inconsistent local odometry can leave an event unverified. Vertical planes are wall candidates, not semantic labels."
+}

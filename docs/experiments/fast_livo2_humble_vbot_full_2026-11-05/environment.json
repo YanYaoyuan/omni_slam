@@ -1,0 +1,33 @@
+{
+  "python": "3.10.12",
+  "platform": "Linux-6.8.0-111-generic-x86_64-with-glibc2.35",
+  "ros_distro": "humble",
+  "cpu": "AMD Ryzen 9 9950X",
+  "memory_gib": 125,
+  "dependencies": {
+    "mcap": "1.3.1",
+    "mcap-ros2-support": "0.5.7",
+    "av": "16.1.0",
+    "numpy": "1.26.4",
+    "scipy": "1.8.0",
+    "matplotlib": "3.5.1",
+    "opencv-python": "4.11.0.86",
+    "PyYAML": "5.4.1"
+  },
+  "decoder_threads": 1,
+  "image_stride": 3,
+  "resolution": [
+    640,
+    360
+  ],
+  "geometric_map_half_width_voxels": 60,
+  "geometric_voxel_size_m": 0.5,
+  "map_sliding_threshold_m": 5.0,
+  "native_executable_sha256": "b30733224f0341828cf132f4200872f8f9dfcd248ba5fe0fd93d49717dd3df45",
+  "validation": {
+    "gtest_cases": 9,
+    "colcon_tests_including_wrapper": 10,
+    "failures": 0
+  },
+  "dependency_warning": "System SciPy 1.8.0 warns about NumPy 1.26.4 compatibility; actual quaternion/calibration operations completed in this environment."
+}

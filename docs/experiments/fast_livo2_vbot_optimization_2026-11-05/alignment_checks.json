@@ -1,0 +1,44 @@
+{
+  "roabag2336": {
+    "control_equals_lio": true,
+    "final_poses": 935,
+    "image_age_p95_ms": 7.039308547973631,
+    "image_age_max_ms": 35.956621170043945,
+    "off_visual_correction_max_m": 0.0
+  },
+  "rosbag0521_2": {
+    "control_equals_lio": true,
+    "final_poses": 1185,
+    "image_age_p95_ms": 30.93252182006836,
+    "image_age_max_ms": 33.28561782836914,
+    "off_visual_correction_max_m": 0.0
+  },
+  "rosbag2245": {
+    "control_equals_lio": true,
+    "final_poses": 2943,
+    "image_age_p95_ms": 9.304928779602053,
+    "image_age_max_ms": 33.27465057373047,
+    "off_visual_correction_max_m": 0.0
+  },
+  "rosbag2_20260415_174148": {
+    "control_equals_lio": true,
+    "final_poses": 5668,
+    "image_age_p95_ms": 32.91991949081421,
+    "image_age_max_ms": 38.78426551818848,
+    "off_visual_correction_max_m": 0.0
+  },
+  "20260414_4": {
+    "control_equals_lio": true,
+    "final_poses": 7273,
+    "image_age_p95_ms": 32.857608795166016,
+    "image_age_max_ms": 33.3857536315918,
+    "off_visual_correction_max_m": 0.0
+  },
+  "rosbag2_20260415_162852": {
+    "control_equals_lio": true,
+    "final_poses": 8207,
+    "image_age_p95_ms": 13.562321662902832,
+    "image_age_max_ms": 33.35738182067871,
+    "off_visual_correction_max_m": 0.0
+  }
+}

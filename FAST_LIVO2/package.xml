@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>fast_livo</name>
+  <version>0.1.0</version>
+  <description>FAST-LIVO2 native ROS 2 Humble port with VBot PointCloud2 input.</description>
+  <maintainer email="zhengcr@connect.hku.hk">Chunran Zheng (upstream)</maintainer>
+  <license>GPL-2.0-only</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>std_srvs</depend>
+  <depend>omni_slam_interfaces</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>pcl_conversions</depend>
+  <depend>cv_bridge</depend>
+  <depend>eigen</depend>
+  <depend>libopencv-dev</depend>
+  <depend>libpcl-all-dev</depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>rosbag2_py</exec_depend>
+  <exec_depend>rosbag2_storage_mcap</exec_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

@@ -1,0 +1,110 @@
+\begin{thebibliography}{14}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Deng et~al.(2026)Deng, Tombari, Pollefeys, Wald, and
+  Barath]{deng2026ovimap}
+Zilong Deng, Federico Tombari, Marc Pollefeys, Johanna Wald, and Daniel Barath.
+\newblock {OVI-MAP}: Open-vocabulary instance-semantic mapping.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition}, pages 12606--12616, 2026.
+
+\bibitem[Fu et~al.(2026)Fu, Du, Zhan, Du, Su, Zhao, and Wang]{fu2026refinable}
+Taimeng Fu, Yi Du, Zitong Zhan, Qiwei Du, Shaoshu Su, Zhipeng Zhao, and Chen
+  Wang.
+\newblock Point-level refinable semantic mapping for spatial understanding.
+\newblock arXiv:2610.31476, 2026.
+\newblock Preprint.
+
+\bibitem[Gu et~al.(2024)Gu, Kuwajerwala, Morin, Jatavallabhula, Sen, Agarwal,
+  Rivera, Paul, Ellis, Chellappa, Gan, de~Melo, Tenenbaum, Torralba, Shkurti,
+  and Paull]{gu2024conceptgraphs}
+Qiao Gu, Ali Kuwajerwala, Sacha Morin, Krishna~Murthy Jatavallabhula, Bipasha
+  Sen, Aditya Agarwal, Corban Rivera, William Paul, Kirsty Ellis, Rama
+  Chellappa, Chuang Gan, Celso~Miguel de Melo, Joshua~B. Tenenbaum, Antonio
+  Torralba, Florian Shkurti, and Liam Paull.
+\newblock {ConceptGraphs}: Open-vocabulary 3d scene graphs for perception and
+  planning.
+\newblock In \emph{IEEE International Conference on Robotics and Automation},
+  pages 5021--5028, 2024.
+
+\bibitem[Hua et~al.(2016)Hua, Pham, Nguyen, Tran, Yu, and
+  Yeung]{scenenn_dataset}
+Binh-Son Hua, Quang-Hieu Pham, Duc~Thanh Nguyen, Minh-Khoi Tran, Lap-Fai Yu,
+  and Sai-Kit Yeung.
+\newblock {SceneNN}: A scene meshes dataset with annotations.
+\newblock In \emph{International Conference on 3D Vision (3DV)}, 2016.
+
+\bibitem[Liu et~al.(2023)Liu, Zeng, Ren, Li, Zhang, Yang, Jiang, Li, Yang, Su,
+  Zhu, and Zhang]{liu2023groundingdino}
+Shilong Liu, Zhaoyang Zeng, Tianhe Ren, Feng Li, Hao Zhang, Jie Yang, Qing
+  Jiang, Chunyuan Li, Jianwei Yang, Hang Su, Jun Zhu, and Lei Zhang.
+\newblock {Grounding DINO}: Marrying {DINO} with grounded pre-training for
+  open-set object detection.
+\newblock arXiv:2303.05499, 2023.
+
+\bibitem[Martins et~al.(2025)Martins, Oswald, and Civera]{martins2025ovo}
+Tomas~Berriel Martins, Martin~R. Oswald, and Javier Civera.
+\newblock Open-vocabulary online semantic mapping for {SLAM}.
+\newblock \emph{IEEE Robotics and Automation Letters}, 2025.
+
+\bibitem[{MaskClustering authors}(2024)]{maskclustering_pinned_code}
+{MaskClustering authors}.
+\newblock Maskclustering official point post-processing implementation, 2024.
+\newblock utils/post\_process.py at commit
+  eb2d41c2267cde21966f4340c37b8cf94b05c23c.
+
+\bibitem[Oh et~al.(2026)Oh, Tao, Chebrolu, and Fallon]{oh2026oasis}
+Haedam Oh, Yifu Tao, Nived Chebrolu, and Maurice Fallon.
+\newblock {OASIS-Map}: Object-level change detection in multi-session mapping
+  using semantic correspondence matching.
+\newblock arXiv:2607.14899, 2026.
+\newblock Preprint.
+
+\bibitem[Ravi et~al.(2024)]{ravi2024sam2}
+Nikhila Ravi et~al.
+\newblock {SAM 2}: Segment anything in images and videos.
+\newblock arXiv:2408.00714, 2024.
+
+\bibitem[Song et~al.(2026)Song, Kodagoda, Carmichael, Thiyagarajan, Gunatilake,
+  Prentice, and Martin]{song2026voim}
+Sangmin Song, Sarath Kodagoda, Marc~G. Carmichael, Karthick Thiyagarajan, Amal
+  Gunatilake, Kelly Prentice, and Jodi Martin.
+\newblock {VOIM}: Training-free open-vocabulary 3d instance mapping for rgb-d
+  and monocular slam.
+\newblock arXiv:2609.00775, 2026.
+\newblock Version 2, revised 8 November 2026; preprint.
+
+\bibitem[Xie et~al.(2021)Xie, Wang, Yu, Anandkumar, Alvarez, and
+  Luo]{xie2021segformer}
+Enze Xie, Wenhai Wang, Zhiding Yu, Anima Anandkumar, Jose~M. Alvarez, and Ping
+  Luo.
+\newblock {SegFormer}: Simple and efficient design for semantic segmentation
+  with transformers.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 2021.
+
+\bibitem[Yan et~al.(2024)Yan, Zhang, Zhu, and Wang]{yan2024maskclustering}
+Mi Yan, Jiazhao Zhang, Yan Zhu, and He Wang.
+\newblock {MaskClustering}: View consensus based mask graph clustering for
+  open-vocabulary 3d instance segmentation.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition}, pages 28274--28284, 2024.
+
+\bibitem[Zhai et~al.(2023)Zhai, Mustafa, Kolesnikov, and Beyer]{zhai2023siglip}
+Xiaohua Zhai, Basil Mustafa, Alexander Kolesnikov, and Lucas Beyer.
+\newblock Sigmoid loss for language image pre-training.
+\newblock In \emph{IEEE/CVF International Conference on Computer Vision}, pages
+  11975--11986, 2023.
+
+\bibitem[Zheng et~al.(2024)Zheng, Xu, Zou, Hua, Yuan, He, Zhou, Liu, Lin, Zhu,
+  Ren, Wang, Meng, and Zhang]{zheng2024fastlivo2}
+Chunran Zheng, Wei Xu, Zuhao Zou, Tong Hua, Chongjian Yuan, Dongjiao He,
+  Bingyang Zhou, Zheng Liu, Jiarong Lin, Fangcheng Zhu, Yunfan Ren, Rong Wang,
+  Fanle Meng, and Fu Zhang.
+\newblock {FAST-LIVO2}: Fast, direct {LiDAR}-inertial-visual odometry.
+\newblock arXiv:2408.14035, 2024.
+
+\end{thebibliography}

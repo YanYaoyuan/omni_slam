@@ -1,0 +1,13 @@
+# VBot lidar_imu is in m/s^2; do not recalibrate its scale from a moving start.
+vio:
+  lidar_timed_fusion: true
+  lidar_bootstrap_s: 0.0
+  max_image_age_s: 0.04
+  exposure_estimate_en: false
+  img_point_cov: 10000.0
+imu:
+  acceleration_scale: 1.0
+runtime:
+  keyframe_archive: true
+pcd_save:
+  pcd_save_en: false

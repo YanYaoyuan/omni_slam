@@ -1,0 +1,74 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Global Options:
+    Fixed Frame: omni_odom
+    Background Color: 15; 20; 28
+    Frame Rate: 20
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+    - Class: rviz_default_plugins/PointCloud2
+      Name: LIVO cloud
+      Enabled: true
+      Topic:
+        Value: /cloud_registered_global
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        Depth: 1
+      Decay Time: 30
+      Size (m): 0.04
+      Style: Points
+      Position Transformer: XYZ
+      Color Transformer: FlatColor
+      Color: 160; 175; 190
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Verified ground
+      Enabled: true
+      Topic:
+        Value: /omni/semantic/ground
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        Depth: 1
+      Decay Time: 30
+      Size (m): 0.06
+      Style: Points
+      Position Transformer: XYZ
+      Color Transformer: FlatColor
+      Color: 50; 230; 120
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Observed boxes
+      Enabled: true
+      Topic:
+        Value: /omni/semantic/boxes
+        Reliability Policy: Reliable
+        Durability Policy: Transient Local
+        Depth: 1
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Current people
+      Enabled: true
+      Topic:
+        Value: /omni/semantic/people
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        Depth: 1
+    - Class: rviz_default_plugins/Image
+      Name: Semantic image
+      Enabled: true
+      Topic:
+        Value: /omni/semantic/image
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+        Depth: 1
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 20
+      Pitch: 0.7
+      Yaw: 0.8
+Window Geometry:
+  Width: 1440
+  Height: 900

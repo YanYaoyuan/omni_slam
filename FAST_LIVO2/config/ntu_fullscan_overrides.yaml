@@ -1,0 +1,17 @@
+# Frozen omni_slam NTU development baseline (2026-11-09).
+# This intentionally preserves the first comparison's numeric settings.
+# It is independent of VBot deployment configuration and is NOT an upstream
+# FAST-LIVO2 reproduction or a claim that these are optimal NTU parameters.
+# Override candidates must use a separate file/run directory and be reported.
+vio:
+  lidar_timed_fusion: true
+  lidar_bootstrap_s: 0.0
+  max_image_age_s: 0.04
+  exposure_estimate_en: false
+  img_point_cov: 10000.0
+imu:
+  acceleration_scale: 1.0
+runtime:
+  keyframe_archive: true
+pcd_save:
+  pcd_save_en: false

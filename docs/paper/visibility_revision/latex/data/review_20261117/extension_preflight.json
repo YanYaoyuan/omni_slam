@@ -1,0 +1,6 @@
+{
+  "cuda_device_nodes": [],
+  "gpu_ready": false,
+  "old_python_runtime_resolves": false,
+  "status": "GPU execution blocked in current environment; selected windows remain unprocessed."
+}

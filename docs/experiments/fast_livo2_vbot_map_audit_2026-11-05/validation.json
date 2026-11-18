@@ -1,0 +1,108 @@
+{
+  "bags": 6,
+  "maps": [
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/roabag2336/map_gravity_only.pcd",
+      "points": 177718
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/roabag2336/map_loop_corrected.pcd",
+      "points": 177718
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/roabag2336/map_gravity_only.pcd",
+      "points": 178179
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/roabag2336/map_loop_corrected.pcd",
+      "points": 178179
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/rosbag0521_2/map_gravity_only.pcd",
+      "points": 202154
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/rosbag0521_2/map_loop_corrected.pcd",
+      "points": 199780
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/rosbag0521_2/map_gravity_only.pcd",
+      "points": 201770
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/rosbag0521_2/map_loop_corrected.pcd",
+      "points": 199568
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/rosbag2245/map_gravity_only.pcd",
+      "points": 581716
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/rosbag2245/map_loop_corrected.pcd",
+      "points": 566153
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/rosbag2245/map_gravity_only.pcd",
+      "points": 581091
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/rosbag2245/map_loop_corrected.pcd",
+      "points": 565791
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/rosbag2_20260415_174148/map_gravity_only.pcd",
+      "points": 2145083
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/rosbag2_20260415_174148/map_loop_corrected.pcd",
+      "points": 2149580
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/rosbag2_20260415_174148/map_gravity_only.pcd",
+      "points": 2144302
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/rosbag2_20260415_174148/map_loop_corrected.pcd",
+      "points": 2148498
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/20260414_4/map_gravity_only.pcd",
+      "points": 2782205
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/20260414_4/map_loop_corrected.pcd",
+      "points": 2763543
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/20260414_4/map_gravity_only.pcd",
+      "points": 2777356
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/20260414_4/map_loop_corrected.pcd",
+      "points": 2778455
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/rosbag2_20260415_162852/map_gravity_only.pcd",
+      "points": 3065200
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIO/rosbag2_20260415_162852/map_loop_corrected.pcd",
+      "points": 3067515
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/rosbag2_20260415_162852/map_gravity_only.pcd",
+      "points": 3064335
+    },
+    {
+      "path": "build/experiments/map_audit_20261105/split_maps/LIVO/rosbag2_20260415_162852/map_loop_corrected.pcd",
+      "points": 3063285
+    }
+  ],
+  "image_pairs": 7,
+  "max_image_offset_ms": 10.587392,
+  "broken_links": [],
+  "reviewed_map_points": 2782381,
+  "qualitative_review": "Viewed all six map/trajectory figures and all seven paired camera figures; images are not pose ground truth.",
+  "status": "pass",
+  "installed_cli_help": "pass"
+}

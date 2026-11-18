@@ -1,0 +1,55 @@
+{
+  "new_experiments": false,
+  "source_sha256": {
+    "scripts/benchmarks/visibility_independent_mapping.py": "522bf20192850c6b7660a89ec5975d221591ea392e486a37e4d4e47d0cdb34ff",
+    "build/benchmarks/visibility_independent_20261112/maps/052/cleanup/run.json": "3cd400523cd0b8695a88e840f8e31e3eee927e01390286dc4c34210443cda4ec",
+    "build/benchmarks/visibility_independent_20261112/maps/052/cleanup/events.json": "6d3cd0c360ba28823cc73ebd59f9c91dc682f0c835fe621f0f8177c60497af69",
+    "build/benchmarks/visibility_independent_20261112/maps/052/cg/history2/classification.json": "f9fff1a46e0f033f8a90092c4be69d7a275784aaa40e82a7ac80417b015e4dce",
+    "build/benchmarks/visibility_independent_20261112/maps/054/cleanup/run.json": "e1cd1ba0939a9a6df041043ef0510854d4b8db3d76f094e5f8ce74283df6b542",
+    "build/benchmarks/visibility_independent_20261112/maps/054/cleanup/events.json": "7aea78716e90974931a12197d733f83312b29a89d19b18b57540ba87a4b11d6b",
+    "build/benchmarks/visibility_independent_20261112/maps/054/cg/history2/classification.json": "4236c0b566cac5b1db0c13d1f02e3029592258e2a8ac6af426ab92b6689bfef1",
+    "build/benchmarks/visibility_independent_20261112/maps/057/cleanup/run.json": "9a52c509251d5ab53ab98f0990aa651e4427f3d5025fe83a744295e4a50089f1",
+    "build/benchmarks/visibility_independent_20261112/maps/057/cleanup/events.json": "40c6ffee7e231920f7fbca8dcbc7d845acc341e321b4656becb32f997bd029f4",
+    "build/benchmarks/visibility_independent_20261112/maps/057/cg/history2/classification.json": "b977442f2350e9c0870116ce716b45f94df43939b4b0697c49239018b3f356e1",
+    "build/benchmarks/visibility_independent_20261112/maps/061/cleanup/run.json": "de30c359313cfeeff451671fc401a1e013c3e02277b0d804aa6017f9e7211067",
+    "build/benchmarks/visibility_independent_20261112/maps/061/cleanup/events.json": "156275e95539d87656ec3d6d4e714f82be2b076363cc2b5fcdb209b322dfd558",
+    "build/benchmarks/visibility_independent_20261112/maps/061/cg/history2/classification.json": "97bf6a7344bfbe4d47c9da1a3a39d9b268c7c9f012ebc425379dee4370917ac1"
+  },
+  "rows": [
+    {
+      "scene": "052",
+      "foreground_objects": 89,
+      "source_points": 48231,
+      "frames": 200,
+      "evidence_seconds": 0.286194913322106,
+      "cleanup_job_seconds": 1.5830912389792502
+    },
+    {
+      "scene": "054",
+      "foreground_objects": 121,
+      "source_points": 70796,
+      "frames": 200,
+      "evidence_seconds": 0.45822112256428227,
+      "cleanup_job_seconds": 1.9490061489632353
+    },
+    {
+      "scene": "057",
+      "foreground_objects": 31,
+      "source_points": 38377,
+      "frames": 200,
+      "evidence_seconds": 0.2618245728663169,
+      "cleanup_job_seconds": 1.2359974869759753
+    },
+    {
+      "scene": "061",
+      "foreground_objects": 12,
+      "source_points": 60913,
+      "frames": 200,
+      "evidence_seconds": 0.390546211914625,
+      "cleanup_job_seconds": 1.8363947569741867
+    }
+  ],
+  "evidence_timer": "frame_evidence plus accumulation; computes gated and FOV-only votes together; excludes mask/depth loading, SOR, rejection and export",
+  "job_timer": "complete cached cleanup job including loading, all four variants, SOR and exports; excludes frontend and initial mapping",
+  "limitations": "Single archived execution; not isolated Ours latency, repeated benchmark, or end-to-end SLAM runtime; original CPU and thread allocation not pinned by these logs."
+}

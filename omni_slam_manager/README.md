@@ -144,3 +144,25 @@ Observe the durable status heartbeat at any time:
 ```bash
 ros2 topic echo /omni/slam/status
 ```
+
+## 可选 VBot LIVO 建图后端
+
+`mapping_backend:=fast_livo` 可选择原生 Humble LIVO，默认仍为 `fast_lio`。此选项目前针对 VBot 建图；已有定位命令保持 FAST-LIO/ICP 路径，不等于已经实现视觉地图重定位。
+
+LIVO 模式必须提供 `mapping_config_file` 和包含相机安装变换的 `tf_profile_path`。Manager 校验 IMU–LiDAR、Camera–LiDAR 外参与 TF 配置一致后启动；不能把本批录包的安装方向直接套用真机默认配置。每次开始会创建独立关键帧运行目录，停止和保存仍走既有 Manager 服务/action。
+
+```bash
+ros2 launch omni_slam_manager manager.launch.py \
+  robot_profile:=vbot mapping_backend:=fast_livo \
+  mapping_config_file:=$PWD/build/experiments/semantic_20261106/managed_config/livo.yaml \
+  tf_profile_path:=$PWD/build/experiments/semantic_20261106/managed_config/tf.yaml \
+  map_root:=$PWD/build/experiments/my_managed_maps \
+  map_source_path:=$PWD/build/experiments/my_managed_work/map.pcd \
+  use_sim_time:=true
+```
+
+这份配置专用于 `rosbag2245` 标定和回放，输入为规范化 LiDAR/IMU 与已校正的 BGR8 图像；实时相机应使用其匹配标定并关闭仿真时钟。`prepare_managed_vbot.py` 可从录包标定生成相互一致的配置，不修改原有真机 TF 文件。
+
+`/state_estimation` 保持 `T_odom_tracking`，机体转换仍由唯一 TF Manager 完成。`/omni/slam/livo/keyframes` 使用 `omni_slam_interfaces/msg/LivoKeyframe`，包含会话内 ID、最终位姿、tracking frame 中完整雷达视野点云、实际图像时间及视觉更新标志。缺图时继续输出 LIO 位姿、非空点云和无视觉关键帧。
+
+`/map_save` 原子保存当前前端关键帧地图，供既有 SaveMap action 导入版本化资产。建图模式下 TF Manager 的 map→odom 为恒等关系；该保存动作不在在线链路中运行离线回环优化。离线校正地图及语义对象的导入对齐需另行处理。

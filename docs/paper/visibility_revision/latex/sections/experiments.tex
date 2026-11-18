@@ -1,0 +1,90 @@
+\section{Experiments}
+\label{sec:experiments}
+\subsection{Protocol and Comparisons}
+We evaluate on SceneNN~\cite{scenenn_dataset} sequences 052, 054, 057, and 061. They were selected before new RGB processing and label evaluation and had not been used for method development in this project. Each sequence provides 400 uniformly sampled geometry frames and 200 semantic frames, with given camera poses. All seven methods share frontend observations, camera data, and the evaluation domain. Predictions were sealed before scoring; no scene was replaced and no parameter was tuned in response to these results.
+
+The primary one-refutation configuration was selected before this run from a separate development study. Previously examined Replica and SceneNN development scenes are reported separately in the supplementary material. They are not pooled with the four test sequences, which assess generalization to new scenes within SceneNN rather than to a new dataset.
+
+\paragraph{Baselines.} The comparisons include the shared-input ConceptGraphs core, the strong history-augmented baseline, the baseline with SOR, \ours{}, its three-frame and no-depth controls, and shared-input MaskClustering. The latter uses the official consensus/clustering core with common masks, descriptors, and cached geometric support. Its exclusive exported labels are scored instead of native overlapping masks. These adapted comparisons control input observations but do not reproduce the original end-to-end external pipelines. OVI-MAP and VOIM are related work rather than measured baselines.
+
+\paragraph{Final-processing parity.} Table~\ref{tab:main} identifies the final stages explicitly. CG and history2 share denoising, object filtering, and the native guarded final merge. That final merge is separate from the history graph and does not enforce its coframe veto. SOR and all three visibility arms start from exactly the same finalized history2 geometry, retained foreground objects, and observation ownership; no subsequent merge or semantic readout is rerun. MaskClustering retains its own DBSCAN splitting, detection-ratio filtering, and overlap suppression. Common inputs and evaluation therefore do not imply identical post-processing across external mapping cores.
+
+\paragraph{Metric.} Predictions are transferred to a fixed observed-valid reference domain by exclusive nearest-source assignment within $5\,\mathrm{cm}$. Matching is class-agnostic and requires strict $\operatorname{IoU}>0.5$. We report
+\begin{equation}
+\PQ=\frac{\sum_{(g,o)\in\mathrm{TP}}\operatorname{IoU}(g,o)}{|\mathrm{TP}|+\tfrac12|\mathrm{FP}|+\tfrac12|\mathrm{FN}|},
+\label{eq:pq}
+\end{equation}
+macro-averaged over scenes and multiplied by 100. This observed-domain instance metric measures geometry, not semantic-category accuracy, and differs from an official full-mesh leaderboard protocol.
+
+
+
+\subsection{Primary Results}
+Table~\ref{tab:main} shows an improvement over the strong baseline in every sequence. The scene-wise gains are $0.061$, $0.237$, $1.406$, and $1.662$ PQ points; the macro mean rises by $0.841$ points, from $32.376$ to $33.218$. The same 66 ground-truth instances are matched before and after revision, with no gained or lost matches. The improvement therefore concerns the geometry of existing matches rather than instance recall.
+
+\ours{} exceeds SOR in three of four scenes, but SOR has a slightly higher macro mean ($33.268$). The $0.050$-point overall deficit is driven by sequence 057. We retain this result as a limitation of the primary comparison and examine its cause in Sec.~\ref{sec:failure}. The adapted MaskClustering result is substantially lower, especially on 061; the input/export differences prevent interpreting this as a ranking against the original method.
+
+\begin{table}[t]
+\centering
+\caption{Paired contrasts on the four test scenes. Differences are in PQ points. Locked assignment is a secondary diagnostic, not a replacement for the primary metric.}
+\label{tab:ablation}
+\input{tables/ablation}
+\end{table}
+
+\subsection{Ablation and Assignment Sensitivity}
+Table~\ref{tab:ablation} isolates two aspects of the rule. Removing depth gating lowers mean PQ by $0.454$ points, with two wins and two losses across scenes. Increasing the minimum refutation count to three lowers mean PQ by $0.136$ points; it improves none of the four scenes relative to the primary configuration. Stricter confirmation has no independent advantage in this evaluation.
+
+Deleting a source point can also change which identity a reference voxel inherits. To distinguish this from deletion alone, a predeclared secondary diagnostic freezes each reference voxel's nearest baseline source point. If that owner is removed, the voxel becomes unassigned rather than inheriting a second-nearest point. Under this locked assignment, \ours{} reaches $33.471$ mean PQ, $1.095$ points above the unchanged baseline, while SOR reaches $32.089$. The ranking change shows that source-point deletion and evaluation reassignment interact. The primary conclusion remains based on the original nearest-point evaluation.
+
+\subsection{Instance-Level Effects}
+Across all 221 ground-truth instances, best-object IoU improves for 100, declines for 27, and is unchanged for 94 (Table~\ref{tab:objects}). These counts include unmatched instances: improved best IoU does not necessarily create an instance match. Objects from the same scene are correlated, so this is a descriptive distribution rather than 221 independent trials.
+
+\begin{table}[t]
+\centering
+\caption{Best-object IoU changes relative to the strong baseline, including all ground-truth instances in the fixed domain.}
+\label{tab:objects}
+\input{tables/objects}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.96\textwidth]{object_comparison_real.pdf}
+\caption{Real image and mask evidence with same-object geometry comparisons on SceneNN 057. Green denotes correct support, red excess support, and gray missed ground truth. The monitor improves from IoU $0.6343$ to $0.7423$. The second object remains below the strict $0.5$ matching threshold with \ours{} while SOR crosses it. Point panels share an orthographic orientation and axis bounds; the image retains its perspective. Both cases were selected after evaluation to explain outcomes.}
+\label{fig:objects}
+\end{figure*}
+
+Figure~\ref{fig:objects} illustrates both outcomes using actual RGB, cached masks, and mapped geometry. For the monitor (GT 59005), IoU increases from $0.6343$ to $0.7423$: correct reference support rises from 111 to 121 while excess support decreases from 44 to 32. These are reference-domain counts, including nearest-point reassignment, rather than counts of deleted source points. Full scene views and the all-object distribution appear in the supplementary material.
+
+\subsection{A Threshold-Sensitive Failure}
+\label{sec:failure}
+In sequence 057, ground-truth object 136313 is best covered by predicted object 7. Its IoU rises from $0.492718$ to $0.496947$ with \ours{}, while SOR reaches $0.535340$ and crosses the strict matching threshold. All three methods have a PQ denominator of 28. The SOR-only match contributes $-1.911930$ points to the \ours{}-minus-SOR gap; the remaining objects contribute $+0.648102$, giving a net scene difference of $-1.263827$ points.
+
+\begin{table}[t]
+\centering
+\caption{Reference-domain support for the threshold-sensitive object (GT 136313, predicted ID 7). Counts are reference voxels, not raw source points.}
+\label{tab:case}
+\begingroup\setlength{\tabcolsep}{5pt}
+\input{tables/case}
+\endgroup
+\end{table}
+
+\paragraph{Residual contamination.} Of 2669 source points, \ours{} removes 92 and SOR removes 97. Similar removal counts therefore do not explain the difference. Among the baseline's 410 excess reference voxels, 304 have source owners with support but no refutation, 73 have no votes, 11 have insufficient refutation relative to support, and only 22 have owners satisfying Eq.~\eqref{eq:rejection}. The mechanism preserves contamination that lacks contrary evidence. These counts do not uniquely distinguish missing viewpoints from persistent mask errors.
+
+\paragraph{Reassignment.} With locked assignment, the same \ours{} object reaches IoU $0.501247$. Primary reassignment admits 22 additional voxels: five correct and 17 excess. This lowers IoU below $0.5$ again (Table~\ref{tab:case}). The lost match relative to SOR is explained by residual contamination and threshold-sensitive reassignment, rather than uniform map degradation.
+
+\subsection{Recorded Computation and Map Scale}
+\label{sec:runtime}
+Table~\ref{tab:runtime} reports archived timers at $640\!\times\!480$ resolution and 200 semantic frames per scene. ``Evidence'' sums calls to the projection/morphology/voting kernel and counter accumulation. The kernel jointly computes depth-gated and FOV-only evidence; depth loading and mask unpacking occur outside this timer. ``Job'' includes input loading, SOR, all four cleanup variants, and exports, but excludes frontend inference and initial mapping. These single-run CPU measurements establish the processed scale and recorded cost, not isolated \ours{} latency, controlled hardware throughput, or end-to-end SLAM speed. The original timer records do not pin CPU model or thread allocation.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Archived computation, in seconds, on the finalized strong-baseline foreground map. Evidence and job timers have different scopes; neither is standalone \ours{} runtime.}
+\label{tab:runtime}
+\input{tables/runtime}
+\end{table}
+
+\subsection{Robot-System Evidence}
+The broader omni\_slam pipeline uses FAST-LIVO2-based motion estimation~\cite{zheng2024fastlivo2} to connect images with measured LiDAR geometry. Six recorded runs include garage and outdoor routes, with estimated path lengths from $84.5$ to $838.4\,\mathrm m$. Their archived maps and observations provide qualitative evidence of the sensing and object-map interfaces.
+
+The garage branch links vehicle records to RGB images, SAM masks, LiDAR support, and measured 3D bounds. A separate outdoor branch uses Grounding DINO~\cite{liu2023groundingdino} for object candidates and SegFormer~\cite{xie2021segformer} with local geometric checks for ground support. These runs predate the frozen visibility revision module: \ours{} has not been applied to these archived results. They do not establish a robot-side accuracy gain or an end-to-end runtime. The supplementary material retains the six-route atlas, detailed object evidence, ground examples, and explicit branch identities.

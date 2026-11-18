@@ -1,0 +1,63 @@
+{
+  "complete": true,
+  "original_inputs_and_sources_unchanged": true,
+  "all_export_seals_verified": true,
+  "bruteforce_readout_checks": 160,
+  "results": {
+    "kitti360_0009": {
+      "witness_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 3847
+      },
+      "witness_no_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 13283
+      },
+      "nearest_witness_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 5
+      },
+      "ours_no_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 9436
+      },
+      "ours_unconditional_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 10773
+      },
+      "certificate_difference": {
+        "nearest_additional_source_ids": 35,
+        "reference_id_differences": 5,
+        "scores_equal": true
+      }
+    },
+    "kitti360_0010": {
+      "witness_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 1140
+      },
+      "witness_no_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 1140
+      },
+      "nearest_witness_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 0
+      },
+      "ours_no_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 0
+      },
+      "ours_unconditional_history": {
+        "bruteforce_readout_checks": 16,
+        "changed_reference_ids_vs_ours": 3453
+      },
+      "certificate_difference": {
+        "nearest_additional_source_ids": 0,
+        "reference_id_differences": 0,
+        "scores_equal": true
+      }
+    }
+  },
+  "script_sha256": "b4ed44a3c1437c54dbf8eb7e0f6b5c61ae37dda41a438a28e91865ec3b53de49"
+}

@@ -1,0 +1,191 @@
+
+\maketitle
+\begin{abstract}
+Object maps must absorb newly observed surfaces without indiscriminately overwriting established identities. We study this problem using posed images and measured LiDAR points, separating authorization of historical identity edits from admission of new surface measurements. For proposed object merges, we compare shared and separate mask explanations and require the evidence margin to remain positive after removing any one jointly observed view. New points require a direct mask witness and a local competing-identity certificate supported by distinct observation frames. Coordinates remain tied to measured sources. With the method frozen before inference on two previously unused KITTI-360 windows, mean building/car instance AP at IoU thresholds 0.50--0.90 improves from 17.259 to 18.762, exceeding unconditional revision and a history-only control. Two additional building instances cross the AP50 matching threshold without losing baseline matches. Subsequent fixed-output interventions attribute 0.161 AP points in one window to authorized historical edits and 2.778 points in the other to preserving old identities instead of overwriting them. Local assignment improves over witness-only admission; adding the two-frame certificate to nearest-seed assignment yields no additional AP on these windows. A 330-frame garage recording demonstrates offline integration. The evaluation isolates object-map revision rather than odometry, uses a local benchmark adapter, and does not establish robot semantic accuracy without independent annotations.
+\end{abstract}
+
+\section{Introduction}
+A useful object map connects physical surfaces to persistent identities. A robot should be able to revisit an object, incorporate measurements from a new view, and revise an earlier association when the accumulated evidence supports doing so. Existing image-to-map pipelines provide strong object proposals, but geometry expansion and historical identity changes are different decisions. Accepting a surface component does not by itself justify merging every old identity that overlaps it.
+
+This distinction is especially relevant outdoors. Partial observations can fragment a building, while a broad connected component can absorb a nearby vehicle or an unrelated surface. A policy that preserves every historical assignment cannot repair fragments; a policy that rewrites all assignments inside an accepted component can erase valid identities. We therefore investigate \emph{evidence-authorized revision}: measured geometry supplies candidates, while observed mask evidence determines which historical edits and new writes are permitted.
+
+An earlier fixed-identity study in this project tested whether visible mask evidence could remove contaminated geometry while preserving all object IDs. That operation improved existing shapes but could neither append missing surfaces nor revise identity assignments. The present method addresses those additional decisions; we retain the earlier study as V1 and reserve \ours{} for the current method.
+
+The revision module operates on a frozen object-mapping backbone. It introduces two explicit decisions. First, an old identity can donate points to a proposed receiver only when shared-mask evidence dominates separate-mask evidence, survives removal of one view, and remains compatible with the accepted group. Second, a new surface point is admitted only through a directly witnessed cell with a stable local identity. Uncertified evidence leads to abstention. These tests are deterministic properties of the supplied observations and graph, not estimates of semantic truth.
+
+The empirical contribution is a controlled separation of these decisions. All methods share measured inputs, foundation-model outputs, candidate generation, and evaluation. The complete candidate is fixed before two new outdoor windows are processed. Its mean AP improves by 1.503 percentage points over the strong backbone and by 1.050 points over history-only authorization. Our analysis also identifies cases where conservative authorization blocks a beneficial merge. This limits the claim: the method improves the tested object maps, but does not solve general instance discovery or every historical association error.
+
+Our contributions are a revision policy that separates surface proposals from permission to overwrite persistent identities; a measured-source write policy with local identity competition; and controlled interventions that distinguish fragment consolidation, identity preservation, and new-surface assignment. The fixed-graph certificate is a stability guard within the write policy, not a separately demonstrated source of AP improvement. The system context is \texttt{omni\_slam}: LIVO supplies robot poses and measured geometry, while public benchmarks use supplied poses. We evaluate the object map separately from odometry.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{architecture.pdf}
+\caption{Evidence-authorized revision. Left: recorded KITTI-360 RGB (0009, frame 903) and a prior-map crop. Center: schematic joint-view authorization and local identity certification; both constrain historical edits. Right: the same measured crop after revision. Blue denotes preserved IDs, purple authorized old-label changes, and teal new measured points. Crops share scale and bounds; RGB is a separate view. The illustrative crop was selected after scoring.}
+\label{fig:architecture}
+\end{figure*}
+
+\section{Context and Scope}
+ConceptGraphs constructs object-centric scene graphs by associating image regions across views and lifting them into 3D~\cite{cg}. MaskClustering uses multi-view consensus to cluster masks into instances~\cite{mc}. These works already establish multi-view association and mask-graph reasoning. We consequently do not claim mask association, a geometric graph, or the use of foundation models as independent novelty.
+
+Our distinction is operational: a proposal to explain additional measured surface is separated from permission to overwrite persistent labels. The method retains a trace from each appended point to a real measurement and distinguishes observed ambiguity from absent evidence. This is a specific refinement of an existing object mapper; superiority to external complete systems has not yet been measured under the same outdoor protocol.
+
+SAM3 supplies mask proposals~\cite{sam3}; SigLIP supplies appearance descriptors~\cite{siglip}; SegFormer supplies semantic evidence~\cite{segformer}. All variants share these outputs. FAST-LIVO2 provides robot poses~\cite{livo}. The AP comparison fixes the prior object mapper and evaluates the downstream revision decisions.
+
+
+
+\input{sections/merged/version_scope}
+
+\section{Evidence-Authorized Object Revision}
+\subsection{State and shared surface proposals}
+Let the prior map be $\mathcal M=\{(x_i,o_i)\}$, where $x_i$ is a three-dimensional point and $o_i$ is its persistent object ID. The measured archive records source coordinates and acquisition-frame indices. The shared backbone constructs the prior map using SAM3 masks, SigLIP descriptors, ConceptGraphs-style association (the frozen history2 configuration), and source-frame-certified measured geometry. Its geometry weights were previously fitted on exposed sequences 0000/0002; no weights are fitted in the present evaluation. SegFormer supplies semantic evidence. All internal variants receive the same prior map, cached model outputs, and classification readout. Appendix~\ref{app:causal} records the frozen artifacts and execution scope.
+
+Candidate surfaces are connected components of a same-class local graph on 0.20\,m cells. Edges follow the frozen 16-neighbor proposal with a strict 0.40\,m distance bound. Each visible cell contributes unit mass, divided among its visible source pixels. This prevents dense sampling of one cell from multiplying its coverage contribution. The visibility domain consists of measured, projected sources; unobserved space is not treated as negative mask evidence.
+
+For a component $C$, frame $t$, and selected query set $\mathcal Q$, let $U_{t,\mathcal Q}$ denote the union of query masks over the visible source domain $V_t$. The shared proposal utility is
+\begin{align}
+F_t(C,\mathcal Q)={}&\sum_{p\in V_t}w_{tp}\,[p\in U_{t,\mathcal Q}]
+             (2[p\in C]-1) \nonumber\\
+ &-\sum_{q\in\mathcal Q}\left[\log_2(1+Q_t)-\log_2 s_{tq}\right],
+\end{align}
+where $Q_t$ is the number of positive-score native queries of the same class. Greedy positive-gain selection counts overlap once. A component is accepted when its pooled utility exceeds $\log_2(K+1)$ for $K$ geometric components and it has positive utility in at least three frames. This is a fixed coverage utility, not a calibrated likelihood or an optimal set-cover solution.
+
+The parent proposal fixes receivers by same-class overlap alignment with prior IDs. Components without same-class old footprints may receive new IDs under the inherited minimum-source and view-support rules. The present method cannot create a new identity inside an old-footprint component merely because its old assignment is wrong. We retain this restriction throughout the experiments.
+
+\subsection{Authorizing historical identity edits}
+An old cell is an identity footprint only if all its old points have the same nonzero ID; mixed-ID cells abstain. For old IDs $a,b$ visible in a common frame, define $A_{tq},B_{tq}\in[0,1]$ as the fractions of their visible footprint mass covered by native query $q$. Using same-class query scores $s_{tq}$, shared and separate explanations are
+\begin{align}
+S_t(a,b)&=\max_q s_{tq}\min(A_{tq},B_{tq}),\\
+E_t(a\mid b)&=\max_q s_{tq}A_{tq}(1-B_{tq}),\\
+R_t(a,b)&=\sqrt{E_t(a\mid b)E_t(b\mid a)}.
+\end{align}
+Let $\delta_t=S_t-R_t$ and $\eps=10^{-10}$. We authorize pair compatibility only if
+\begin{equation}
+\Delta_{-1}(a,b)=\sum_t\delta_t-\max\{0,\max_t\delta_t\}>\eps.
+\label{eq:margin}
+\end{equation}
+The expression is the worst margin after deleting no frame or one observed frame. Missing joint views abstain, and duplicate frame IDs are not counted as independent votes. It does not establish independence of views or correctness of a merge.
+
+The proposal fixes the receiver. Donors are considered by decreasing worst-deletion margin, with stable-ID tie breaking. A donor joins only when every pair with the accepted group passes Eq.~\ref{eq:margin}. Thus two individually plausible links cannot force a transitive merge across an incompatible pair. This greedy complete-link rule does not claim globally optimal grouping.
+
+Authorization alone is insufficient to change a point. An old point changes only if the parent proposed that donor-to-receiver transition, the point lies in that component, and the local identity certificate below agrees with the receiver. All remaining old coordinates and labels are preserved.
+
+\subsection{Certifying new surface writes}
+We restrict local identity competition to the accepted geometric components. Seeds use pure old-ID cells actually witnessed by the selected mask union in a frame. Approved donors alias to their receiver; unapproved identities remain separate. A component without old footprints uses its proposed new identity at witnessed cells. An old-footprint component with no usable seed abstains.
+
+Let $d_o(v)$ be shortest-path distance from node $v$ to seeds of identity $o$. Seeds also retain their observation-frame group. For the unique nearest identity $o^*$, let $d^{(2)}_{o^*,t}(v)$ be its second-nearest distance from a distinct frame group. A certificate requires two such groups and
+\begin{equation}
+d^{(2)}_{o^*,t}(v)<\min_{o\ne o^*}d_o(v)-\eps.
+\label{eq:certificate}
+\end{equation}
+Under the fixed graph, removing any one seed-frame group leaves a winning seed closer than every competing identity. This is a label-stability certificate under seed-group deletion, not robustness to deleting the graph, to pose noise, or to erroneous masks.
+
+A parent-added source is written only if it belongs to a direct accepted component, its cell has an actual mask witness, and Eq.~\ref{eq:certificate} supplies an identity. The witness is at cell level: another measurement in the same 0.20\,m cell can be admitted. Appended coordinates are copied from measured sources; none are synthesized. Shared parent filtering excludes additions within 0.05\,m of prior geometry. Classes and ranking scores are inherited without a new final SOR, NMS, or variant-specific postfilter.
+
+\begin{algorithm}[t]
+\caption{Revision of a persistent object map}
+\label{alg:revision}
+\begin{algorithmic}[1]
+\Require Prior map $\mathcal M$, measured archive, posed mask observations
+\State Generate shared component and receiver proposals
+\State Compute joint-view margins for candidate old-ID pairs
+\State Form compatible donor groups around fixed receivers
+\State Seed witnessed cells with authorized persistent IDs
+\State Compute local competing-ID and frame-group distances
+\State Certify identities by Eq.~\ref{eq:certificate}
+\State Copy all old coordinates and initially preserve old IDs
+\State Apply only proposed, authorized, locally agreed old edits
+\State Append witnessed, certified parent-added source points
+\State \Return revised map and source/decision records
+\end{algorithmic}
+\end{algorithm}
+
+\section{Evaluation}
+\subsection{Protocol and comparison methods}
+We use KITTI-360~\cite{kitti} and a garage robot recording. The public comparison covers building/car instances in two preselected validation windows: sequence 0009, frames 778--1026 (50 sampled pairs), and sequence 0010, frames 1872--2033 (34 pairs). Seven sequences already exposed during development are excluded in full. Selection, method, and thresholds were fixed before inspecting the new images, running the models, or decoding their semantic references. All eight final maps were sealed before either reference was decoded. These are new local evaluation windows, not an official test-server submission or full-sequence benchmark run.
+
+Predicted IDs transfer to the full static reference domain by nearest map point within a strict 0.20\,m radius. The pinned public AP kernel is used through an explicit local confidence-weighted adapter. Primary results follow the upstream train-ID reference encoding. We report AP averaged across IoU thresholds 0.50, 0.55, \ldots, 0.90 and AP50, with minimum reference confidence mass 100. The primary domain contains 83 eligible instances, including uncovered objects. A canonical raw-class diagnostic contains 74. A second diagnostic assigns all prediction scores the same value. Neither diagnostic replaces the primary result.
+
+Four methods are compared: (i) the current \emph{strong baseline}, including source-frame-certified measured geometry; (ii) \emph{unconditional revision}, which applies the parent component assignments; (iii) \emph{history-only}, which changes only the old-label prefix to authorized history and retains all parent-added geometry, IDs, and scores; and (iv) \ours, with authorized history and certified new writes. History-only versus unconditional isolates historical protection. \ours{} versus history-only changes the joint new-region assignment/admission policy; it does not isolate each ingredient of that policy.
+
+\begin{table}[t]
+\centering\small
+\input{tables/current/primary}
+\caption{Primary instance AP50:90 (\%). Same inputs and fixed protocol. \ours{} is the complete authorization method.}
+\label{tab:primary}
+\end{table}
+
+\subsection{Prospective outdoor results}
+Table~\ref{tab:primary} shows mean AP of 18.762 for \ours{}, compared with 17.259 for the strong baseline, 17.050 for unconditional revision, and 17.712 for history-only. The improvement over the strong baseline is 0.229 points in 0009 and 2.778 points in 0010. AP50 also increases in both windows: 33.453 to 34.319 in 0009 and 18.056 to 30.556 in 0010. The predeclared prospective gate is met: at least one mean AP point, nonregression in each window's AP/AP50, a higher mean than both controls, at least one additional raw-target AP50 match with no lost match, and actual historical edits.
+
+The gain is not solely score ranking. Canonical-class mean AP rises from 18.716 to 20.727; uniform-score mean AP rises from 17.079 to 18.905. There are 12,855 historical point-ID edits in 0009 and none in 0010. \ours{} adds 42,403 and 9,715 measured source points over the respective baselines. These counts establish that the outputs changed; AP assesses whether those changes helped.
+
+The positive result is localized. Building instances 2168 and 2086 become additional AP50 matches. Both had partial baseline coverage, so these are completions crossing a threshold rather than discovery of entirely unseen physical objects. For 2086 the baseline IoU is 0.49984, immediately below the threshold; the final IoU is 0.55764. We report this boundary effect explicitly.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.86\textwidth]{object_cases.pdf}
+\caption{Actual reference-domain geometry for two gains and one counterexample. Columns share the same crop within each row. Teal marks the chosen prediction's overlap with the target, coral its excess surface, and gray missing target surface. IoU uses the full confidence-weighted reference domain, not the crop; out-of-crop prediction counts are printed. The cases were selected after scoring to explain mechanisms. Building 2164 exposes excessive conservatism: unconditional revision attains IoU 0.535 while \ours{} attains 0.286. These are measured evaluation points, not generated illustrations.}
+\label{fig:cases}
+\end{figure*}
+
+\subsection{Ablation interpretation and development history}
+On the new windows, unconditional revision to history-only changes mean AP by +0.662 points; history-only to \ours{} changes it by +1.050 points. The latter combines local reassignment, certification, and witness filtering. It is not evidence that each submodule has an independently positive effect. The shared multi-mask cover accepts exactly the same number of components as the best-single-mask control in both windows (46 and 5). Improved utility in individual frames therefore does not establish an independent complete-map benefit from mask unions.
+
+Earlier exposed development windows remain part of the record. There, the strong baseline mean was 28.012, \ours{} 28.048, and history-only 28.217; the original development gate failed. The new prospective evaluation was explicitly registered as a bounded replication after that failure, not reported as a retroactive pass. Development and new-window results are not pooled, nor is the per-window winner renamed \ours. The expanded development ablations appear in Appendix~\ref{app:controls}.
+
+\subsection{What causes the gain?}
+After inspecting the original results, we froze five additional export interventions per window. They reuse the fixed decisions and change only designated output labels or admission rules; they are controlled output interventions, not newly independent tests or fully rerun pipelines. All ten maps were sealed before their evaluation. Table~\ref{tab:causal} fixes the new coordinates, labels, and ranking scores when comparing historical-label prefixes.
+
+\begin{table}[t]
+\centering\footnotesize
+\input{tables/current/causal_contrasts}
+\caption{Post-hoc controlled AP changes. Each row uses the paired intervention specified in Appendix~\ref{app:causal}; rows are not additive. The last two rows hold Ours historical decisions fixed.}
+\label{tab:causal}
+\end{table}
+
+Applying authorized old-label edits instead of retaining the original prefix adds 0.161 AP points in 0009. In 0010, Ours performs no old-label edits, yet preserving the prefix instead of applying the unconditional edits adds 2.778 points at identical new geometry. Thus withholding an overwrite can have measurable value. A fixed baseline-to-GT correspondence identifies the 0009 edits as same-object fragment consolidation, rather than correction of cross-object assignments.
+
+The local write policy improves mean AP by 0.743 points over direct witness admission with parent labels. However, a unique nearest-seed assignment without the additional new-write certificate attains exactly the same AP as Ours in both windows. The certificate excludes 35 additional sources and changes five reference labels in 0009; it changes neither in 0010. These results support local assignment and historical protection, but do not establish an incremental AP benefit from certifying new writes. Historical authorization and its local certificate remain fixed in this particular contrast.
+
+\subsection{Failures and equal scores}
+Building 2164 improves over the strong baseline but remains below the unconditional control (Fig.~\ref{fig:cases}). In 0009, 15 canonical objects improve their best same-class IoU, 26 decline, and 21 remain unchanged. In 0010, the counts are 2, 0, and 10. Zero lost AP50 matches on the new windows does not mean zero geometric regression.
+
+The vehicle result also limits the claim. In 0010 all four methods have identical car AP of 6.173; car 13311 retains IoU 0.72844, while the other eight eligible cars have zero best same-class IoU. In 0009 car AP declines slightly, from 45.411 to 45.355. The current gain is driven by buildings, not uniform improvement across categories. Among the original four methods, every pair has different reference-domain predictions. The subsequent nearest-seed control is genuinely identical to \ours{} on 0010; this is an audited algorithmic equality, not a reused result.
+
+\input{sections/merged/indoor_context}
+
+\subsection{Robot integration}
+The same revision kernels were evaluated on the 330-frame \texttt{rosbag2245} garage recording with the existing LIVO pose and geometry outputs. The four sealed versions contain 65,189 / 1,158,094 / 1,158,094 / 717,816 points for baseline / unconditional / history-only / \ours, respectively. \ours{} retains the old-label prefix and produces 68 nonempty IDs. Appendix~\ref{app:robot} shows actual images and maps.
+
+The original system record also includes six garage/outdoor recordings and image-linked landmark and ground examples. Appendix~\ref{app:routes} retains their inventory and coordinate-version distinctions. These archived outputs are separate from the current four-method garage comparison.
+
+This is an offline integration comparison. The robot diagnostic uses the complete measurement archive, whereas the public visibility adapter respects source acquisition time. There is no independent robot semantic reference, no measured S100 deployment performance, and no validated semantic-accuracy gain inferred from increased point or object counts.
+
+\section{Discussion and Conclusion}
+Separating historical revision permission from new-surface admission improves the two fixed outdoor object maps relative to the tested same-input controls. The fixed-output interventions sharpen the mechanism: selected edits consolidate fragments, withholding edits protects established identities, and local assignment improves on witness-only additions. The implementation links these operations to observations and measured coordinates. The additional certificate on new writes has a fixed-graph stability argument, but no observed AP advantage over nearest-seed assignment in this audit.
+
+Evidence for the current revision method remains limited to two new windows from one dataset, with small absolute improvements and uneven category behavior. An external MaskClustering core adaptation is reported as a limited diagnostic, not a complete-system reproduction. Wider fixed-method evaluation is reserved but not yet executed. External complete-system comparisons, pose/depth perturbation experiments, longer-sequence evaluation, and independently labeled robot accuracy remain absent. The graph certificate only covers seed-group removal on a fixed graph. Broader robustness and identity correctness cannot be inferred from it. The current representation also restricts new identities inside old-footprint components.
+
+The certificate has a direct fixed-graph argument: under Eq.~\ref{eq:certificate}, two distinct frame groups supply winning-identity seeds closer than every competitor. Removing one group leaves at least one such seed. Removing competing seeds cannot reduce competing distances. Thus the winning identity remains unchanged. This argument assumes unchanged graph geometry and edge weights; it does not imply correctness of the masks or identities.
+
+The results support evidence-authorized revision as a useful mechanism for persistent object geometry. Multi-view observations permit selected historical changes and surface additions while preserving a record of why each operation was allowed. Wider evaluation can establish how far this behavior generalizes beyond the present building-dominated gains.
+
+\section*{Reproducibility and AI assistance}
+Tables are generated from sealed result JSON; object crops use saved spatial predictions. The original 24 new-window score records and 628 object-by-method IoU entries were replayed successfully. The subsequent audit adds ten sealed intervention maps, 30 score records, fixed-correspondence history diagnostics, and 160 sampled brute-force readout checks. Six additional score records cover the explicitly limited external core adaptation. Indoor V1 results retain their own frozen evaluation and provenance; they are not new current-method runs. The source package includes input hashes, copied evidence, and figure-generation code. OpenAI Codex assisted with implementation, experiment orchestration, result inspection, literature verification, figures, and manuscript drafting. Photographs and point clouds are recorded data. This disclosure must be adapted to the eventual venue policy.
+
+\balance
+\setlength{\bibsep}{1pt}
+\begin{thebibliography}{99}\small
+\bibitem{cg} Q. Gu et al. ConceptGraphs: Open-Vocabulary 3D Scene Graphs for Perception and Planning. ICRA, 2024. \url{https://concept-graphs.github.io/}.
+\bibitem{mc} M. Yan, J. Zhang, Y. Zhu, and H. Wang. MaskClustering: View Consensus based Mask Graph Clustering for Open-Vocabulary 3D Instance Segmentation. CVPR, 2024. \url{https://arxiv.org/abs/2401.07745}.
+\bibitem{sam3} Meta. SAM 3 official repository and model documentation. \url{https://github.com/facebookresearch/sam3}. Accessed November 15, 2026.
+\bibitem{siglip} X. Zhai, B. Mustafa, A. Kolesnikov, and L. Beyer. Sigmoid Loss for Language Image Pre-Training. ICCV, 2023. \url{https://arxiv.org/abs/2303.15343}.
+\bibitem{segformer} E. Xie et al. SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers. NeurIPS, 2021. \url{https://arxiv.org/abs/2105.15203}.
+\bibitem{livo} C. Zheng et al. FAST-LIVO2: Fast, Direct LiDAR-Inertial-Visual Odometry. arXiv:2408.14035, 2024. \url{https://arxiv.org/abs/2408.14035}.
+\bibitem{kitti} KITTI-360 team. KITTI-360: A large-scale dataset with 3D and 2D annotations. Official dataset and evaluation tools. \url{https://www.cvlibs.net/datasets/kitti-360/}.
+\bibitem{scenenn} B.-S. Hua et al. SceneNN: A Scene Meshes Dataset with aNNotations. 3DV, 2016. \url{https://hkust-vgd.github.io/scenenn/}.
+\bibitem{sam2} N. Ravi et al. SAM 2: Segment Anything in Images and Videos. arXiv:2408.00714, 2024. \url{https://arxiv.org/abs/2408.00714}.
+\bibitem{gdino} S. Liu et al. Grounding DINO: Marrying DINO with Grounded Pre-Training for Open-Set Object Detection. arXiv:2303.05499, 2023. \url{https://arxiv.org/abs/2303.05499}.
+\end{thebibliography}
+
+

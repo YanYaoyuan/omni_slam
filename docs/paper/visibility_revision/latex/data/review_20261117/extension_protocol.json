@@ -1,0 +1,250 @@
+{
+  "date": "2026-11-17",
+  "created_epoch": 1794883563.004085,
+  "selection": "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/reviewer_extension_20261117/window_selection.json",
+  "selection_sha256": "d2adf138faab553059e47733e54ac02318769e5a48347d8f59b0823f41e4ab31",
+  "scientific_parent": "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_assessment_v1/protocol.json",
+  "scientific_parent_sha256": "db818c57284b425716a8d9986f5e93f04edf92fd57b045409b77015d1ed60d5a",
+  "sources": {
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_prepare/splits/2013_05_28_drive_val.txt": "cc4ebc13e18c6fc0fc7584f74c83482c397c5b541d8dde5d4ddb6e34bcf1c3c8",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_reserved_v4/semantic_archive_index.json": "017d3c5d7d2960bc85a61a39595ba169ffb51d157b25765d0fa9da4e9da76f8b",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_reserved_v4/geometry_separation_audit.json": "8845d31ae88bfa2e177ddb7d704c13cde4d4a36be1669a0009a2b04411ee8958",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_prepare/extracted/2013_05_28_drive_0003_sync/cam0_to_world.txt": "ba90f580e684faf5e34ebbe28076319da57f9104ec9cc90c54a8797da0307c6c",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_prepare/extracted/2013_05_28_drive_0004_sync/cam0_to_world.txt": "a551fb860599cac0dc9258cdb200dc4ded4af499191a89b1126db86fc188dfb3",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_prepare/extracted/2013_05_28_drive_0005_sync/cam0_to_world.txt": "2efdf115a2928da30af6de9f5a3867db4b9f25f85e1876d5184597ab8963e22b",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/datasets/kitti360_prepare/extracted/2013_05_28_drive_0006_sync/cam0_to_world.txt": "702a568ab8bf30ce22aedc104050ea5d41c2fcb162b45c5630e22c3d69026524"
+  },
+  "methods": [
+    "strong_baseline",
+    "unconditional",
+    "history_only",
+    "witness_history",
+    "nearest_witness_history",
+    "full_authorization",
+    "MaskClustering_shared_core"
+  ],
+  "primary": "full_authorization unchanged; nearest/witness are controls, not post-hoc replacement Ours",
+  "fixed_models": {
+    "selected_model": "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/intrinsic_surface_ownership_v1/models/rosbag2245/intrinsic_geometry/model.pt",
+    "sam3_checkpoint": "/home/user/vbot/sam3/checkpoints/sam3.pt",
+    "sam3_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"
+  },
+  "budget": {
+    "windows": 4,
+    "max_input_pairs": 244,
+    "max_complete_maps": 28,
+    "max_score_records": 84,
+    "parameter_search": false
+  },
+  "protocol": "Reuse all parent geometric/semantic/model thresholds; same parent candidates for internal controls. Export all frozen maps before annotation decoding. Primary/canonical/uniform and ALL eligible object outcomes retained. No replacement if a window has no eligible target; report NA. Include unchanged/negative results; do not promote based on best windows.",
+  "required_before_inference": [
+    "Download SHA/CRC checks",
+    "Raw measured-space separation versus all earlier windows",
+    "Isolated-root execution adapter plus exposed golden-output checks",
+    "Working GPU and pinned model/runtime preflight"
+  ],
+  "status": "reserved_not_executed",
+  "new_rgb_read": false,
+  "new_gt_decoded": false,
+  "model_calls": 0,
+  "considered": [
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0003_sync/static/0000000002_0000000282.ply",
+      "frames": 261,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0003_sync/static/0000000274_0000000401.ply",
+      "frames": 128,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0003_sync/static/0000000394_0000000514.ply",
+      "frames": 121,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 77.85381976804639,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0003_sync/static/0000000508_0000000623.ply",
+      "frames": 116,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 262.52048658000695,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0003_sync/static/0000000617_0000000738.ply",
+      "frames": 122,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 448.9559035445569,
+      "decision": "selected"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000002897_0000003118.ply",
+      "frames": 222,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000003107_0000003367.ply",
+      "frames": 261,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000003356_0000003586.ply",
+      "frames": 231,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000003570_0000003975.ply",
+      "frames": 323,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000003967_0000004185.ply",
+      "frames": 219,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 43.196822906700845,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000004174_0000004380.ply",
+      "frames": 207,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 27.36882290670087,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000004370_0000004726.ply",
+      "frames": 320,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000004708_0000004929.ply",
+      "frames": 222,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000004919_0000005171.ply",
+      "frames": 253,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 62.9828229067009,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000005157_0000005564.ply",
+      "frames": 323,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 68.16282290670074,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000005466_0000005775.ply",
+      "frames": 244,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 77.1987401403169,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000005765_0000005945.ply",
+      "frames": 181,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 252.7814901936645,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0004_sync/static/0000005930_0000006119.ply",
+      "frames": 190,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 428.47971974946864,
+      "decision": "selected"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0005_sync/static/0000000002_0000000357.ply",
+      "frames": 322,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 542.4939338920867,
+      "decision": "selected"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000000002_0000000403.ply",
+      "frames": 307,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000000387_0000000772.ply",
+      "frames": 334,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000000754_0000001010.ply",
+      "frames": 257,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000001000_0000001219.ply",
+      "frames": 220,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 44.40275081219884,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000001208_0000001438.ply",
+      "frames": 231,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 231.81951408913676,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000001423_0000001711.ply",
+      "frames": 289,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 206.3507223899138,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000001700_0000001916.ply",
+      "frames": 217,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 253.69870219500064,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000001906_0000002133.ply",
+      "frames": 228,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 221.780097086256,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000002124_0000002289.ply",
+      "frames": 166,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 64.03741483194426,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000002280_0000002615.ply",
+      "frames": 247,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000002511_0000002810.ply",
+      "frames": 230,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 0.0,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000002801_0000003011.ply",
+      "frames": 211,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 72.38241483194406,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000003001_0000003265.ply",
+      "frames": 265,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 228.63643474648322,
+      "decision": "near_exposed_or_selected_extent"
+    },
+    {
+      "member": "data_3d_semantics/train/2013_05_28_drive_0006_sync/static/0000003251_0000003634.ply",
+      "frames": 365,
+      "minimum_trajectory_to_exposed_raw_aabb_m": 359.9782008269967,
+      "decision": "selected"
+    }
+  ]
+}

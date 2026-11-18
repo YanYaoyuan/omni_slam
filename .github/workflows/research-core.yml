@@ -1,0 +1,33 @@
+name: Object mapping core (CPU)
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install isolated CPU dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ python3-venv
+          python3 -m venv .venv
+          .venv/bin/python -m pip install -r requirements/research-core.txt
+          .venv/bin/python -m pip install --no-deps ./omni_semantic_map
+      - name: Test revision mechanisms and installed native sources
+        run: |
+          source .venv/bin/activate
+          bash scripts/test_research_core.sh
+          # No source PYTHONPATH: this checks the installed package's C++ assets.
+          python examples/revision_core_demo.py --output build/demo/revision_core.json
+      - name: Validate tracked paper sources
+        run: .venv/bin/python docs/paper/visibility_revision/latex/verify_sources.py

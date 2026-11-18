@@ -1,0 +1,9 @@
+{
+  "status": "pass",
+  "object_ids_preserved": 206,
+  "max_roundtrip_error_m": 0.0,
+  "median_before_after_shift_m": 0.4690012652014369,
+  "max_before_after_shift_m": 2.198890751288667,
+  "mismatched_epochs_rejected": true,
+  "installed_query_pass": true
+}

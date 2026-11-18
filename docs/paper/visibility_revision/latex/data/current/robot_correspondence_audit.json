@@ -1,0 +1,55 @@
+{
+  "complete": true,
+  "methods": {
+    "strong_baseline": {
+      "folder": "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/batch_transport_robot_v1/final_maps/rosbag2245/ours_frame",
+      "geometry_sha256": "0496d9085522884a4a26246ba9d81eb27bb39d52b672584ccf0467eef97681f3",
+      "classification_sha256": "2679766d0745b6f8f8c0857e7adf675074eef2c242e77737b46e79818d284842",
+      "points": 65189,
+      "nonempty_object_ids": 61,
+      "old_point_id_changes": 0
+    },
+    "unconditional": {
+      "folder": "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/cover/maps/rosbag2245/cover_history",
+      "geometry_sha256": "55dd0c0c678f10b93b17be0ed195b7c03789a149042d141c653f36eaefe80ff0",
+      "classification_sha256": "36c7637dfbd35a0dc6a5095f7e0b4aec865cce89e25b62e1f7990d4bc60aeee4",
+      "points": 1158094,
+      "nonempty_object_ids": 69,
+      "old_point_id_changes": 11100
+    },
+    "history_only": {
+      "folder": "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_factorial_v1/maps/rosbag2245/authorized_history_only",
+      "geometry_sha256": "d9c9b17ae6947be1a43c357497fde84fdc176655c1ea656968aeb54756e8ab6c",
+      "classification_sha256": "36c7637dfbd35a0dc6a5095f7e0b4aec865cce89e25b62e1f7990d4bc60aeee4",
+      "points": 1158094,
+      "nonempty_object_ids": 69,
+      "old_point_id_changes": 0
+    },
+    "full_authorization": {
+      "folder": "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/authorization/maps/rosbag2245/ours",
+      "geometry_sha256": "1c7eaf0ba867be0d5c3884cd4fe3cde8344a67e2e29c7ab75f54940cf037ae09",
+      "classification_sha256": "36c7637dfbd35a0dc6a5095f7e0b4aec865cce89e25b62e1f7990d4bc60aeee4",
+      "points": 717816,
+      "nonempty_object_ids": 68,
+      "old_point_id_changes": 0
+    }
+  },
+  "robot_frames": 330,
+  "shared_kernel_sha256": {
+    "/home/user/work/bgyfw/omni_code/omni_slam/scripts/benchmarks/run_revision_authorization.py": "e727f91dce2ceafc3ec881b0be15d896998142299c40665bfa4fbdc56838112a",
+    "/home/user/work/bgyfw/omni_code/omni_slam/omni_semantic_map/omni_semantic_map/revision_authorization.py": "2212f13bd2bcc008fa150ecd2e5c13bb00f6ea7a56efae5f0d2d47f27926c779",
+    "/home/user/work/bgyfw/omni_code/omni_slam/omni_semantic_map/omni_semantic_map/batch_stable_transport.py": "3b2a4dd396c6863529a66c26a79db2002b17a85257cfd1ce1f8b4b8c31d9732d",
+    "/home/user/work/bgyfw/omni_code/omni_slam/omni_semantic_map/omni_semantic_map/batch_stable_transport.cpp": "d3af2dc0e76bf678659ae263940f5995c402d58a7bea5b0b00a455ad61a15130"
+  },
+  "protocol_sha256": "db818c57284b425716a8d9986f5e93f04edf92fd57b045409b77015d1ed60d5a",
+  "sources": {
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/protocol.json": "2970ae5bb96ec905648ad95ffbf3d5d39233418050e0bb7c25d3467c1015b0b8",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_robot_v1/delivery_audit.json": "38ac3b7aacade76588c602277b6b175f4d2fb81a592153491568c7ee69297469",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/revision_factorial_v1/prediction_audit.json": "60a533ef732c38271f7c1674e24b596d63aff1114f243b479cf6f663ca0fb24f"
+  },
+  "new_robot_runs": 0,
+  "reused_complete_robot_maps": 4,
+  "semantic_accuracy_available": false,
+  "scope": "Exact four-version robot correspondence and export invariant replay. No new scene, independent semantic labels or S100 execution; actual source manifests remain authoritative.",
+  "goal_complete": false
+}

@@ -1,0 +1,278 @@
+[
+  {
+    "bag": "roabag2336",
+    "T_camera_lidar": [
+      [
+        -0.004191981197259822,
+        0.9999764174640438,
+        -0.005439835421971405,
+        0.0342365328347576
+      ],
+      [
+        0.024681028244581873,
+        -0.005334764291852923,
+        -0.9996811427323917,
+        -0.0832081159688827
+      ],
+      [
+        -0.9996865879556611,
+        -0.004324905285284904,
+        -0.024658082971742573,
+        -0.07405928706892614
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "samples": [
+      {
+        "image_stamp_ns": 1779377447928458752,
+        "near_time_points": 4704,
+        "front_points": 3446,
+        "visible_points": 1701,
+        "figure": "roabag2336_0.png"
+      },
+      {
+        "image_stamp_ns": 1779377462928576512,
+        "near_time_points": 4676,
+        "front_points": 3480,
+        "visible_points": 1746,
+        "figure": "roabag2336_1.png"
+      }
+    ],
+    "note": "Recorded TF/K/D; no fitted calibration, no motion compensation or quantitative calibration accuracy claim."
+  },
+  {
+    "bag": "rosbag0521_2",
+    "T_camera_lidar": [
+      [
+        -0.004191981197259822,
+        0.9999764174640438,
+        -0.005439835421971405,
+        0.0342365328347576
+      ],
+      [
+        0.024681028244581873,
+        -0.005334764291852923,
+        -0.9996811427323917,
+        -0.0832081159688827
+      ],
+      [
+        -0.9996865879556611,
+        -0.004324905285284904,
+        -0.024658082971742573,
+        -0.07405928706892614
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "samples": [
+      {
+        "image_stamp_ns": 1779359678571505664,
+        "near_time_points": 4760,
+        "front_points": 3681,
+        "visible_points": 1738,
+        "figure": "rosbag0521_2_0.png"
+      },
+      {
+        "image_stamp_ns": 1779359693571643904,
+        "near_time_points": 4753,
+        "front_points": 3609,
+        "visible_points": 1737,
+        "figure": "rosbag0521_2_1.png"
+      }
+    ],
+    "note": "Recorded TF/K/D; no fitted calibration, no motion compensation or quantitative calibration accuracy claim."
+  },
+  {
+    "bag": "rosbag2245",
+    "T_camera_lidar": [
+      [
+        -0.004191981197259822,
+        0.9999764174640438,
+        -0.005439835421971405,
+        0.0342365328347576
+      ],
+      [
+        0.024681028244581873,
+        -0.005334764291852923,
+        -0.9996811427323917,
+        -0.0832081159688827
+      ],
+      [
+        -0.9996865879556611,
+        -0.004324905285284904,
+        -0.024658082971742573,
+        -0.07405928706892614
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "samples": [
+      {
+        "image_stamp_ns": 1779373994860244480,
+        "near_time_points": 4643,
+        "front_points": 367,
+        "visible_points": 0,
+        "figure": "rosbag2245_0.png"
+      },
+      {
+        "image_stamp_ns": 1779374009860365824,
+        "near_time_points": 4590,
+        "front_points": 173,
+        "visible_points": 0,
+        "figure": "rosbag2245_1.png"
+      }
+    ],
+    "note": "Recorded TF/K/D; no fitted calibration, no motion compensation or quantitative calibration accuracy claim."
+  },
+  {
+    "bag": "rosbag2_20260415_162852",
+    "T_camera_lidar": [
+      [
+        -0.004191981197259822,
+        0.9999764174640438,
+        -0.005439835421971405,
+        0.0342365328347576
+      ],
+      [
+        0.024681028244581873,
+        -0.005334764291852923,
+        -0.9996811427323917,
+        -0.0832081159688827
+      ],
+      [
+        -0.9996865879556611,
+        -0.004324905285284904,
+        -0.024658082971742573,
+        -0.07405928706892614
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "samples": [
+      {
+        "image_stamp_ns": 1776241738220391424,
+        "near_time_points": 4353,
+        "front_points": 1246,
+        "visible_points": 157,
+        "figure": "rosbag2_20260415_162852_0.png"
+      },
+      {
+        "image_stamp_ns": 1776241753220522240,
+        "near_time_points": 4262,
+        "front_points": 646,
+        "visible_points": 227,
+        "figure": "rosbag2_20260415_162852_1.png"
+      }
+    ],
+    "note": "Recorded TF/K/D; no fitted calibration, no motion compensation or quantitative calibration accuracy claim."
+  },
+  {
+    "bag": "rosbag2_20260415_174148",
+    "T_camera_lidar": [
+      [
+        -0.004191981197259822,
+        0.9999764174640438,
+        -0.005439835421971405,
+        0.0342365328347576
+      ],
+      [
+        0.024681028244581873,
+        -0.005334764291852923,
+        -0.9996811427323917,
+        -0.0832081159688827
+      ],
+      [
+        -0.9996865879556611,
+        -0.004324905285284904,
+        -0.024658082971742573,
+        -0.07405928706892614
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "samples": [
+      {
+        "image_stamp_ns": 1776246114628005120,
+        "near_time_points": 3267,
+        "front_points": 1260,
+        "visible_points": 173,
+        "figure": "rosbag2_20260415_174148_0.png"
+      },
+      {
+        "image_stamp_ns": 1776246129628113152,
+        "near_time_points": 3721,
+        "front_points": 916,
+        "visible_points": 47,
+        "figure": "rosbag2_20260415_174148_1.png"
+      }
+    ],
+    "note": "Recorded TF/K/D; no fitted calibration, no motion compensation or quantitative calibration accuracy claim."
+  },
+  {
+    "bag": "20260414_4",
+    "T_camera_lidar": [
+      [
+        -0.004191981197259822,
+        0.9999764174640438,
+        -0.005439835421971405,
+        0.0342365328347576
+      ],
+      [
+        0.024681028244581873,
+        -0.005334764291852923,
+        -0.9996811427323917,
+        -0.0832081159688827
+      ],
+      [
+        -0.9996865879556611,
+        -0.004324905285284904,
+        -0.024658082971742573,
+        -0.07405928706892614
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "samples": [
+      {
+        "image_stamp_ns": 1776156406931356160,
+        "near_time_points": 4050,
+        "front_points": 2678,
+        "visible_points": 1525,
+        "figure": "20260414_4_0.png"
+      },
+      {
+        "image_stamp_ns": 1776156421931451136,
+        "near_time_points": 4119,
+        "front_points": 3010,
+        "visible_points": 1333,
+        "figure": "20260414_4_1.png"
+      }
+    ],
+    "note": "Recorded TF/K/D; no fitted calibration, no motion compensation or quantitative calibration accuracy claim."
+  }
+]

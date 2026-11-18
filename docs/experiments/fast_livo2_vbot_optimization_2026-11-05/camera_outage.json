@@ -1,0 +1,24 @@
+{
+  "camera_configured_enabled": true,
+  "delivered_images": 0,
+  "poses": 48,
+  "same_as_pure_lio": true,
+  "source_complete": false,
+  "duration_s": 10,
+  "transport": {
+    "completed": true,
+    "exit_code": 0,
+    "error": "",
+    "input_counts": {
+      "imu": 1999,
+      "lidar": 49,
+      "image": 0
+    },
+    "estimator_cycles": 49,
+    "pending_imu": 26,
+    "pending_lidar": 0,
+    "pending_image": 0,
+    "wall_s": 0.430492803,
+    "peak_rss_mib": 175.59375
+  }
+}

@@ -1,0 +1,410 @@
+{
+  "frame": "offline_livo_map",
+  "map_revision": "6d1315fcfa844b356e61eae6833b3c9841e92c4eb667a52b7cb6376102495ed5",
+  "query": "找车",
+  "objects": [
+    {
+      "id": "car_0001",
+      "label": "car",
+      "position": [
+        -3.497201128612428,
+        1.725470821644537,
+        0.3595727691678805
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00005.jpg",
+      "observation_count": 10,
+      "position_spread_p90_m": 0.09165961627795001,
+      "confirmed": true
+    },
+    {
+      "id": "car_0004",
+      "label": "car",
+      "position": [
+        -13.38157668619807,
+        -7.7724223163147705,
+        0.13726521837115138
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00020.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.6591403896406476,
+      "confirmed": true
+    },
+    {
+      "id": "car_0006",
+      "label": "car",
+      "position": [
+        -19.903119557372072,
+        -0.6256521537043622,
+        0.09302565643329988
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00026.jpg",
+      "observation_count": 4,
+      "position_spread_p90_m": 0.5862428616619337,
+      "confirmed": true
+    },
+    {
+      "id": "car_0019",
+      "label": "car",
+      "position": [
+        -46.80832534177141,
+        -1.77455669070605,
+        -1.264237753805563
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00053.jpg",
+      "observation_count": 4,
+      "position_spread_p90_m": 0.6701021486821778,
+      "confirmed": true
+    },
+    {
+      "id": "car_0021",
+      "label": "car",
+      "position": [
+        -45.03217435170758,
+        -1.3637784421011214,
+        -1.2029396564883945
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00052.jpg",
+      "observation_count": 4,
+      "position_spread_p90_m": 0.5864163728496545,
+      "confirmed": true
+    },
+    {
+      "id": "car_0022",
+      "label": "car",
+      "position": [
+        -47.36205580018944,
+        -8.021400392747351,
+        -1.6000300065109723
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00055.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.21845813376928347,
+      "confirmed": true
+    },
+    {
+      "id": "car_0023",
+      "label": "car",
+      "position": [
+        -49.74922127408632,
+        -2.6758195711814396,
+        -1.5344307919420919
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00108.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.4389731882182138,
+      "confirmed": true
+    },
+    {
+      "id": "car_0024",
+      "label": "car",
+      "position": [
+        -57.15989062368471,
+        -14.375910009628083,
+        -2.1516852685326198
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00056.jpg",
+      "observation_count": 7,
+      "position_spread_p90_m": 0.3605867236168163,
+      "confirmed": true
+    },
+    {
+      "id": "car_0036",
+      "label": "car",
+      "position": [
+        -60.39197151563545,
+        -13.127836097373818,
+        -2.572795010661576
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00068.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.3352379835723454,
+      "confirmed": true
+    },
+    {
+      "id": "car_0045",
+      "label": "car",
+      "position": [
+        -63.91081945892593,
+        -6.813253078771503,
+        -2.6395076137028344
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00094.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.6074168752550656,
+      "confirmed": true
+    },
+    {
+      "id": "car_0046",
+      "label": "car",
+      "position": [
+        -48.0137612102787,
+        -11.088111109609912,
+        -1.7719588892639475
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00096.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.42130516021909276,
+      "confirmed": true
+    },
+    {
+      "id": "car_0047",
+      "label": "car",
+      "position": [
+        -51.37982764009169,
+        0.07673150312743005,
+        -1.4290128992202882
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00102.jpg",
+      "observation_count": 4,
+      "position_spread_p90_m": 0.2634156923628902,
+      "confirmed": true
+    },
+    {
+      "id": "car_0061",
+      "label": "car",
+      "position": [
+        -32.921743010039634,
+        3.9722324637683517,
+        -0.2751383362022477
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00122.jpg",
+      "observation_count": 6,
+      "position_spread_p90_m": 0.5989593674532618,
+      "confirmed": true
+    },
+    {
+      "id": "car_0063",
+      "label": "car",
+      "position": [
+        -29.921350296048338,
+        -0.17668489525445574,
+        -0.47222250011245614
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00122.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.2128569586166652,
+      "confirmed": true
+    },
+    {
+      "id": "car_0066",
+      "label": "car",
+      "position": [
+        -40.292379910859424,
+        12.264072851281078,
+        -0.5839120781243948
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00132.jpg",
+      "observation_count": 4,
+      "position_spread_p90_m": 0.4177633084180279,
+      "confirmed": true
+    },
+    {
+      "id": "car_0067",
+      "label": "car",
+      "position": [
+        -36.94190621950548,
+        12.825229748443672,
+        -0.4283750898107848
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00129.jpg",
+      "observation_count": 5,
+      "position_spread_p90_m": 0.24912180421972352,
+      "confirmed": true
+    },
+    {
+      "id": "car_0104",
+      "label": "car",
+      "position": [
+        29.27822630713349,
+        23.628026721563927,
+        0.2679790128603622
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00195.jpg",
+      "observation_count": 6,
+      "position_spread_p90_m": 0.24734689640439828,
+      "confirmed": true
+    },
+    {
+      "id": "car_0110",
+      "label": "car",
+      "position": [
+        35.48849990796811,
+        36.14741814760978,
+        -0.1521569161918469
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00208.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.5777062582998492,
+      "confirmed": true
+    },
+    {
+      "id": "car_0124",
+      "label": "car",
+      "position": [
+        61.268267458721475,
+        33.00851075470318,
+        -1.371097668613573
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00228.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.5249318379677766,
+      "confirmed": true
+    },
+    {
+      "id": "car_0131",
+      "label": "car",
+      "position": [
+        60.57066285271601,
+        9.299849201547076,
+        -1.4004050509255634
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00255.jpg",
+      "observation_count": 4,
+      "position_spread_p90_m": 0.39614934853935685,
+      "confirmed": true
+    },
+    {
+      "id": "car_0132",
+      "label": "car",
+      "position": [
+        72.19960457556974,
+        14.314733449225837,
+        -1.990135117773305
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00248.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.1517553603025235,
+      "confirmed": true
+    },
+    {
+      "id": "car_0136",
+      "label": "car",
+      "position": [
+        56.81157155702688,
+        9.939559189228834,
+        -1.504042337883996
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00260.jpg",
+      "observation_count": 4,
+      "position_spread_p90_m": 0.47199443248388445,
+      "confirmed": true
+    },
+    {
+      "id": "car_0140",
+      "label": "car",
+      "position": [
+        52.568723955300136,
+        15.748717807440613,
+        -0.9348790178142319
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00261.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.374364809691909,
+      "confirmed": true
+    },
+    {
+      "id": "car_0154",
+      "label": "car",
+      "position": [
+        42.475601981909335,
+        4.731572214449779,
+        -0.23698138893781512
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00279.jpg",
+      "observation_count": 5,
+      "position_spread_p90_m": 0.21364139649282077,
+      "confirmed": true
+    },
+    {
+      "id": "car_0155",
+      "label": "car",
+      "position": [
+        36.00557337317632,
+        11.34419978573206,
+        0.008233660855526126
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00278.jpg",
+      "observation_count": 6,
+      "position_spread_p90_m": 0.30693577923501286,
+      "confirmed": true
+    },
+    {
+      "id": "car_0168",
+      "label": "car",
+      "position": [
+        30.843037128311614,
+        2.4970694560072877,
+        0.15046032309444604
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00289.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.07556786219514322,
+      "confirmed": true
+    },
+    {
+      "id": "car_0172",
+      "label": "car",
+      "position": [
+        24.098415800402343,
+        8.39331936400603,
+        0.8085543652792355
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00293.jpg",
+      "observation_count": 4,
+      "position_spread_p90_m": 0.47832780487026966,
+      "confirmed": true
+    },
+    {
+      "id": "car_0175",
+      "label": "car",
+      "position": [
+        26.317685660178668,
+        8.404838911855144,
+        0.08992905149395757
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00294.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.17599769802722234,
+      "confirmed": true
+    },
+    {
+      "id": "car_0191",
+      "label": "car",
+      "position": [
+        20.25687373796914,
+        -0.2959244787723545,
+        0.15767349291542992
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00301.jpg",
+      "observation_count": 4,
+      "position_spread_p90_m": 0.5321349721561652,
+      "confirmed": true
+    },
+    {
+      "id": "car_0201",
+      "label": "car",
+      "position": [
+        1.871982822318233,
+        3.2284610715338196,
+        0.3899139417137971
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00314.jpg",
+      "observation_count": 3,
+      "position_spread_p90_m": 0.23532282693091358,
+      "confirmed": true
+    },
+    {
+      "id": "car_0206",
+      "label": "car",
+      "position": [
+        -3.457394266034317,
+        1.3785532893888228,
+        0.3530545820999735
+      ],
+      "evidence": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/rosbag2245_final/evidence/keyframe_00327.jpg",
+      "observation_count": 6,
+      "position_spread_p90_m": 0.018791599880021444,
+      "confirmed": true
+    }
+  ]
+}

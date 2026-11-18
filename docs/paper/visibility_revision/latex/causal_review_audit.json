@@ -1,0 +1,133 @@
+{
+  "date": "2026-11-17",
+  "revision": "Causal review, fixed extension reservation, evidence-based claims and matching robot control figure",
+  "original_archive": "docs/paper/archives/before_causal_review_2026-11-17",
+  "pages": 28,
+  "numbered_figures": 23,
+  "original_figure_and_evidence_files_unchanged": {
+    "data/current/cover_prepared.json": "fc6c9c3faf7a6f1e16d6d222d20f161d4826208b3d252212db54e844f811dc17",
+    "data/current/delivery_audit.json": "0c925f1520320a936ee8290252451b63de1117c3df962afd8ce2d1f9165c66ce",
+    "data/current/development_summary.json": "73be2ea1fd9b3789107fa9dcc1611f23115ec077726a194f38e7bdf31ca18ded",
+    "data/current/factorial_summary.json": "6dd697f04b97f6ab4cf3f948e3f934d60b58caf21e6493a6fefe40e31c73cfed",
+    "data/current/per_object.json": "c0c2346bed600ad3c8c19f9d7ab7bf69e749204cf9d9f3a1b852997eb801a70a",
+    "data/current/protocol.json": "db818c57284b425716a8d9986f5e93f04edf92fd57b045409b77015d1ed60d5a",
+    "data/current/robot_correspondence_audit.json": "c56f2f7b2654b70e864c2f828a24a864f6b24ef6076829399cfc4076ba8a1a64",
+    "data/current/summary.json": "53bcedec7308031f3b086d1c0692c2f337ca212abbe92f3804376c31d7b4765b",
+    "figures/057_threshold_case.pdf": "2277df087964b46e33baef150e63b699dc1895c7ea428051927946524aeec6e8",
+    "figures/all_object_changes.pdf": "be1157bfc01d0bd42cccfdcd9b09db20badb8f60bc6fa70599845943ae5ad69a",
+    "figures/current/architecture.pdf": "f52354216ccba4a0fddcc3f5bebd94d28619484eb9a6d208413b8cb6b76728ec",
+    "figures/current/architecture.png": "bfde0faf2efc1781e01a2798a2bea7f6bc04e9cb2b97e8915a0d579139fc1f1d",
+    "figures/current/architecture.svg": "54adee4ff7edac175d344860dfdace3abda2ee25bc81c01233fd530783329901",
+    "figures/current/architecture_manifest.json": "0e8c22c723752a1b11cebf56964e4f5377c5173181e68881c1945430029a79d4",
+    "figures/current/kitti360_0009_maps.png": "e9c3f03d791d84cb9ee4fc5187a084a292026f0ee06860cead55bef5c23f47ef",
+    "figures/current/kitti360_0009_rgb_1026.png": "df3a4cd65ca55084ecfa6b4776836c5e04e18956b8a3c06e84d8aab559d2f6ae",
+    "figures/current/kitti360_0009_rgb_778.png": "5dc6c79e7378cfd99b4e2fdfbc3d8c6c0bf1856f29f1e999e1dc3688a90e4bf6",
+    "figures/current/kitti360_0009_rgb_903.png": "ebd981d2108fe8f18d8cca93a7911f49425f43dc4f803f43d875ebcff81426fd",
+    "figures/current/kitti360_0010_maps.png": "a181e70a6345a871e11280f76a5937bc6b057c36143a8229de9f558ae0b85c62",
+    "figures/current/kitti360_0010_rgb_1872.png": "74206ef0634c37a198d8b07c18c13275afb95b0a0a8aed4d8fca58aa0c2ab91b",
+    "figures/current/kitti360_0010_rgb_1957.png": "82392d87d1b0d8b1f47a0991cff7baded715dfaaf6c2884a1117f61a81138246",
+    "figures/current/kitti360_0010_rgb_2033.png": "b35da05ad330befc1bfaa496cd030f4e6f15fd7da4cbbed8140a6bbb10660dca",
+    "figures/current/object_cases.pdf": "7aaf004af54c6f282483455909db69c009bc2f3b66889d9f7cc8e3c3d92d99f9",
+    "figures/current/object_cases.png": "6a5947ed4f010a3358cbff3003b9850ee540f7ad98efb258b6531c9d219e36a0",
+    "figures/current/robot_all_maps.png": "628786ded65f163e990fba7ad50f6afe4bcc3f9a539f558f47e639d790abc6fe",
+    "figures/current/robot_frame_000126.png": "b523d21db93b65d61f24dfc2d1bd44dfca32530fdc7b11311fed81b21408c4ee",
+    "figures/current/robot_vehicles.png": "af8f2dcc2d630c7b739d0c368d1fc7a6dbf7b9a396835b785498c56f64e7fae9",
+    "figures/current/scores.png": "046d49a626b63b1432210404cb1d5d1380d659fb6429cb5945a1706f874c62f6",
+    "figures/dataset_scene_057.pdf": "9fb8597adb587bbd841d93ce8d10166149e33214b9fc034bb2910a6c207ef133",
+    "figures/dataset_scene_061.pdf": "73c26d57136294aaaeaccce9fbd79d1415bb5b238cd090727bae86977aacf13b",
+    "figures/development_vs_unseen.pdf": "ce8ba60e87bd410df505d1fd743db43e06df5e26e686c93ac5bfcd0d25657867",
+    "figures/garage_real_evidence.pdf": "21bb48fb96635935e8aa0f06e4bf3cd62014188fc0daa954a60add1fbbc8f3e4",
+    "figures/history/current_baseline_manifest.json": "14f8f80d62d02f6ad850991701b9e26de82ee0da70d13f6070e1b8582b09001f",
+    "figures/history/dino_livo_manifest.json": "4e8b0902c2089f1db636e7f41aca4a7b1cb34294516833532bb5674819773c09",
+    "figures/history/dino_livo_system_architecture.pdf": "fca2d58348e411da441cf732f40c06111fc6d45a3868d290708a59327a27cbc9",
+    "figures/history/dino_object_graph_detail.pdf": "ce9b6d15305659a6fb8f5da8f7a0e773849eca4b5a4ef6b35bee1f944669cf9f",
+    "figures/history/omni_slam_current_baseline.pdf": "8e5e014605bf28a5eb205b7489f1c45bd9e1feb3e643ff5ef136b0702f1bac28",
+    "figures/mechanism_decomposition.pdf": "6e67ab14915ce8070df945bc027f14b46098e8ffe09f70392161ced9d979b65f",
+    "figures/method_architecture.pdf": "66f245518b876bd8163e6e08b3ed2ba187b0a58433e6f8c7c55596285c0fcba2",
+    "figures/object_comparison_real.pdf": "254584f63ceca00a18404f192bdf3395f241d1dd9573b6818ceac2a780b6252f",
+    "figures/rosbag_ground_details.pdf": "63628350437a56cf56d95b4d1f52405e54f1c77aaacfe9bcbc7bc0db378786b4",
+    "figures/rosbag_outdoor_semantics.pdf": "807986ce8a9583a279cde3112a797d65b7b2ba9802db7c6a4d3da9c7b713bfa1",
+    "figures/rosbag_routes_1.pdf": "1ff6f532692dc6d4857a105e412eec573029fe97dc161476252ea47342c34dca",
+    "figures/rosbag_routes_2.pdf": "82b4221a015628f64fb9a654a5ab644349d8fbf521ff5c49ede2dbfb221e8f27",
+    "tables/v1/ablation.tex": "49fdfa6076d3962d291be8f85471676868c996bef9cb0d6d66871d88f555c564",
+    "tables/v1/case.tex": "838f856f62338fed5143c1066fa310cc6193407f7794ff402ae4f6d3531fa2d5",
+    "tables/v1/development.tex": "0df0a653214eda6746b0c8b45a759f258ac28d86842118d8503a805c4cae69da",
+    "tables/v1/main.tex": "8191519d940767935ea3fc069bde3ed76acc006059d1dfb6de22d3718b5e107b",
+    "tables/v1/objects.tex": "dc7199a28afba43c08998b439036d1fcaf4819bf1b05f360bfaff72d4f36b0c7",
+    "tables/v1/recordings.tex": "d135132be4b76a2a78f1725f6b600de44468a2ddb654a317a271a6a61c551ebb",
+    "tables/v1/runtime.tex": "ef3adf58428b62d1591d7bbef7e5a82f907cf598927da9d63b360aea914e8ab2"
+  },
+  "new_intervention_maps": 10,
+  "new_intervention_score_conditions": 30,
+  "external_core_maps": 2,
+  "external_core_unique_score_conditions": 6,
+  "new_foundation_model_calls": 0,
+  "new_training": 0,
+  "extension_status": "reserved_not_executed; GPU unavailable; data and isolated-runner preflight pending",
+  "external_native_full_pipeline_complete": false,
+  "old_method_and_primary_scores_unchanged": true,
+  "experiment_validation": {
+    "complete": true,
+    "original_inputs_and_sources_unchanged": true,
+    "all_export_seals_verified": true,
+    "bruteforce_readout_checks": 160,
+    "results": {
+      "kitti360_0009": {
+        "witness_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 3847
+        },
+        "witness_no_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 13283
+        },
+        "nearest_witness_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 5
+        },
+        "ours_no_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 9436
+        },
+        "ours_unconditional_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 10773
+        },
+        "certificate_difference": {
+          "nearest_additional_source_ids": 35,
+          "reference_id_differences": 5,
+          "scores_equal": true
+        }
+      },
+      "kitti360_0010": {
+        "witness_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 1140
+        },
+        "witness_no_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 1140
+        },
+        "nearest_witness_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 0
+        },
+        "ours_no_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 0
+        },
+        "ours_unconditional_history": {
+          "bruteforce_readout_checks": 16,
+          "changed_reference_ids_vs_ours": 3453
+        },
+        "certificate_difference": {
+          "nearest_additional_source_ids": 0,
+          "reference_id_differences": 0,
+          "scores_equal": true
+        }
+      }
+    },
+    "script_sha256": "b4ed44a3c1437c54dbf8eb7e0f6b5c61ae37dda41a438a28e91865ec3b53de49"
+  },
+  "pdf_sha256": "4ba3adcde844425b7aa185e94d49946afef5f9458f2c09e942ba465d4c5c4728"
+}

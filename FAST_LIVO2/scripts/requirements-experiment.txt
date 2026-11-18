@@ -1,0 +1,8 @@
+mcap
+mcap-ros2-support
+av
+numpy
+scipy
+matplotlib
+opencv-python
+PyYAML

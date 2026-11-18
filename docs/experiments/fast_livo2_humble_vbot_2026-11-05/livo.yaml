@@ -1,0 +1,103 @@
+/**:
+  ros__parameters:
+    use_sim_time: true
+    common:
+      lid_topic: /experiment/lidar
+      imu_topic: /experiment/imu
+      img_topic: /experiment/image
+      img_en: 1
+      lidar_en: 1
+      odom_frame: omni_odom
+      tracking_frame: omni_imu_link
+      camera_frame: omni_rgb_camera_optical_frame
+    camera:
+      width: 640
+      height: 360
+      scale: 1.0
+      fx: 268.43302408854163
+      fy: 268.62662760416663
+      cx: 319.73221842447913
+      cy: 179.6041259765625
+      distortion:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+    extrin_calib:
+      extrinsic_T:
+      - 0.012559999999999988
+      - 0.01699
+      - 0.03705999999999998
+      extrinsic_R:
+      - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+      Rcl:
+      - -0.004191981197259822
+      - 0.9999764174640438
+      - -0.005439835421971405
+      - 0.024681028244581873
+      - -0.005334764291852923
+      - -0.9996811427323917
+      - -0.9996865879556611
+      - -0.004324905285284904
+      - -0.024658082971742573
+      Pcl:
+      - 0.0342365328347576
+      - -0.0832081159688827
+      - -0.07405928706892614
+    time_offset:
+      img_time_offset: 0.0
+      imu_time_offset: 0.0
+      lidar_time_offset: 0.0
+    preprocess:
+      lidar_type: 8
+      scan_line: 16
+      point_filter_num: 1
+      blind: 0.3
+      filter_size_surf: 0.2
+    imu:
+      imu_en: true
+      imu_int_frame: 20
+      acc_cov: 0.1
+      gyr_cov: 0.1
+    vio:
+      grid_size: 20
+      grid_n_height: 18
+      patch_size: 8
+      patch_pyrimid_level: 3
+      max_iterations: 5
+      img_point_cov: 100.0
+      outlier_threshold: 1000.0
+      normal_en: true
+      raycast_en: false
+      exposure_estimate_en: true
+      inv_expo_cov: 0.1
+    lio:
+      max_iterations: 5
+      voxel_size: 0.5
+      max_layer: 2
+      layer_init_num:
+      - 5
+      - 5
+      - 5
+      max_points_num: 50
+      min_eigen_value: 0.0025
+    publish:
+      tf_en: false
+      pub_scan_num: 1
+      dense_map_en: false
+      pub_plane_en: false
+    pcd_save:
+      pcd_save_en: true
+      interval: -1
+      filter_size_pcd: 0.15
+    runtime:
+      output_directory: /tmp/fast_livo_vbot/livo

@@ -1,0 +1,13 @@
+\begin{tabular}{lcrrrrr}
+\toprule
+Method & Final stages & 052 & 054 & 057 & 061 & Mean \\
+\midrule
+ConceptGraphs (shared input) & C & \textbf{16.448} & 18.075 & 30.613 & 66.176 & 32.828 \\
+MaskClustering (shared input) & M & 15.288 & 16.759 & 21.944 & 26.989 & 20.245 \\
+Strong baseline & C & 14.298 & 18.110 & 30.922 & 66.176 & 32.376 \\
+Baseline + SOR & C+S & 14.355 & 18.276 & \textbf{33.592} & 66.847 & \textbf{33.268} \\
+\rowcolor{ourstint}\textbf{Ours} & C+V & 14.358 & 18.348 & 32.328 & \textbf{67.837} & 33.218 \\
+Ours: three-frame control & C+V & 14.337 & 18.219 & 32.056 & 67.717 & 33.082 \\
+Ours: no depth gate & C+V & 14.462 & \textbf{18.460} & 31.826 & 66.307 & 32.764 \\
+\bottomrule
+\end{tabular}

@@ -1,0 +1,19 @@
+\paragraph{Two evaluated versions.}
+Table~\ref{tab:versions} separates the method versions and evidence roles. Both belong to the object-mapping pipeline, but differ in state changes, inputs, and scoring domains. Indoor results motivate the expansion beyond fixed-identity filtering; they do not establish indoor generalization of the current algorithm. Grounding DINO appears only in the archived outdoor landmark branch~\cite{gdino}, not as a component of the current AP experiment.
+
+\begin{table*}[t]
+\centering\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{.15\textwidth}>{\raggedright\arraybackslash}p{.26\textwidth}>{\raggedright\arraybackslash}p{.23\textwidth}>{\raggedright\arraybackslash}p{.27\textwidth}}
+\toprule
+Evidence branch & Allowed map changes & Inputs and backbone & Evaluation and role \\
+\midrule
+V1: fixed identity & Delete contradicted points; preserve IDs and observation ownership & RGB-D / given poses; SAM2.1, SigLIP, history-augmented association & Four SceneNN scenes; observed-domain class-agnostic PQ. Earlier geometric-refinement study. \\
+\textbf{Ours: current} & Authorize selected historical ID edits; append witnessed, certified measured sources & RGB + LiDAR / given poses; SAM3, SigLIP, frozen geometry and SegFormer & Two new KITTI-360 windows; building/car AP50:90. Current primary comparison. \\
+Current robot & Same revision kernels; four fixed outputs & 330 garage frames with existing LIVO geometry & Qualitative integration; no independent semantic reference. \\
+Archived system & Earlier object/ground interfaces and route maps & Six ROS recordings with distinct stored map revisions & Qualitative sensing coverage; not six independent tests of either revision method. \\
+\bottomrule
+\end{tabular}
+\caption{Version and evidence boundaries in the integrated manuscript. PQ and AP are not pooled or ranked against one another. \ours{} consistently denotes the current complete authorization method.}
+\label{tab:versions}
+\end{table*}

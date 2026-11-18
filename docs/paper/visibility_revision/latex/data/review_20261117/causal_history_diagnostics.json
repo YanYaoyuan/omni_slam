@@ -1,0 +1,656 @@
+{
+  "complete": true,
+  "results": {
+    "kitti360_0009": {
+      "unconditional": {
+        "changed_source_points": 26788,
+        "changed_reference_points": 25301,
+        "changed_confidence_mass": 22522.874317646027,
+        "categories": {
+          "correction": {
+            "reference_points": 115,
+            "confidence_mass": 101.06623095273972
+          },
+          "damage": {
+            "reference_points": 1194,
+            "confidence_mass": 1072.8576229810715
+          },
+          "same_object_consolidation": {
+            "reference_points": 12218,
+            "confidence_mass": 10847.98805040121
+          },
+          "still_wrong": {
+            "reference_points": 8062,
+            "confidence_mass": 7152.767731785774
+          },
+          "unknown_correspondence": {
+            "reference_points": 3712,
+            "confidence_mass": 3348.1946815252304
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": [
+          {
+            "old_id": 13,
+            "new_id": 7,
+            "source_points": 2,
+            "fixed_old_gt": 13050,
+            "fixed_new_gt": 13049,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 14,
+            "new_id": 53,
+            "source_points": 1575,
+            "fixed_old_gt": 2468,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          },
+          {
+            "old_id": 17,
+            "new_id": 28,
+            "source_points": 209,
+            "fixed_old_gt": 2168,
+            "fixed_new_gt": 13058,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 22,
+            "new_id": 19,
+            "source_points": 6,
+            "fixed_old_gt": 13056,
+            "fixed_new_gt": 13055,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 27,
+            "new_id": 17,
+            "source_points": 8745,
+            "fixed_old_gt": 2168,
+            "fixed_new_gt": 2168,
+            "relation": "same_GT_consolidation"
+          },
+          {
+            "old_id": 27,
+            "new_id": 28,
+            "source_points": 2987,
+            "fixed_old_gt": 2168,
+            "fixed_new_gt": 13058,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 28,
+            "new_id": 27,
+            "source_points": 8764,
+            "fixed_old_gt": 13058,
+            "fixed_new_gt": 2168,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 35,
+            "new_id": 52,
+            "source_points": 5,
+            "fixed_old_gt": 2426,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          },
+          {
+            "old_id": 36,
+            "new_id": 48,
+            "source_points": 4110,
+            "fixed_old_gt": 2486,
+            "fixed_new_gt": 2486,
+            "relation": "same_GT_consolidation"
+          },
+          {
+            "old_id": 41,
+            "new_id": 50,
+            "source_points": 112,
+            "fixed_old_gt": 2430,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          },
+          {
+            "old_id": 45,
+            "new_id": 50,
+            "source_points": 148,
+            "fixed_old_gt": 0,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          },
+          {
+            "old_id": 46,
+            "new_id": 10,
+            "source_points": 56,
+            "fixed_old_gt": 13051,
+            "fixed_new_gt": 13051,
+            "relation": "same_GT_consolidation"
+          },
+          {
+            "old_id": 49,
+            "new_id": 34,
+            "source_points": 69,
+            "fixed_old_gt": 2484,
+            "fixed_new_gt": 2484,
+            "relation": "same_GT_consolidation"
+          }
+        ]
+      },
+      "full_authorization": {
+        "changed_source_points": 12855,
+        "changed_reference_points": 12024,
+        "changed_confidence_mass": 10674.446652114391,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 12021,
+            "confidence_mass": 10671.710510253906
+          },
+          "still_wrong": {
+            "reference_points": 3,
+            "confidence_mass": 2.736141860485077
+          },
+          "unknown_correspondence": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": [
+          {
+            "old_id": 27,
+            "new_id": 17,
+            "source_points": 8745,
+            "fixed_old_gt": 2168,
+            "fixed_new_gt": 2168,
+            "relation": "same_GT_consolidation"
+          },
+          {
+            "old_id": 36,
+            "new_id": 48,
+            "source_points": 4110,
+            "fixed_old_gt": 2486,
+            "fixed_new_gt": 2486,
+            "relation": "same_GT_consolidation"
+          }
+        ]
+      },
+      "ours_no_history": {
+        "changed_source_points": 0,
+        "changed_reference_points": 0,
+        "changed_confidence_mass": 0.0,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "still_wrong": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "unknown_correspondence": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": []
+      },
+      "ours_unconditional_history": {
+        "changed_source_points": 26788,
+        "changed_reference_points": 25301,
+        "changed_confidence_mass": 22522.874317646027,
+        "categories": {
+          "correction": {
+            "reference_points": 115,
+            "confidence_mass": 101.06623095273972
+          },
+          "damage": {
+            "reference_points": 1194,
+            "confidence_mass": 1072.8576229810715
+          },
+          "same_object_consolidation": {
+            "reference_points": 12218,
+            "confidence_mass": 10847.98805040121
+          },
+          "still_wrong": {
+            "reference_points": 8062,
+            "confidence_mass": 7152.767731785774
+          },
+          "unknown_correspondence": {
+            "reference_points": 3712,
+            "confidence_mass": 3348.1946815252304
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": [
+          {
+            "old_id": 13,
+            "new_id": 7,
+            "source_points": 2,
+            "fixed_old_gt": 13050,
+            "fixed_new_gt": 13049,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 14,
+            "new_id": 53,
+            "source_points": 1575,
+            "fixed_old_gt": 2468,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          },
+          {
+            "old_id": 17,
+            "new_id": 28,
+            "source_points": 209,
+            "fixed_old_gt": 2168,
+            "fixed_new_gt": 13058,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 22,
+            "new_id": 19,
+            "source_points": 6,
+            "fixed_old_gt": 13056,
+            "fixed_new_gt": 13055,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 27,
+            "new_id": 17,
+            "source_points": 8745,
+            "fixed_old_gt": 2168,
+            "fixed_new_gt": 2168,
+            "relation": "same_GT_consolidation"
+          },
+          {
+            "old_id": 27,
+            "new_id": 28,
+            "source_points": 2987,
+            "fixed_old_gt": 2168,
+            "fixed_new_gt": 13058,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 28,
+            "new_id": 27,
+            "source_points": 8764,
+            "fixed_old_gt": 13058,
+            "fixed_new_gt": 2168,
+            "relation": "cross_GT_transition"
+          },
+          {
+            "old_id": 35,
+            "new_id": 52,
+            "source_points": 5,
+            "fixed_old_gt": 2426,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          },
+          {
+            "old_id": 36,
+            "new_id": 48,
+            "source_points": 4110,
+            "fixed_old_gt": 2486,
+            "fixed_new_gt": 2486,
+            "relation": "same_GT_consolidation"
+          },
+          {
+            "old_id": 41,
+            "new_id": 50,
+            "source_points": 112,
+            "fixed_old_gt": 2430,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          },
+          {
+            "old_id": 45,
+            "new_id": 50,
+            "source_points": 148,
+            "fixed_old_gt": 0,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          },
+          {
+            "old_id": 46,
+            "new_id": 10,
+            "source_points": 56,
+            "fixed_old_gt": 13051,
+            "fixed_new_gt": 13051,
+            "relation": "same_GT_consolidation"
+          },
+          {
+            "old_id": 49,
+            "new_id": 34,
+            "source_points": 69,
+            "fixed_old_gt": 2484,
+            "fixed_new_gt": 2484,
+            "relation": "same_GT_consolidation"
+          }
+        ]
+      },
+      "witness_history": {
+        "changed_source_points": 12855,
+        "changed_reference_points": 12024,
+        "changed_confidence_mass": 10674.446652114391,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 12021,
+            "confidence_mass": 10671.710510253906
+          },
+          "still_wrong": {
+            "reference_points": 3,
+            "confidence_mass": 2.736141860485077
+          },
+          "unknown_correspondence": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": [
+          {
+            "old_id": 27,
+            "new_id": 17,
+            "source_points": 8745,
+            "fixed_old_gt": 2168,
+            "fixed_new_gt": 2168,
+            "relation": "same_GT_consolidation"
+          },
+          {
+            "old_id": 36,
+            "new_id": 48,
+            "source_points": 4110,
+            "fixed_old_gt": 2486,
+            "fixed_new_gt": 2486,
+            "relation": "same_GT_consolidation"
+          }
+        ]
+      },
+      "witness_no_history": {
+        "changed_source_points": 0,
+        "changed_reference_points": 0,
+        "changed_confidence_mass": 0.0,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "still_wrong": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "unknown_correspondence": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": []
+      }
+    },
+    "kitti360_0010": {
+      "unconditional": {
+        "changed_source_points": 3427,
+        "changed_reference_points": 3702,
+        "changed_confidence_mass": 3552.2262364029884,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "still_wrong": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "unknown_correspondence": {
+            "reference_points": 3702,
+            "confidence_mass": 3552.2262364029884
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": [
+          {
+            "old_id": 3,
+            "new_id": 6,
+            "source_points": 3427,
+            "fixed_old_gt": 2086,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          }
+        ]
+      },
+      "full_authorization": {
+        "changed_source_points": 0,
+        "changed_reference_points": 0,
+        "changed_confidence_mass": 0.0,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "still_wrong": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "unknown_correspondence": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": []
+      },
+      "ours_no_history": {
+        "changed_source_points": 0,
+        "changed_reference_points": 0,
+        "changed_confidence_mass": 0.0,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "still_wrong": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "unknown_correspondence": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": []
+      },
+      "ours_unconditional_history": {
+        "changed_source_points": 3427,
+        "changed_reference_points": 3702,
+        "changed_confidence_mass": 3552.2262364029884,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "still_wrong": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "unknown_correspondence": {
+            "reference_points": 3702,
+            "confidence_mass": 3552.2262364029884
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": [
+          {
+            "old_id": 3,
+            "new_id": 6,
+            "source_points": 3427,
+            "fixed_old_gt": 2086,
+            "fixed_new_gt": 0,
+            "relation": "unmapped"
+          }
+        ]
+      },
+      "witness_history": {
+        "changed_source_points": 0,
+        "changed_reference_points": 0,
+        "changed_confidence_mass": 0.0,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "still_wrong": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "unknown_correspondence": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": []
+      },
+      "witness_no_history": {
+        "changed_source_points": 0,
+        "changed_reference_points": 0,
+        "changed_confidence_mass": 0.0,
+        "categories": {
+          "correction": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "damage": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "same_object_consolidation": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "still_wrong": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "unknown_correspondence": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          },
+          "void_reference": {
+            "reference_points": 0,
+            "confidence_mass": 0.0
+          }
+        },
+        "transitions": []
+      }
+    }
+  },
+  "scope": "Nearest baseline source ownership fixed at strict20cm. Restrict to references whose fixed source changed ID and whose GT and both endpoint correspondences are known. Correct-to-correct counts as same-object consolidation; wrong-to-correct correction; correct-to-wrong damage; wrong-to-wrong unresolved. Unmapped and void tracked separately, never silently counted correct."
+}

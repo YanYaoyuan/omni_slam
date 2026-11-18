@@ -1,0 +1,66 @@
+{
+  "bag": "rosbag2245",
+  "processed_keyframes": 182,
+  "skipped_frames": 1,
+  "car_detections": 670,
+  "depth_supported_observations": 332,
+  "object_proposals": 206,
+  "queryable_object_records": 31,
+  "detector": "maskrcnn COCO_V1",
+  "weights_sha256": "73cbd0190fcbe3ba339921fbce2c3a0b6bb9126c9a133c85e43a2a8e060a109e",
+  "wall_s": 246.2388914669864,
+  "parameters": {
+    "period_s": 2.0,
+    "score": 0.6,
+    "association_radius_m": 1.0,
+    "appearance_distance_limit": 0.35,
+    "minimum_observations": 3,
+    "maximum_position_spread_p90_m": 0.8
+  },
+  "long_revisit": {
+    "id": "car_0001",
+    "observations": 10,
+    "span_s": 572.4017541408539,
+    "position": [
+      -3.497201128612428,
+      1.725470821644537,
+      0.3595727691678805
+    ],
+    "spread_p90_m": 0.09165961627795001
+  },
+  "manager": {
+    "status": "pass",
+    "input_counts": {
+      "/experiment/imu": 5995,
+      "/experiment/lidar": 150,
+      "/experiment/image": 596,
+      "withheld_images": 300
+    },
+    "sensor_poses": 148,
+    "body_poses": 148,
+    "matched_body_poses": 148,
+    "body_transform_max_error": 4.440892098500626e-16,
+    "outage_poses": 40,
+    "outage_nonempty_clouds": 40,
+    "keyframes": 17,
+    "visual_keyframes": 11,
+    "mapping_state_seen": true,
+    "map_saved": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/semantic_20261106/managed_replay_v2/maps/livo_test/versions/v000001/map.pcd",
+    "map_checksum": "940fd5aed1d7bc3f341376121b139b37f96938996e2280488db92890fb9ddee9",
+    "stopped": true
+  },
+  "frontend": {
+    "poses": 2943,
+    "identical_epochs": true,
+    "identical_poses": true,
+    "max_abs_difference": 0.0,
+    "reference": "build/experiments/z_20261105/si_full/rosbag2245/livo/trajectory_final.tum",
+    "candidate": "build/experiments/semantic_20261106/frontend_regression/rosbag2245/livo/trajectory_final.tum"
+  },
+  "limitations": [
+    "Car class prototype; confirmed means repeated geometric observations, not ground-truth identity.",
+    "Surface positions are partial-view estimates, not full object centers.",
+    "Potentially moving cars require further dynamic filtering.",
+    "Offline corrected map frame is not the live TF map frame."
+  ]
+}

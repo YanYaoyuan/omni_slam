@@ -1,0 +1,8 @@
+# Experiment overrides for run_full_bags.py --params-override.
+# Calibration is still extracted from each bag; this is not a full launch YAML.
+vio:
+  lidar_timed_fusion: true
+  lidar_bootstrap_s: 0.0
+  max_image_age_s: 0.04
+  exposure_estimate_en: false
+  img_point_cov: 10000.0

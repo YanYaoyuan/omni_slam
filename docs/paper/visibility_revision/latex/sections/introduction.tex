@@ -1,0 +1,21 @@
+\section{Introduction}
+Object-level maps connect visual observations to spatial entities that a robot can locate and revisit. Foundation-model masks and descriptors make this representation practical without training a category-specific mapper. However, associating observations of an object does not guarantee that every accumulated surface point belongs to it. Mask spillover, partial views, and nearby surfaces can leave geometric contamination in an otherwise useful object map. A later image may contradict a point assignment that earlier observations accepted.
+
+This motivates a specific question: \emph{can existing observations improve object geometry after association, without changing object identities or retraining the perception frontend?} The distinction matters for both interpretation and deployment. Changing masks, descriptors, association, and filtering together obscures the cause of a gain. In a persistent map, changing an object's identity also changes how observations and downstream references are attached to it.
+
+We investigate fixed-identity source-point revision within omni\_slam. Given an existing object map and its posed observations, the proposed module queries each point against the original masks. A depth-consistent observation can support the point inside its object's mask or refute it inside another known mask. Invalid depth, occlusion, unknown pixels, and uncertain boundaries provide no vote. A fixed rule compares accumulated refutation with support and removes contradicted source points. The operation changes geometry alone.
+
+The contributions of this controlled study are:
+\begin{enumerate}
+\item A fully specified instantiation of visibility-conditioned revision with separate support, refutation, and abstention, preserving object identities and observation ownership.
+\item A controlled evaluation of seven methods on four SceneNN sequences held out from method development, with common frontend observations and a fixed evaluation domain. The method improves the strong baseline in every sequence without losing existing instance matches.
+\item An object-level attribution study that separates geometric deletion from nearest-point reassignment and explains both improvements and a failure relative to statistical outlier removal (SOR).
+\end{enumerate}
+The scope is geometric refinement of an existing object map; visibility reasoning and multi-view point filtering are established techniques. We do not introduce a new foundation model, an association backbone, or a localization estimator. Robot recordings document the surrounding system and observation-to-map interface; quantitative claims about the revision module come from the controlled RGB-D evaluation.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{method_architecture.pdf}
+\caption{Overview of the evaluated pipeline. Cached RGB-D observations, SAM2.1 masks, and SigLIP descriptors form a frozen object map. The highlighted \ours{} module uses depth-gated support and refutation to revise geometry without changing identity. The projection illustration is schematic; image panels, vote counts, and point clouds are from actual cached results. For SceneNN 057 object 29, 590 source points become 486, with 104 removed points marked red. Scene-map panels share a display transform.}
+\label{fig:architecture}
+\end{figure*}

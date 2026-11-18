@@ -1,0 +1,12 @@
+{
+  "reason": "Original score() completed all six evaluations but JSON export failed because matched_ids returns a set. Original frozen script/maps unchanged. Reuse all cached predictions and sort matched IDs for JSON.",
+  "original_script_sha256": "880be47bf67c7b35d3c9d961fb27c0c6a532da82bfa8f9dd7dcff79e0d7e7056",
+  "recovery_script_sha256": "588dd3571d1f8c24df565d24ab3e09240870668843445b8d404dd05985f703c3",
+  "cached_predictions": {
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/evaluation/kitti360_0009/reference_prediction.npz": "2735e39697094dfe084d78c62dc141ae804fb2a05c777e7a0ae24543cf0ea501",
+    "/home/user/work/bgyfw/omni_code/omni_slam/build/benchmarks/reviewer_maskclustering_20261117/evaluation/kitti360_0010/reference_prediction.npz": "6e5e65f75c15584a7830869e8a778daf1ba50b168ed53080b75a9f63f24252d5"
+  },
+  "unique_logical_scores": 6,
+  "total_kernel_calls_including_failed_serialization_attempt": 12,
+  "scientific_parameters_changed": false
+}

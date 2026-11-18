@@ -1,0 +1,69 @@
+\clearpage
+\section{V1: Fixed-Identity Geometry Study}\label{app:v1}
+This appendix preserves the earlier algorithm and its evidence. Every occurrence of ``Ours'' embedded in a retained V1 figure denotes V1 only; the current method is identified as \ours{} in the new main result and outdoor appendices. The versions do not share an evaluation protocol.
+
+\subsection{Depth-conditioned support, refutation, and deletion}
+For source point $p$ assigned to object $o$, V1 projects into frames with an assigned observation. It requires positive camera depth $z>0.2$\,m and a finite positive measured depth $D$ satisfying $|z-D|\leq0.05\,\mathrm m+0.01D$. An eligible projection supports $o$ inside its eroded mask union, or refutes $o$ inside another known mask outside the dilated union. The erosion/dilation radius is two pixels. Unknown pixels, occlusions, and uncertain boundaries abstain; overlapping masks contribute at most one vote per point/frame. With support $S_o(p)$ and refutation $R_o(p)$ accumulated over eligible frames, V1 deletes exactly when
+\begin{equation}
+R_o(p)\geq1\quad\land\quad R_o(p)\geq2S_o(p).
+\label{eq:v1-rule}
+\end{equation}
+For nonzero evidence this is equivalent to support share $S/(S+R)\leq1/3$; zero-evidence points remain. It cannot append surfaces, create objects, split mergers, or revise identity. SOR uses each object's mean 20-neighbor distance with a mean-plus-two-standard-deviations cutoff. These are separate point-selection mechanisms.
+
+\subsection{Development chronology and selection}
+Replica office\_0/office\_1 and SceneNN 014/015 were exposed development data. The pilot primary required three refutations. Before processing the four new SceneNN scenes, the existing one-refutation arm was selected empirically: its dataset-mean gains were +2.018 and +1.034 points, versus +2.002 and +0.656 for three refutations. Only the minimum count changed; the depth gate, boundaries, and refutation/support ratio remained fixed. This did not make the original two-point-per-dataset pilot requirement pass. The subsequent new-scene beats-SOR condition also failed. No configuration was selected after those new-scene scores.
+
+\begin{center}\small
+\input{tables/v1/development}
+\captionof{table}{V1 development PQ, kept separate from both SceneNN new-scene and current KITTI-360 results. ``No depth (3)'' uses three refutations, unlike the one-refutation no-depth control in the SceneNN main table.}
+\end{center}
+
+\begin{minipage}[t]{.49\textwidth}\vspace{0pt}\centering\small
+\input{tables/v1/ablation}
+\captionof{table}{V1 paired contrasts on four SceneNN scenes. Locked assignment is a diagnostic, not the primary metric.}
+\end{minipage}\hfill
+\begin{minipage}[t]{.48\textwidth}\vspace{0pt}\centering\small
+\input{tables/v1/runtime}
+\captionof{table}{V1 archived CPU timers and map scale. Evidence jointly times gated and ungated voting; job includes loading, SOR, cleanup variants and exports. Neither is isolated V1 latency or current-method speed.}
+\end{minipage}
+
+\subsection{Matched-set and assignment interpretation}
+V1's 66 SceneNN matches are unchanged. At GT 136313 in scene 057, V1 gives IoU 0.496947 while SOR reaches 0.535340. V1 removes 92 source points and SOR removes 97: deletion count alone does not explain the ranking. Of 410 excess baseline reference voxels, 304 have owners with support but no refutation. Under locked baseline source ownership, V1 instead reaches IoU 0.501247; ordinary reassignment adds five correct and 17 excess voxels. This is a geometric/evaluator interaction, not a new current-method result.
+
+
+\clearpage
+\section{V1 Architecture and Visibility Evidence}\label{app:v1-architecture}
+The diagram below preserves the complete fixed-identity architecture and its evidence flow. It complements the current authorization architecture in Figure~\ref{fig:architecture}; the two diagrams describe different update operations.
+\begin{center}
+\includegraphics[width=\textwidth]{method_architecture.pdf}
+\captionof{figure}{Retained V1 architecture with actual SceneNN observations, cached descriptors, source-point evidence, and revised object geometry. The embedded ``OURS'' block denotes V1. It retains a subset of existing source points while keeping identities, observation ownership, and semantic classes fixed. View frustums and the feature-stack layout are schematic.}
+\label{fig:v1-architecture}
+\end{center}
+\subsection{Reading the two architectures together}
+V1 asks whether a point already assigned to an object should remain in that object. Depth gating defines eligible observations; support and refutation determine deletion. It does not grant permission to change the historical identity of a point or append missing measurements.
+
+The current method separates those two additional decisions: authorization of an old-label edit and admission of a directly witnessed measured surface. The V1 diagram is retained to explain the earlier mechanism and its limitations, not as a diagram of current SAM3-based processing. Neither diagram asserts a new odometry estimator.
+
+\clearpage
+\section{Retained Indoor Image and Object Evidence}
+\begin{center}
+\includegraphics[width=\textwidth]{object_comparison_real.pdf}
+\captionof{figure}{Actual SceneNN 057 observations and same-object geometry from V1. Embedded ``Ours'' labels mean V1. The monitor improves from IoU 0.6343 to 0.7423; the second object remains below 0.5 while SOR crosses it. These were post-evaluation explanatory selections, not random samples.}
+\end{center}
+These indoor images use supplied RGB-D poses and the SAM2.1/SigLIP branch. The following two pages retain each scene at full width so that RGB, masks, colored geometry, and predicted object boundaries can be inspected separately. No RGB model or mapping job was rerun for this integration.
+
+\clearpage
+\section{SceneNN 057: Observations and V1 Map}
+\begin{center}
+\includegraphics[width=.98\textwidth,height=.77\textheight,keepaspectratio]{dataset_scene_057.pdf}
+\captionof{figure}{Actual RGB, cached SAM2.1 masks, accumulated colored geometry, and the V1 object map in one calibrated camera view. Embedded ``Ours'' means V1. The view was selected after evaluation to maximize support for predicted object 7. Point clouds use nearest-depth splats without hole completion. For dense display only, IDs transfer within 3\,cm; scoring uses 5\,cm on the observed-valid domain. Gray indicates unlabeled context. Colors encode predicted IDs, not GT classes.}
+\end{center}
+
+\clearpage
+\section{SceneNN 061: A Second Evaluated V1 Scene}
+\begin{center}
+\includegraphics[width=.98\textwidth,height=.77\textheight,keepaspectratio]{dataset_scene_061.pdf}
+\captionof{figure}{Real RGB and segmentation of the seating area, accumulated colored geometry, and V1 object IDs. Embedded ``Ours'' means V1. Display rules match the preceding page; the explanatory view maximizes cached support for predicted object 10. Accumulated geometry includes other viewpoints, so coverage need not match the single image. These are retained V1 results, not current-method cross-dataset runs.}
+\end{center}
+\input{sections/merged/restored_diagnostics}
+\input{sections/merged/restored_garage}

@@ -1,0 +1,32 @@
+{
+  "frame": 126,
+  "frame_selection": "Same previously published frame; not newly selected for this revision",
+  "methods": {
+    "strong_baseline": {
+      "visible_points": 165,
+      "car_points": 65189,
+      "map_sha256": "0496d9085522884a4a26246ba9d81eb27bb39d52b672584ccf0467eef97681f3"
+    },
+    "unconditional": {
+      "visible_points": 986,
+      "car_points": 69458,
+      "map_sha256": "55dd0c0c678f10b93b17be0ed195b7c03789a149042d141c653f36eaefe80ff0"
+    },
+    "history_only": {
+      "visible_points": 986,
+      "car_points": 78074,
+      "map_sha256": "d9c9b17ae6947be1a43c357497fde84fdc176655c1ea656968aeb54756e8ab6c"
+    },
+    "full_authorization": {
+      "visible_points": 917,
+      "car_points": 69776,
+      "map_sha256": "1c7eaf0ba867be0d5c3884cd4fe3cde8344a67e2e29c7ab75f54940cf037ae09"
+    }
+  },
+  "raw_image_sha256": "feefb893c659dc4b36f8af0c63c99dd2eabd53dc221e17d6bdf2bb2268008563",
+  "current_cloud_sha256": "29e64282f09d4f7f190d59040dc494fa686f56b8e3521d5cccac2ff832720af8",
+  "coordinate_scope": "Offline full archive; given LIVO poses; not robot semantic GT",
+  "display": "Repeated tab20 instance palette. IDs across methods are not physical association evidence. Context deterministic60000point subsample; vehicle points unthinned.",
+  "figure_sha256": "2b51f91ce8cf9c82f6c3e92450c2a3374d11d00c071c5ad791149690f1366c4e",
+  "source_sha256": "e3a71ce18e803957d3c03c34be5c5581cab242f2a6f12257151741032996b3c8"
+}

@@ -1,0 +1,24 @@
+{
+  "bag": "rosbag2_20260415_174148",
+  "duration_s": 60,
+  "modes": {
+    "lio": {
+      "common_poses": 297,
+      "repeat_poses": 297,
+      "max_absolute_difference": 0.0,
+      "all_repeat_poses_covered": true
+    },
+    "livo": {
+      "common_poses": 297,
+      "repeat_poses": 297,
+      "max_absolute_difference": 0.0,
+      "all_repeat_poses_covered": true
+    },
+    "lidar_scheduled": {
+      "common_poses": 297,
+      "repeat_poses": 297,
+      "max_absolute_difference": 0.0,
+      "all_repeat_poses_covered": true
+    }
+  }
+}

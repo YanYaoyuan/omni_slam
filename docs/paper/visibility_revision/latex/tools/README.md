@@ -1,0 +1,3 @@
+These scripts record figure generation and the one-time merge in the full omni_slam repository. They require the original repository and frozen experimental assets to regenerate figures; they are not needed for compiling this standalone LaTeX package. All figures required for compilation are included.
+
+The current architecture is independently reproducible from the bundled measured crop and RGB: `python3 tools/draw_authorization_architecture.py --paper-dir .` (NumPy, Pillow and Matplotlib). It exports vector PDF/SVG and a PNG preview without loading any model or full dataset. The original paper-wide asset builder above remains a historical tool.

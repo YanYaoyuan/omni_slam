@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import threading
 import time
+import uuid
 from typing import Optional
 
 from ament_index_python.packages import get_package_share_directory
@@ -46,6 +47,7 @@ from .telemetry_monitor import (
     yaw_from_quaternion,
 )
 from .tf_profile import load_tf_frames
+from .livo_profile import LIVO_MAPPING_COMMAND, validate_livo_profile
 
 
 REASON_NONE = 0
@@ -140,6 +142,12 @@ class SlamManagerNode(Node):
                 f"expected one of {sorted(ROBOT_PROFILES)}"
             )
         profile = ROBOT_PROFILES[robot_profile]
+        self.declare_parameter("mapping_backend", "fast_lio")
+        mapping_backend = str(self.get_parameter("mapping_backend").value)
+        if mapping_backend not in ("fast_lio", "fast_livo"):
+            raise ValueError("mapping_backend must be fast_lio or fast_livo")
+        if mapping_backend == "fast_livo" and robot_profile != "vbot":
+            raise ValueError("fast_livo is currently validated only with robot_profile=vbot")
 
         mapping_config_default = ""
         localization_config_default = ""
@@ -176,7 +184,7 @@ class SlamManagerNode(Node):
         self.declare_parameter("map_source_path", "/tmp/omni_slam_work/map.pcd")
         self.declare_parameter(
             "mapping_command",
-            profile["mapping_command"],
+            LIVO_MAPPING_COMMAND if mapping_backend == "fast_livo" else profile["mapping_command"],
         )
         self.declare_parameter(
             "localization_command",
@@ -222,6 +230,8 @@ class SlamManagerNode(Node):
         self._localization_config_file = str(
             self.get_parameter("localization_config_file").value
         )
+        if mapping_backend == "fast_livo":
+            validate_livo_profile(self._mapping_config_file, tf_profile_path)
         if robot_profile == "matrix":
             for parameter_name, config_path in (
                 ("mapping_config_file", self._mapping_config_file),
@@ -488,6 +498,8 @@ class SlamManagerNode(Node):
                         "tracking_frame": self._tf_frames["tracking"],
                         "icp_sensor_frame": self._tf_frames["icp_sensor"],
                         "mapping_config_file": self._mapping_config_file,
+                        "runtime_directory": str(self._map_source_path.parent / ("livo_" + uuid.uuid4().hex)),
+                        "use_sim_time": str(bool(self.get_parameter("use_sim_time").value)).lower(),
                     },
                 )
             except ProcessSupervisorError as error:

@@ -1,0 +1,197 @@
+{
+  "name": "vbot_livo_full_keyframe_baseline_20261106",
+  "purpose": "Development baseline for visual-assisted localization and semantic object mapping",
+  "frontend_executable": "build/experiments/z_20261105/candidate_si/fastlivo_offline",
+  "frontend_sha256": "c56700b2babff8fafc7c0cef21f06277922b61cfa341b7badebcb48edfe2bf8b",
+  "parameter_overrides": "FAST_LIVO2/config/vbot_si_overrides.yaml",
+  "effective_overrides": {
+    "vio": {
+      "lidar_timed_fusion": true,
+      "lidar_bootstrap_s": 0.0,
+      "max_image_age_s": 0.04,
+      "exposure_estimate_en": false,
+      "img_point_cov": 10000.0
+    },
+    "imu": {
+      "acceleration_scale": 1.0
+    },
+    "runtime": {
+      "keyframe_archive": true
+    },
+    "pcd_save": {
+      "pcd_save_en": false
+    }
+  },
+  "modes": [
+    "livo"
+  ],
+  "loop_fitting": "all archived keyframes; no alternating scan holdout",
+  "backend": {
+    "optimize_keyframe_map.py": {
+      "path": "build/experiments/z_20261105/backend_v3/optimize_keyframe_map.py",
+      "sha256": "21b1dd5c9f14aa11a86a99b87a3779d319cae61b8c14bf656970a2826ceedb9c"
+    },
+    "revisit_geometry.py": {
+      "path": "build/experiments/z_20261105/backend_v3/revisit_geometry.py",
+      "sha256": "1a349a4a2d6ca3c60441356f1b31b893b397b4d75a05c6dca50ccd378da6130d"
+    }
+  },
+  "bags": [
+    {
+      "name": "roabag2336",
+      "files": {
+        "effective_configuration": {
+          "path": "build/experiments/z_20261105/si_full/roabag2336/livo.yaml",
+          "sha256": "58683bb42c9f7074884f3fd2d4ef4474a862811cc1cc0ff2a0477655a308f3f1"
+        },
+        "keyframe_index": {
+          "path": "build/experiments/z_20261105/si_full/roabag2336/livo/keyframes.csv",
+          "sha256": "472f0012f713097aa3846f417cf34005d0f3ea390a9219f7bb03832c44f25a1e"
+        },
+        "trajectory": {
+          "path": "build/experiments/z_20261105/si_maps/roabag2336/trajectory_corrected.tum",
+          "sha256": "9a08a09fd95f0e0d44adcc8add248590c88026324ea3d892ee43a20ef90c35be"
+        },
+        "map": {
+          "path": "build/experiments/z_20261105/si_maps/roabag2336/map_loop_corrected.pcd",
+          "sha256": "ae0eb4cf47b1c217c7a4783f8eb6bab87443d14dc244d81e91281714ff7bb0e1"
+        },
+        "map_result": {
+          "path": "build/experiments/z_20261105/si_maps/roabag2336/result.json",
+          "sha256": "20aece70aa3fdf21a4f23cb58a13c8ca33428324833a310f67c8593ba2bb7462"
+        }
+      }
+    },
+    {
+      "name": "rosbag0521_2",
+      "files": {
+        "effective_configuration": {
+          "path": "build/experiments/z_20261105/si_full/rosbag0521_2/livo.yaml",
+          "sha256": "c7a850c6e41f7799bcc50e24974e523d4bc421e3286ac814608f1676e6df63b7"
+        },
+        "keyframe_index": {
+          "path": "build/experiments/z_20261105/si_full/rosbag0521_2/livo/keyframes.csv",
+          "sha256": "a4d8ef3f0bc163c17389a314ac0de93b5e08a4024fba3ddc2cf76998b719ae34"
+        },
+        "trajectory": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag0521_2/trajectory_corrected.tum",
+          "sha256": "629ebc23b72a3159bf8df2fe4daf3b2ea032efa86168f17dd7afc8c2dc4a7dba"
+        },
+        "map": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag0521_2/map_loop_corrected.pcd",
+          "sha256": "08cbab3dde86d55c88eb9b37f850eb83274369e93c765aad718dbc3d92d681da"
+        },
+        "map_result": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag0521_2/result.json",
+          "sha256": "2ed248339bd162e412fdbdf0fd5a79a719568886f1c263fcc890b150a30d59ef"
+        }
+      }
+    },
+    {
+      "name": "rosbag2245",
+      "files": {
+        "effective_configuration": {
+          "path": "build/experiments/z_20261105/si_full/rosbag2245/livo.yaml",
+          "sha256": "793a9312f286de776ac154b7c779bbd50fbbea0c6e2a83679a629b53f47b41bc"
+        },
+        "keyframe_index": {
+          "path": "build/experiments/z_20261105/si_full/rosbag2245/livo/keyframes.csv",
+          "sha256": "ecc46d4a88ea8f459fea684c6e20cb1ed54b3764d910a6230a5b5e534cedbb84"
+        },
+        "trajectory": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag2245/trajectory_corrected.tum",
+          "sha256": "9651ff4492841d144af6fe2d1dc0b621565bdb20e4b66b46259941a57f0080ea"
+        },
+        "map": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag2245/map_loop_corrected.pcd",
+          "sha256": "c6a9faa43101ea7e35d7dac9d47f77c98fbe3a47feec8ce079b18aa403f7b356"
+        },
+        "map_result": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag2245/result.json",
+          "sha256": "3908f15df483fedc444b606ef417527429054497fc6c0dcf3ab8150ed51c3d56"
+        }
+      }
+    },
+    {
+      "name": "rosbag2_20260415_174148",
+      "files": {
+        "effective_configuration": {
+          "path": "build/experiments/z_20261105/si_full/rosbag2_20260415_174148/livo.yaml",
+          "sha256": "2cebb925146d20304d969508ff5456f88bdd065b76518bbf13c4b0644b362ff7"
+        },
+        "keyframe_index": {
+          "path": "build/experiments/z_20261105/si_full/rosbag2_20260415_174148/livo/keyframes.csv",
+          "sha256": "aca1f89e019305633c58c2435ea0ea6c5f672b3cdf348f9b4114d92512a47a15"
+        },
+        "trajectory": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag2_20260415_174148/trajectory_corrected.tum",
+          "sha256": "ed24e3da324b0133f7b8a44cf62de8b1c79da552bc7e5672cc9076e767fde7b2"
+        },
+        "map": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag2_20260415_174148/map_loop_corrected.pcd",
+          "sha256": "63107be8516d1818a57863d081ede5e65016d1572c07a16909595947382b794a"
+        },
+        "map_result": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag2_20260415_174148/result.json",
+          "sha256": "b64cbffc075fef448f93a2f9619143cf906cc1f645b5a4ec81bd59acff303a59"
+        }
+      }
+    },
+    {
+      "name": "20260414_4",
+      "files": {
+        "effective_configuration": {
+          "path": "build/experiments/z_20261105/si_full/20260414_4/livo.yaml",
+          "sha256": "fd30c1e670e2620c05f68e197c0fd2c84e5961acef752477cbfba0e9791d5005"
+        },
+        "keyframe_index": {
+          "path": "build/experiments/z_20261105/si_full/20260414_4/livo/keyframes.csv",
+          "sha256": "9b9fd3687562d2940eb377b15fa5ab5e482dffae3df24090a8142b1aa59625eb"
+        },
+        "trajectory": {
+          "path": "build/experiments/z_20261105/si_maps/20260414_4/trajectory_corrected.tum",
+          "sha256": "f91e874210aab058146a7e7b0d4d17d333f29463fe86b2f62056820683e04e91"
+        },
+        "map": {
+          "path": "build/experiments/z_20261105/si_maps/20260414_4/map_loop_corrected.pcd",
+          "sha256": "8e73c58d92c447ae0a117a49a6ae2d6b3f5d6d4783df80fe35daf54b04188759"
+        },
+        "map_result": {
+          "path": "build/experiments/z_20261105/si_maps/20260414_4/result.json",
+          "sha256": "e797f819e4435818dd94a58ef7f4b31a0e17f700002249fcdc6ab9c44b983c8c"
+        }
+      }
+    },
+    {
+      "name": "rosbag2_20260415_162852",
+      "files": {
+        "effective_configuration": {
+          "path": "build/experiments/z_20261105/si_full/rosbag2_20260415_162852/livo.yaml",
+          "sha256": "ca8bfa0e0949fff83913da6640bef0359bb7089638fa159266ae16923f159926"
+        },
+        "keyframe_index": {
+          "path": "build/experiments/z_20261105/si_full/rosbag2_20260415_162852/livo/keyframes.csv",
+          "sha256": "c2d68c6e93a585b0fe62a92e0d19815f3b759f3fe2ad5ac8223f9d06214c24c1"
+        },
+        "trajectory": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag2_20260415_162852/trajectory_corrected.tum",
+          "sha256": "cc5e40afa8cd086a99dc2c9fc46da3e6551e517ee24f57a6a646aa05852b052b"
+        },
+        "map": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag2_20260415_162852/map_loop_corrected.pcd",
+          "sha256": "aa8fe9b0aaf2d8fb1f764ab8f40aa240e22c4796dc8699311641d23deced745b"
+        },
+        "map_result": {
+          "path": "build/experiments/z_20261105/si_maps/rosbag2_20260415_162852/result.json",
+          "sha256": "4489d51648adef86df442fd303320188dabfcfef36de71ed7e7f176229dfffdb"
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Offline loop correction is not fed back to online localization or Manager.",
+    "April14 late closure is sensitive to scan selection; full-input result is retained, reliability remains under review.",
+    "Overall localization accuracy gain from vision has not been demonstrated."
+  ],
+  "diagnostic_only": "build/experiments/map_audit_20261105/split_maps and reviewed_maps are not this baseline"
+}

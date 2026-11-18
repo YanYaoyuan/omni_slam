@@ -1,0 +1,22 @@
+# OmniSLAM 论文
+
+当前唯一正文入口：[visibility_revision/latex/main.tex](visibility_revision/latex/main.tex)。目录名沿用早期项目名称，当前论文方法为 `full_authorization`，历史可见性方法标为 V1。
+
+**OmniSLAM: Evidence-Authorized Revision of Persistent Object Maps**
+
+Yaoyuan Yan, Haoxiang Jie, Zhiyou Heng, Kailin Wang, Liang Li, Lifeng Liu
+Omni AI, AI Lab, Country Garden Services（碧桂园服务）
+
+正文、参考文献与补充材料连续分页。当前完整稿 28 页、23 幅编号图，包含原始实验图和历史系统证据。尚未确定投稿会议。
+
+```bash
+cd docs/paper/visibility_revision/latex
+bash build.sh
+python3 verify_sources.py
+```
+
+使用 TeX Live + latexmk 或设置 `TECTONIC_BIN`。生成 `main.pdf`，编译产物被 Git 忽略。模型、GPU、数据集或 ROSBAG 不参与论文编译。`source_manifest.json` 核验随论文交付的源码与图片，不用于宣称重新运行算法实验。
+
+[详细编译说明](visibility_revision/latex/README.md) · [图表索引](visibility_revision/latex/FIGURES.md) · [当前研究与最新扩展](../research/README.md)
+
+历史草稿、重复图表与压缩交付包保存在本地，未复制到 Git 的当前论文入口。文中历史方法图仍保留在当前 LaTeX 资源中。

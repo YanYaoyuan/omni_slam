@@ -1,0 +1,51 @@
+{
+  "complete": true,
+  "scope": "Reviewer manuscript changes and research protocol; no new algorithm, mapping or inference",
+  "compiler": "Tectonic 0.17.0",
+  "document": {
+    "path": "output/pdf/omni_slam_manuscript_complete.pdf",
+    "pages": 18,
+    "supplement_starts_page": 8,
+    "sha256": "cc401014d70343dbe1a217d77d0dd917e295f153b7c9504b7e0ea1f73fe60bb1",
+    "visually_reviewed_pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ]
+  },
+  "checks": {
+    "original_numeric_results_unchanged": true,
+    "frozen_package_verify_passed": true,
+    "appendix_pages_9_to_18_identical_except_pagination": true,
+    "all_fonts_embedded": true,
+    "no_overfull_or_undefined_references": true,
+    "portable_build_text_and_pixels_identical": true,
+    "conference_branding_absent": true
+  },
+  "source_archive": {
+    "path": "output/paper/omni_slam_latex_source.zip",
+    "sha256": "f562c73dca664317eb9952f3dc86f0ae4819ef2f1fd5dd10827f8a1fe72f877a"
+  },
+  "pending": [
+    "same-ownership filtering comparisons",
+    "isolated repeated Ours timing",
+    "robot Ours vs SOR quantitative validation",
+    "reversible split implementation and evaluation",
+    "independent cross-dataset and robustness experiments"
+  ]
+}

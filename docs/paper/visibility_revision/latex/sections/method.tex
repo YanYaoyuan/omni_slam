@@ -1,0 +1,73 @@
+\section{Visibility-Guided Geometry Revision}
+\label{sec:method}
+
+
+\subsection{Representation and Fixed Baseline}
+Let the input map be $\mathcal M=\{(\mathcal P_o,\mathcal A_o,\mathbf f_o,c_o)\}_{o=1}^{O}$, where $\mathcal P_o$ is the source-point set of object $o$, $\mathcal A_o$ stores its assigned image observations, $\mathbf f_o$ is its semantic descriptor, and $c_o$ is its semantic readout. The baseline uses SAM2.1 masks, SigLIP-384 features, and a ConceptGraphs-based association core. A history graph adds two-frame bridge evidence with a coframe conflict veto, followed by inherited final processing and unique-frame mean semantic readout. This complete baseline is fixed before revision.
+
+The revision output is $\mathcal M'$ with $\mathcal P'_o\subseteq\mathcal P_o$. The quantities $\mathcal A_o$, $\mathbf f_o$, $c_o$, object IDs, and poses are unchanged. This separates the contribution of source geometry from association or semantic classification.
+
+For frame $t$, let $U_{o,t}$ be the union of masks assigned to object $o$ and let $K_t$ be the union of all segmented masks. The set $\mathcal T_o$ contains frames in which $o$ has an assigned observation. For $\mathbf p\in\mathcal P_o$, the known world-to-camera transform $T_{cw,t}$ yields camera coordinates $\mathbf q_t=T_{cw,t}\bar{\mathbf p}$, depth $z_t$, and projected pixel $\mathbf u_t=\pi(\mathbf q_t)$.
+
+\subsection{Depth-Consistent Evidence Domain}
+The field-of-view condition $F_t(\mathbf p)$ requires an in-image projection and $z_t>0.2\,\mathrm m$. A point is eligible for evidence only if its projected surface agrees with a finite, positive depth measurement $D_t(\mathbf u_t)$:
+\begin{equation}
+\begin{split}
+V_t(\mathbf p)={}&F_t(\mathbf p)\land[D_t(\mathbf u_t)>0]\\
+&\land[|z_t-D_t(\mathbf u_t)|\leq\tau(D_t(\mathbf u_t))],\\
+\tau(D)={}&0.05\,\mathrm m+0.01D.
+\end{split}
+\label{eq:visibility}
+\end{equation}
+Nonfinite measurements fail the gate. In particular, a depth disagreement is not interpreted as evidence of incorrect ownership: an occluded or inconsistent projection abstains.
+
+We erode and dilate $U_{o,t}$ with a square kernel of radius two pixels, obtaining $U^-_{o,t}$ and $U^+_{o,t}$. For $t\in\mathcal T_o$, the support and refutation indicators are
+\begin{align}
+s_{o,t}(\mathbf p)&=\ind[V_t(\mathbf p)\land\mathbf u_t\in U^-_{o,t}],\\
+r_{o,t}(\mathbf p)&=\ind[V_t(\mathbf p)\land\mathbf u_t\in K_t\setminus U^+_{o,t}].
+\label{eq:votes}
+\end{align}
+Both indicators are zero outside $\mathcal T_o$. Mask-boundary pixels and pixels outside known masks also abstain. Each point receives at most one vote of either type per frame, regardless of overlapping masks.
+
+\subsection{Accumulation and Revision}
+We use $S_o$ for support counts, $R_o$ for refutation counts, and $d_o$ for the deletion indicator; $\mathcal P_o$ denotes the point set. Accumulating over the semantic frames gives
+\begin{equation}
+S_o(\mathbf p)=\sum_{t\in\mathcal T_o}s_{o,t}(\mathbf p),\qquad
+R_o(\mathbf p)=\sum_{t\in\mathcal T_o}r_{o,t}(\mathbf p).
+\end{equation}
+The frozen primary configuration removes a point when
+\begin{equation}
+d_o(\mathbf p)=\ind[R_o(\mathbf p)\geq1\ \land\ R_o(\mathbf p)\geq2S_o(\mathbf p)].
+\label{eq:rejection}
+\end{equation}
+Thus $\mathcal P'_o=\{\mathbf p\in\mathcal P_o:d_o(\mathbf p)=0\}$. A minimum of one refutation does not restrict evidence accumulation to one view: all eligible observations contribute to $S_o$ and $R_o$. With nonzero total evidence, Eq.~\eqref{eq:rejection} is equivalent to removing points whose support share is at most $1/3$. Points with $S_o=R_o=0$ remain unchanged.
+
+\begin{algorithm}[t]
+\caption{Fixed-identity source-point revision}
+\label{alg:revision}
+\begin{algorithmic}[1]
+\Require Fixed map $\mathcal M$, masks, depth, and poses
+\State Initialize $S_o(\mathbf p),R_o(\mathbf p)\gets0$
+\For{each cached semantic frame $t$}
+  \State Project source points and evaluate $V_t$
+  \For{each object $o$ observed in $t$}
+    \State Form $U^-_{o,t}$, $U^+_{o,t}$, and known-mask union $K_t$
+    \State $S_o\gets S_o+s_{o,t}$; $R_o\gets R_o+r_{o,t}$
+  \EndFor
+\EndFor
+\State Remove points satisfying Eq.~\eqref{eq:rejection}
+\State \Return $\mathcal M'$ with unchanged IDs and semantics
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Controls and Implementation}
+The three-frame control changes only the minimum refutation count from one to three. The no-depth control omits measured-depth gating while retaining projection, object-observation availability, boundary handling, and Eq.~\eqref{eq:rejection}. SOR independently filters each object's mean 20-neighbor distance using a mean-plus-two-standard-deviations threshold.
+
+Frames are processed sequentially. The primary rule needs two per-point counters; the experimental implementation stores four arrays for the depth-gated and no-depth variants, in addition to projection and morphology workspaces. Unsigned 16-bit counters are sufficient for the 200 semantic frames used here. Archived per-frame timers separate evidence computation from the complete cleanup job (Sec.~\ref{sec:runtime}). They compute both gated and no-depth votes; they are not isolated \ours{} latency. The module cannot create missed objects, split incorrect mergers, or repair fragmented identities.
+
+\begin{table*}[t]
+\centering
+\caption{Observed-domain instance PQ ($\times100$) on four SceneNN test sequences. All methods use common frontend observations. Final stages: C = inherited CG denoise, object filter and guarded merge; M = native MaskClustering splitting, point filtering and overlap suppression; S = added SOR; V = added visibility-rule variant. C and M are different finalization pipelines. S/V operate on the identical finalized strong-baseline map, without rerunning C. \textbf{Bold} marks the best value in each column; shading identifies \ours{}, independently of rank. Shared-input external methods are adapted comparisons, not original full-pipeline reproductions.}
+\label{tab:main}
+\input{tables/main}
+\end{table*}

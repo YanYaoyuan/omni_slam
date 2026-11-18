@@ -1,0 +1,4375 @@
+{
+  "run": {
+    "inventory": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/full_20261105/inventory.json",
+    "executable": "/home/user/work/bgyfw/omni_code/omni_slam/build/fast_livo_humble/fastlivo_offline",
+    "executable_sha256": "b30733224f0341828cf132f4200872f8f9dfcd248ba5fe0fd93d49717dd3df45",
+    "width": 640,
+    "height": 360,
+    "image_stride": 3,
+    "local_map_half_size": 60,
+    "limit_seconds": null,
+    "inventory_sha256": "63ec80d8a50733a73274d76123cf5a6592150085c600b061bee80f29203b518c",
+    "timestamp_policy": "acquisition-order-1s-recording-window-v1",
+    "transport": "synchronous stream",
+    "worker_execution": "three separate processes sharing CPU; identical acquisition-time ordering with 1 s bounded reorder",
+    "results": [
+      {
+        "bag": "roabag2336",
+        "duration_s": 187.446105425,
+        "source_complete": true,
+        "counts": {
+          "imu": 37486,
+          "video_packets": 5621,
+          "lidar": 937,
+          "decoded_frames": 5616,
+          "image": 1872
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 37.15162567101652
+      },
+      {
+        "bag": "rosbag0521_2",
+        "duration_s": 237.35476895,
+        "source_complete": true,
+        "counts": {
+          "imu": 47432,
+          "video_packets": 7121,
+          "lidar": 1187,
+          "decoded_frames": 7119,
+          "image": 2373
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 44.79766430199379
+      },
+      {
+        "bag": "rosbag2245",
+        "duration_s": 589.054926425,
+        "source_complete": true,
+        "counts": {
+          "imu": 117722,
+          "video_packets": 17673,
+          "lidar": 2945,
+          "decoded_frames": 17666,
+          "image": 5889
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 110.19422639301047
+      },
+      {
+        "bag": "rosbag2_20260415_174148",
+        "duration_s": 1134.192893375,
+        "source_complete": true,
+        "counts": {
+          "imu": 226612,
+          "video_packets": 33945,
+          "lidar": 5671,
+          "decoded_frames": 33942,
+          "image": 11314
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 250.35772151499987
+      },
+      {
+        "bag": "20260414_4",
+        "duration_s": 1455.097454475,
+        "source_complete": true,
+        "counts": {
+          "imu": 290816,
+          "video_packets": 43652,
+          "lidar": 7275,
+          "decoded_frames": 43646,
+          "image": 14549
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 379.0880209229945
+      },
+      {
+        "bag": "rosbag2_20260415_162852",
+        "duration_s": 1641.941447675,
+        "source_complete": true,
+        "counts": {
+          "imu": 328072,
+          "video_packets": 49250,
+          "decoded_frames": 49249,
+          "image": 16417,
+          "lidar": 8210
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 355.234608786006
+      }
+    ]
+  },
+  "bags": [
+    {
+      "result": {
+        "bag": "roabag2336",
+        "duration_s": 187.446105425,
+        "source_complete": true,
+        "counts": {
+          "imu": 37486,
+          "video_packets": 5621,
+          "lidar": 937,
+          "decoded_frames": 5616,
+          "image": 1872
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 37.15162567101652
+      },
+      "audit": {
+        "source": {
+          "path": "/home/user/vbot/data/roabag2336/rosbag2_20260521_233041_0.mcap",
+          "name": "roabag2336",
+          "duration_s": 187.446105425,
+          "first_record_ns": 1779377442939505750,
+          "last_record_ns": 1779377630385611175,
+          "size_bytes": 532462375,
+          "topics": {
+            "/tf_static": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 77
+            },
+            "/tf": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 938
+            },
+            "/stereo_right/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 38
+            },
+            "/stereo_left/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 38
+            },
+            "/slam/status": {
+              "type": "slam_msgs/msg/SlamStatus",
+              "count": 938
+            },
+            "/stereo/left/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 5624
+            },
+            "/pct_path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 720
+            },
+            "/dog_2Dmap_occupancy": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 582
+            },
+            "/dog_output_global_path_unfinished": {
+              "type": "nav_msgs/msg/Path",
+              "count": 1262
+            },
+            "/image_left_raw/h265_undistort": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 5623
+            },
+            "/stereo/right/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 5623
+            },
+            "/lidar_imu": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 37486
+            },
+            "/dog_output_local_path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 1261
+            },
+            "/semantic_map": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 0
+            },
+            "/grid_map": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 0
+            },
+            "/gnss/fix": {
+              "type": "sensor_msgs/msg/NavSatFix",
+              "count": 187
+            },
+            "/image_left_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 5621
+            },
+            "/lidar_points": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 937
+            },
+            "/imu_raw": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 93688
+            },
+            "/odometry": {
+              "type": "nav_msgs/msg/Odometry",
+              "count": 937
+            },
+            "/image_right_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 5621
+            },
+            "/path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 94
+            }
+          },
+          "calibration": {
+            "width": 1920,
+            "height": 1080,
+            "K": [
+              805.299072265625,
+              0.0,
+              959.1966552734375,
+              0.0,
+              805.8798828125,
+              538.8123779296875,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "D": [
+              7.998585224151611,
+              3.083042860031128,
+              -8.164579776348546e-05,
+              0.0001791279937606305,
+              0.07636485248804092,
+              8.388995170593262,
+              5.921084403991699,
+              0.5596563816070557
+            ],
+            "model": "rational_polynomial",
+            "transforms": {
+              "stereo_left": [
+                [
+                  0.004191981197259775,
+                  -0.02468102824458185,
+                  0.9996865879556613,
+                  0.24471889523405452
+                ],
+                [
+                  -0.9999764174640439,
+                  0.0053347642918529226,
+                  0.004324905285284952,
+                  0.034999920538423004
+                ],
+                [
+                  -0.005439835421971406,
+                  -0.9996811427323917,
+                  -0.0246580829717426,
+                  0.13352849660228427
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "stereo_right": [
+                [
+                  -0.004509607007277122,
+                  -0.02955072992917529,
+                  0.9995531090468845,
+                  0.2443247992674951
+                ],
+                [
+                  -0.99996580244192,
+                  0.007062647104909642,
+                  -0.004302669236503298,
+                  -0.033828257692075564
+                ],
+                [
+                  -0.006932343855230894,
+                  -0.9995383301187226,
+                  -0.029581569129246504,
+                  0.13362487823880237
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "infrared": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.21835
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "body_imu": [
+                [
+                  0.0,
+                  1.0000000000000002,
+                  0.0,
+                  -0.07192
+                ],
+                [
+                  -1.0000000000000002,
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                [
+                  -0.0,
+                  0.0,
+                  1.0000000000000002,
+                  0.04999
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar_imu": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.18544
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.01699
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.18129
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "anchor": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.23494
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.20652
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_pitch": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.13052
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_yaw": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          },
+          "calibration_status": "ok"
+        },
+        "source_complete": true,
+        "limit_seconds": null,
+        "image_stride": 3,
+        "input_counts": {
+          "imu": 37486,
+          "video_packets": 5621,
+          "lidar": 937,
+          "decoded_frames": 5616,
+          "image": 1872
+        },
+        "expected_source_counts": {
+          "imu": 37486,
+          "lidar": 937,
+          "video_packets": 5621
+        },
+        "streams": {
+          "imu": {
+            "count": 37486,
+            "first_ns": 1779377442900289024,
+            "last_ns": 1779377630378504960,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.008099072
+          },
+          "lidar": {
+            "count": 937,
+            "first_ns": 1779377442801908992,
+            "last_ns": 1779377629999627776,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.20276300800000002
+          },
+          "image": {
+            "count": 1872,
+            "first_ns": 1779377443061730101,
+            "last_ns": 1779377630229928091,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.133344697
+          }
+        },
+        "video_errors": [],
+        "gnss_status_counts": {
+          "-1": 187
+        },
+        "record_minus_sensor_ms": {
+          "imu": {
+            "median": 2.5060124999999998,
+            "p95": 5.25427325
+          },
+          "image": {
+            "median": 59.671493999999996,
+            "p95": 74.774832
+          },
+          "lidar": {
+            "median": 234.19179799999998,
+            "p95": 236.2878528
+          }
+        },
+        "timestamp_policy": "unchanged acquisition timestamps; 1 s bounded reorder; acquisitions outside recording window excluded",
+        "acquisition_window_exclusions_by_type": {
+          "1": 8,
+          "2": 1
+        },
+        "reorder_window_s": 1,
+        "schedule": "all modes receive identical LiDAR/IMU events; visual modes receive the same decoded image events"
+      },
+      "modes": {
+        "lio": {
+          "mode": "lio",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 36.94810430100188,
+          "input_counts": {
+            "1": 37478,
+            "2": 936
+          },
+          "final_poses": 935,
+          "trajectory_start_s": 1779377443.401604,
+          "trajectory_end_s": 1779377630.199607,
+          "path_length_m": 84.53323570989357,
+          "endpoint_displacement_m": 17.628408299627594,
+          "z_range_m": 2.196852070867686,
+          "peak_rss_mib": 995.96484375,
+          "pending_at_eof": {
+            "pending_imu": 36,
+            "pending_lidar": 0,
+            "pending_image": 0
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 935,
+          "valid_duration_s": 186.79800295829773,
+          "finite_state": true,
+          "valid_timing": {
+            "lidar": {
+              "count": 935,
+              "p50_ms": 6.724746,
+              "p95_ms": 10.280990999999998,
+              "p99_ms": 13.413263759999996
+            }
+          },
+          "speed_p99_m_s": 0.7043205945333345,
+          "speed_max_m_s": 0.8010370504633065,
+          "max_step_m": 0.16084914819675838,
+          "local_z_range_m": 1.2937438056491795,
+          "max_quaternion_norm_error": 1.199040866595169e-14,
+          "start_after_first_record_s": 0.4620981216430664,
+          "end_before_last_record_s": 0.1860044002532959,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 37478,
+              "lidar": 936,
+              "image": 0
+            },
+            "estimator_cycles": 936,
+            "pending_imu": 36,
+            "pending_lidar": 0,
+            "pending_image": 0,
+            "wall_s": 36.488384301,
+            "peak_rss_mib": 995.96484375
+          },
+          "map_artifacts": [
+            {
+              "path": "roabag2336/lio/Log/pcd/all_raw_points.pcd",
+              "points": 3913941,
+              "size_bytes": 125246365,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "livo": {
+          "mode": "livo",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 37.11816461899434,
+          "input_counts": {
+            "1": 37478,
+            "2": 936,
+            "3": 1872
+          },
+          "final_poses": 1867,
+          "trajectory_start_s": 1779377443.261764,
+          "trajectory_end_s": 1779377629.929922,
+          "path_length_m": 92.39934071469352,
+          "endpoint_displacement_m": 17.671098963423407,
+          "z_range_m": 2.8791647664940876,
+          "peak_rss_mib": 1454.38671875,
+          "pending_at_eof": {
+            "pending_imu": 70,
+            "pending_lidar": 0,
+            "pending_image": 3
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 1867,
+          "valid_duration_s": 186.6681580543518,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 1867,
+              "p50_ms": 2.209351,
+              "p95_ms": 3.2919553999999995,
+              "p99_ms": 3.8548068399999993
+            },
+            "lidar": {
+              "count": 1868,
+              "p50_ms": 4.174761,
+              "p95_ms": 6.466381049999998,
+              "p99_ms": 7.853454139999999
+            }
+          },
+          "visual_evidence": {
+            "frames": 1867,
+            "frames_with_support": 1819,
+            "median_support_points": 18.0,
+            "frames_with_position_correction_over_1um": 1819,
+            "median_position_correction_mm": 10.062944643125332,
+            "max_position_correction_mm": 75.92317467836813,
+            "median_rotation_correction_deg": 0.16141859739787734
+          },
+          "speed_p99_m_s": 0.8930624699498774,
+          "speed_max_m_s": 1.4976117729305636,
+          "max_step_m": 0.14975353624177806,
+          "local_z_range_m": 2.482594681560686,
+          "max_quaternion_norm_error": 1.554312234475219e-14,
+          "start_after_first_record_s": 0.32225823402404785,
+          "end_before_last_record_s": 0.4556891918182373,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 37478,
+              "lidar": 936,
+              "image": 1872
+            },
+            "estimator_cycles": 3739,
+            "pending_imu": 70,
+            "pending_lidar": 0,
+            "pending_image": 3,
+            "wall_s": 36.453944288,
+            "peak_rss_mib": 1454.38671875
+          },
+          "map_artifacts": [
+            {
+              "path": "roabag2336/livo/Log/pcd/all_downsampled_points.pcd",
+              "points": 197491,
+              "size_bytes": 3160040,
+              "binary_size_valid": true
+            },
+            {
+              "path": "roabag2336/livo/Log/pcd/all_raw_points.pcd",
+              "points": 897816,
+              "size_bytes": 14365240,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "lidar_scheduled": {
+          "mode": "lidar_scheduled",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 37.13216272601858,
+          "input_counts": {
+            "1": 37478,
+            "2": 936,
+            "3": 1872
+          },
+          "final_poses": 1867,
+          "trajectory_start_s": 1779377443.261764,
+          "trajectory_end_s": 1779377629.929922,
+          "path_length_m": 91.04698229425492,
+          "endpoint_displacement_m": 17.683545190945132,
+          "z_range_m": 1.3654483355971654,
+          "peak_rss_mib": 1396.4296875,
+          "pending_at_eof": {
+            "pending_imu": 70,
+            "pending_lidar": 0,
+            "pending_image": 3
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 1867,
+          "valid_duration_s": 186.6681580543518,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 1867,
+              "p50_ms": 1.892017,
+              "p95_ms": 2.600208,
+              "p99_ms": 2.9995888999999996
+            },
+            "lidar": {
+              "count": 1868,
+              "p50_ms": 4.0811885,
+              "p95_ms": 6.101226499999998,
+              "p99_ms": 7.545082459999998
+            }
+          },
+          "visual_evidence": {
+            "frames": 1867,
+            "frames_with_support": 1811,
+            "median_support_points": 25.0,
+            "frames_with_position_correction_over_1um": 0,
+            "median_position_correction_mm": 0.0,
+            "max_position_correction_mm": 0.0,
+            "median_rotation_correction_deg": 0.0
+          },
+          "speed_p99_m_s": 0.7895830895857642,
+          "speed_max_m_s": 1.4976117729305636,
+          "max_step_m": 0.14975353624177806,
+          "local_z_range_m": 1.2647590972896752,
+          "max_quaternion_norm_error": 1.2212453270876722e-14,
+          "start_after_first_record_s": 0.32225823402404785,
+          "end_before_last_record_s": 0.4556891918182373,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 37478,
+              "lidar": 936,
+              "image": 1872
+            },
+            "estimator_cycles": 3739,
+            "pending_imu": 70,
+            "pending_lidar": 0,
+            "pending_image": 3,
+            "wall_s": 36.453979154,
+            "peak_rss_mib": 1396.4296875
+          },
+          "map_artifacts": [
+            {
+              "path": "roabag2336/lidar_scheduled/Log/pcd/all_downsampled_points.pcd",
+              "points": 193990,
+              "size_bytes": 3104024,
+              "binary_size_valid": true
+            },
+            {
+              "path": "roabag2336/lidar_scheduled/Log/pcd/all_raw_points.pcd",
+              "points": 897868,
+              "size_bytes": 14366072,
+              "binary_size_valid": true
+            }
+          ]
+        }
+      },
+      "errors": {},
+      "matched_schedule_comparison": {
+        "common_samples": 1867,
+        "identical_final_timestamps": true,
+        "median_relative_path_separation_m": 0.8093194308951134,
+        "endpoint_relative_path_separation_m": 1.1562713316911992,
+        "note": "First-pose-frame trajectory separation; not error versus ground truth."
+      }
+    },
+    {
+      "result": {
+        "bag": "rosbag0521_2",
+        "duration_s": 237.35476895,
+        "source_complete": true,
+        "counts": {
+          "imu": 47432,
+          "video_packets": 7121,
+          "lidar": 1187,
+          "decoded_frames": 7119,
+          "image": 2373
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 44.79766430199379
+      },
+      "audit": {
+        "source": {
+          "path": "/home/user/vbot/data/rosbag0521_2/rosbag2_20260521_183432_0.mcap",
+          "name": "rosbag0521_2",
+          "duration_s": 237.35476895,
+          "first_record_ns": 1779359673577418800,
+          "last_record_ns": 1779359910932187750,
+          "size_bytes": 545178265,
+          "topics": {
+            "/stereo/right/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 7121
+            },
+            "/stereo/left/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 7121
+            },
+            "/imu_raw": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 118644
+            },
+            "/lidar_points": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 1187
+            },
+            "/image_right_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 7120
+            },
+            "/lidar_imu": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 47432
+            },
+            "/image_left_raw/h265_undistort": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 7121
+            },
+            "/image_left_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 7121
+            },
+            "/gnss/fix": {
+              "type": "sensor_msgs/msg/NavSatFix",
+              "count": 237
+            },
+            "/tf_static": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 88
+            },
+            "/slam/status": {
+              "type": "slam_msgs/msg/SlamStatus",
+              "count": 1119
+            },
+            "/path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 111
+            },
+            "/odometry": {
+              "type": "nav_msgs/msg/Odometry",
+              "count": 1119
+            },
+            "/semantic_map": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 0
+            },
+            "/grid_map": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 0
+            },
+            "/tf": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 1119
+            },
+            "/stereo_left/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 43
+            },
+            "/stereo_right/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 43
+            }
+          },
+          "calibration": {
+            "width": 1920,
+            "height": 1080,
+            "K": [
+              805.299072265625,
+              0.0,
+              959.1966552734375,
+              0.0,
+              805.8798828125,
+              538.8123779296875,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "D": [
+              7.998585224151611,
+              3.083042860031128,
+              -8.164579776348546e-05,
+              0.0001791279937606305,
+              0.07636485248804092,
+              8.388995170593262,
+              5.921084403991699,
+              0.5596563816070557
+            ],
+            "model": "rational_polynomial",
+            "transforms": {
+              "stereo_left": [
+                [
+                  0.004191981197259775,
+                  -0.02468102824458185,
+                  0.9996865879556613,
+                  0.24471889523405452
+                ],
+                [
+                  -0.9999764174640439,
+                  0.0053347642918529226,
+                  0.004324905285284952,
+                  0.034999920538423004
+                ],
+                [
+                  -0.005439835421971406,
+                  -0.9996811427323917,
+                  -0.0246580829717426,
+                  0.13352849660228427
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "stereo_right": [
+                [
+                  -0.004509607007277122,
+                  -0.02955072992917529,
+                  0.9995531090468845,
+                  0.2443247992674951
+                ],
+                [
+                  -0.99996580244192,
+                  0.007062647104909642,
+                  -0.004302669236503298,
+                  -0.033828257692075564
+                ],
+                [
+                  -0.006932343855230894,
+                  -0.9995383301187226,
+                  -0.029581569129246504,
+                  0.13362487823880237
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "infrared": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.21835
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "body_imu": [
+                [
+                  0.0,
+                  1.0000000000000002,
+                  0.0,
+                  -0.07192
+                ],
+                [
+                  -1.0000000000000002,
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                [
+                  -0.0,
+                  0.0,
+                  1.0000000000000002,
+                  0.04999
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar_imu": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.18544
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.01699
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.18129
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "anchor": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.23494
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.20652
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_pitch": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.13052
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_yaw": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          },
+          "calibration_status": "ok"
+        },
+        "source_complete": true,
+        "limit_seconds": null,
+        "image_stride": 3,
+        "input_counts": {
+          "imu": 47432,
+          "video_packets": 7121,
+          "lidar": 1187,
+          "decoded_frames": 7119,
+          "image": 2373
+        },
+        "expected_source_counts": {
+          "imu": 47432,
+          "lidar": 1187,
+          "video_packets": 7121
+        },
+        "streams": {
+          "imu": {
+            "count": 47432,
+            "first_ns": 1779359673569591040,
+            "last_ns": 1779359910929209088,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.0077327360000000005
+          },
+          "lidar": {
+            "count": 1187,
+            "first_ns": 1779359673401107968,
+            "last_ns": 1779359910600759040,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.2056192
+          },
+          "image": {
+            "count": 2373,
+            "first_ns": 1779359673571467830,
+            "last_ns": 1779359910773377493,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.100115139
+          }
+        },
+        "video_errors": [],
+        "gnss_status_counts": {
+          "-1": 237
+        },
+        "record_minus_sensor_ms": {
+          "imu": {
+            "median": 3.1287469999999997,
+            "p95": 5.8574891
+          },
+          "image": {
+            "median": 59.606642,
+            "p95": 74.76569599999999
+          },
+          "lidar": {
+            "median": 234.64029499999998,
+            "p95": 236.5418507
+          }
+        },
+        "timestamp_policy": "unchanged acquisition timestamps; 1 s bounded reorder; acquisitions outside recording window excluded",
+        "acquisition_window_exclusions_by_type": {
+          "1": 2,
+          "2": 1,
+          "3": 1
+        },
+        "reorder_window_s": 1,
+        "schedule": "all modes receive identical LiDAR/IMU events; visual modes receive the same decoded image events"
+      },
+      "modes": {
+        "lio": {
+          "mode": "lio",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 44.586970139993355,
+          "input_counts": {
+            "1": 47430,
+            "2": 1186
+          },
+          "final_poses": 1185,
+          "trajectory_start_s": 1779359674.001403,
+          "trajectory_end_s": 1779359910.800738,
+          "path_length_m": 108.80050477559632,
+          "endpoint_displacement_m": 0.16743352539390874,
+          "z_range_m": 0.9177037015691799,
+          "peak_rss_mib": 1102.421875,
+          "pending_at_eof": {
+            "pending_imu": 26,
+            "pending_lidar": 0,
+            "pending_image": 0
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 1185,
+          "valid_duration_s": 236.79933500289917,
+          "finite_state": true,
+          "valid_timing": {
+            "lidar": {
+              "count": 1185,
+              "p50_ms": 6.668162,
+              "p95_ms": 11.0056172,
+              "p99_ms": 14.094017880000026
+            }
+          },
+          "speed_p99_m_s": 0.7037589053038388,
+          "speed_max_m_s": 0.75241889898453,
+          "max_step_m": 0.14965772175579978,
+          "local_z_range_m": 0.92793316447548,
+          "max_quaternion_norm_error": 3.3861802251067274e-14,
+          "start_after_first_record_s": 0.4239842891693115,
+          "end_before_last_record_s": 0.13144969940185547,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 47430,
+              "lidar": 1186,
+              "image": 0
+            },
+            "estimator_cycles": 1186,
+            "pending_imu": 26,
+            "pending_lidar": 0,
+            "pending_image": 0,
+            "wall_s": 44.338837273,
+            "peak_rss_mib": 1102.421875
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag0521_2/lio/Log/pcd/all_raw_points.pcd",
+              "points": 4964129,
+              "size_bytes": 158852381,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "livo": {
+          "mode": "livo",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 44.757061721989885,
+          "input_counts": {
+            "1": 47430,
+            "2": 1186,
+            "3": 2372
+          },
+          "final_poses": 2368,
+          "trajectory_start_s": 1779359673.871465,
+          "trajectory_end_s": 1779359910.5733774,
+          "path_length_m": 113.20510311248447,
+          "endpoint_displacement_m": 0.3432747741676361,
+          "z_range_m": 1.5373556929871897,
+          "peak_rss_mib": 1591.703125,
+          "pending_at_eof": {
+            "pending_imu": 52,
+            "pending_lidar": 0,
+            "pending_image": 2
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 2368,
+          "valid_duration_s": 236.7019124031067,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 2368,
+              "p50_ms": 2.5109209999999997,
+              "p95_ms": 4.567188650000002,
+              "p99_ms": 5.500179839999999
+            },
+            "lidar": {
+              "count": 2369,
+              "p50_ms": 4.041231,
+              "p95_ms": 6.5350714,
+              "p99_ms": 8.374231320000025
+            }
+          },
+          "visual_evidence": {
+            "frames": 2368,
+            "frames_with_support": 2136,
+            "median_support_points": 27.0,
+            "frames_with_position_correction_over_1um": 2135,
+            "median_position_correction_mm": 7.739068790294522,
+            "max_position_correction_mm": 62.97537409083459,
+            "median_rotation_correction_deg": 0.13858433022101188
+          },
+          "speed_p99_m_s": 0.8532664205419006,
+          "speed_max_m_s": 1.102165617277208,
+          "max_step_m": 0.11023537654376588,
+          "local_z_range_m": 1.546981897481338,
+          "max_quaternion_norm_error": 8.759659664292485e-14,
+          "start_after_first_record_s": 0.29404616355895996,
+          "end_before_last_record_s": 0.3588104248046875,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 47430,
+              "lidar": 1186,
+              "image": 2372
+            },
+            "estimator_cycles": 4741,
+            "pending_imu": 52,
+            "pending_lidar": 0,
+            "pending_image": 2,
+            "wall_s": 44.286979751,
+            "peak_rss_mib": 1591.703125
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag0521_2/livo/Log/pcd/all_downsampled_points.pcd",
+              "points": 221246,
+              "size_bytes": 3540120,
+              "binary_size_valid": true
+            },
+            {
+              "path": "rosbag0521_2/livo/Log/pcd/all_raw_points.pcd",
+              "points": 1122864,
+              "size_bytes": 17966010,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "lidar_scheduled": {
+          "mode": "lidar_scheduled",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 44.774487183982274,
+          "input_counts": {
+            "1": 47430,
+            "2": 1186,
+            "3": 2372
+          },
+          "final_poses": 2368,
+          "trajectory_start_s": 1779359673.871465,
+          "trajectory_end_s": 1779359910.5733774,
+          "path_length_m": 113.50133283622534,
+          "endpoint_displacement_m": 0.35687564900333885,
+          "z_range_m": 1.409097604698775,
+          "peak_rss_mib": 1567.58984375,
+          "pending_at_eof": {
+            "pending_imu": 52,
+            "pending_lidar": 0,
+            "pending_image": 2
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 2368,
+          "valid_duration_s": 236.7019124031067,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 2368,
+              "p50_ms": 2.0202185,
+              "p95_ms": 3.8126046,
+              "p99_ms": 4.765609709999997
+            },
+            "lidar": {
+              "count": 2369,
+              "p50_ms": 3.993859,
+              "p95_ms": 6.2815487999999995,
+              "p99_ms": 8.389846680000003
+            }
+          },
+          "visual_evidence": {
+            "frames": 2368,
+            "frames_with_support": 2020,
+            "median_support_points": 25.0,
+            "frames_with_position_correction_over_1um": 0,
+            "median_position_correction_mm": 0.0,
+            "max_position_correction_mm": 0.0,
+            "median_rotation_correction_deg": 0.0
+          },
+          "speed_p99_m_s": 0.7680501702055642,
+          "speed_max_m_s": 0.8706396121498746,
+          "max_step_m": 0.08706491606761996,
+          "local_z_range_m": 1.419330842561488,
+          "max_quaternion_norm_error": 3.352873534367973e-14,
+          "start_after_first_record_s": 0.29404616355895996,
+          "end_before_last_record_s": 0.3588104248046875,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 47430,
+              "lidar": 1186,
+              "image": 2372
+            },
+            "estimator_cycles": 4741,
+            "pending_imu": 52,
+            "pending_lidar": 0,
+            "pending_image": 2,
+            "wall_s": 44.289214235,
+            "peak_rss_mib": 1567.58984375
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag0521_2/lidar_scheduled/Log/pcd/all_downsampled_points.pcd",
+              "points": 217874,
+              "size_bytes": 3486168,
+              "binary_size_valid": true
+            },
+            {
+              "path": "rosbag0521_2/lidar_scheduled/Log/pcd/all_raw_points.pcd",
+              "points": 1123863,
+              "size_bytes": 17981994,
+              "binary_size_valid": true
+            }
+          ]
+        }
+      },
+      "errors": {},
+      "matched_schedule_comparison": {
+        "common_samples": 2368,
+        "identical_final_timestamps": true,
+        "median_relative_path_separation_m": 0.11277103847157816,
+        "endpoint_relative_path_separation_m": 0.08373008579976454,
+        "note": "First-pose-frame trajectory separation; not error versus ground truth."
+      }
+    },
+    {
+      "result": {
+        "bag": "rosbag2245",
+        "duration_s": 589.054926425,
+        "source_complete": true,
+        "counts": {
+          "imu": 117722,
+          "video_packets": 17673,
+          "lidar": 2945,
+          "decoded_frames": 17666,
+          "image": 5889
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 110.19422639301047
+      },
+      "audit": {
+        "source": {
+          "path": "/home/user/vbot/data/rosbag2245/rosbag2_20260521_223309_0.mcap",
+          "name": "rosbag2245",
+          "duration_s": 589.054926425,
+          "first_record_ns": 1779373989863654875,
+          "last_record_ns": 1779374578918581300,
+          "size_bytes": 1355464874,
+          "topics": {
+            "/stereo/right/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 17672
+            },
+            "/stereo/left/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 17672
+            },
+            "/imu_raw": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 294450
+            },
+            "/lidar_points": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 2945
+            },
+            "/image_right_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 17673
+            },
+            "/lidar_imu": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 117722
+            },
+            "/image_left_raw/h265_undistort": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 17672
+            },
+            "/image_left_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 17673
+            },
+            "/gnss/fix": {
+              "type": "sensor_msgs/msg/NavSatFix",
+              "count": 589
+            },
+            "/tf_static": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 232
+            },
+            "/slam/status": {
+              "type": "slam_msgs/msg/SlamStatus",
+              "count": 2906
+            },
+            "/path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 290
+            },
+            "/odometry": {
+              "type": "nav_msgs/msg/Odometry",
+              "count": 2906
+            },
+            "/semantic_map": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 0
+            },
+            "/grid_map": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 0
+            },
+            "/tf": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 2906
+            },
+            "/stereo_left/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 115
+            },
+            "/stereo_right/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 115
+            }
+          },
+          "calibration": {
+            "width": 1920,
+            "height": 1080,
+            "K": [
+              805.299072265625,
+              0.0,
+              959.1966552734375,
+              0.0,
+              805.8798828125,
+              538.8123779296875,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "D": [
+              7.998585224151611,
+              3.083042860031128,
+              -8.164579776348546e-05,
+              0.0001791279937606305,
+              0.07636485248804092,
+              8.388995170593262,
+              5.921084403991699,
+              0.5596563816070557
+            ],
+            "model": "rational_polynomial",
+            "transforms": {
+              "stereo_left": [
+                [
+                  0.004191981197259775,
+                  -0.02468102824458185,
+                  0.9996865879556613,
+                  0.24471889523405452
+                ],
+                [
+                  -0.9999764174640439,
+                  0.0053347642918529226,
+                  0.004324905285284952,
+                  0.034999920538423004
+                ],
+                [
+                  -0.005439835421971406,
+                  -0.9996811427323917,
+                  -0.0246580829717426,
+                  0.13352849660228427
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "stereo_right": [
+                [
+                  -0.004509607007277122,
+                  -0.02955072992917529,
+                  0.9995531090468845,
+                  0.2443247992674951
+                ],
+                [
+                  -0.99996580244192,
+                  0.007062647104909642,
+                  -0.004302669236503298,
+                  -0.033828257692075564
+                ],
+                [
+                  -0.006932343855230894,
+                  -0.9995383301187226,
+                  -0.029581569129246504,
+                  0.13362487823880237
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "infrared": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.21835
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "body_imu": [
+                [
+                  0.0,
+                  1.0000000000000002,
+                  0.0,
+                  -0.07192
+                ],
+                [
+                  -1.0000000000000002,
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                [
+                  -0.0,
+                  0.0,
+                  1.0000000000000002,
+                  0.04999
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar_imu": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.18544
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.01699
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.18129
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "anchor": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.23494
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.20652
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_pitch": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.13052
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_yaw": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          },
+          "calibration_status": "ok"
+        },
+        "source_complete": true,
+        "limit_seconds": null,
+        "image_stride": 3,
+        "input_counts": {
+          "imu": 117722,
+          "video_packets": 17673,
+          "lidar": 2945,
+          "decoded_frames": 17666,
+          "image": 5889
+        },
+        "expected_source_counts": {
+          "imu": 117722,
+          "lidar": 2945,
+          "video_packets": 17673
+        },
+        "streams": {
+          "imu": {
+            "count": 117722,
+            "first_ns": 1779373989853668096,
+            "last_ns": 1779374578915429120,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.008017920000000001
+          },
+          "lidar": {
+            "count": 2945,
+            "first_ns": 1779373989800128000,
+            "last_ns": 1779374578601920000,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.205926656
+          },
+          "image": {
+            "count": 5889,
+            "first_ns": 1779373990026875895,
+            "last_ns": 1779374578831610240,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.10012939600000001
+          }
+        },
+        "video_errors": [],
+        "gnss_status_counts": {
+          "-1": 589
+        },
+        "record_minus_sensor_ms": {
+          "imu": {
+            "median": 2.709078,
+            "p95": 5.3178791499999996
+          },
+          "image": {
+            "median": 59.643277,
+            "p95": 74.7633462
+          },
+          "lidar": {
+            "median": 234.28815999999998,
+            "p95": 236.2021308
+          }
+        },
+        "timestamp_policy": "unchanged acquisition timestamps; 1 s bounded reorder; acquisitions outside recording window excluded",
+        "acquisition_window_exclusions_by_type": {
+          "1": 3,
+          "2": 1
+        },
+        "reorder_window_s": 1,
+        "schedule": "all modes receive identical LiDAR/IMU events; visual modes receive the same decoded image events"
+      },
+      "modes": {
+        "lio": {
+          "mode": "lio",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 109.60019559701323,
+          "input_counts": {
+            "1": 117719,
+            "2": 2944
+          },
+          "final_poses": 2943,
+          "trajectory_start_s": 1779373990.400183,
+          "trajectory_end_s": 1779374578.801899,
+          "path_length_m": 316.25921443499686,
+          "endpoint_displacement_m": 0.7569767097787717,
+          "z_range_m": 7.502811751346012,
+          "peak_rss_mib": 1742.03515625,
+          "pending_at_eof": {
+            "pending_imu": 23,
+            "pending_lidar": 0,
+            "pending_image": 0
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 2943,
+          "valid_duration_s": 588.4017159938812,
+          "finite_state": true,
+          "valid_timing": {
+            "lidar": {
+              "count": 2943,
+              "p50_ms": 7.158686,
+              "p95_ms": 11.414047000000002,
+              "p99_ms": 15.070728319999995
+            }
+          },
+          "speed_p99_m_s": 0.7563683933737078,
+          "speed_max_m_s": 1.0385544683820347,
+          "max_step_m": 0.20946600770314072,
+          "local_z_range_m": 7.884779562659018,
+          "max_quaternion_norm_error": 1.7319479184152442e-14,
+          "start_after_first_record_s": 0.5365278720855713,
+          "end_before_last_record_s": 0.11668229103088379,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 117719,
+              "lidar": 2944,
+              "image": 0
+            },
+            "estimator_cycles": 2944,
+            "pending_imu": 23,
+            "pending_lidar": 0,
+            "pending_image": 0,
+            "wall_s": 109.311133013,
+            "peak_rss_mib": 1742.03515625
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag2245/lio/Log/pcd/all_raw_points.pcd",
+              "points": 12863894,
+              "size_bytes": 411644863,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "livo": {
+          "mode": "livo",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 110.09133352100616,
+          "input_counts": {
+            "1": 117719,
+            "2": 2944,
+            "3": 5889
+          },
+          "final_poses": 5884,
+          "trajectory_start_s": 1779373990.2268715,
+          "trajectory_end_s": 1779374578.5316205,
+          "path_length_m": 325.62700570129175,
+          "endpoint_displacement_m": 1.6355964747061038,
+          "z_range_m": 3.6078630363466617,
+          "peak_rss_mib": 2841.796875,
+          "pending_at_eof": {
+            "pending_imu": 57,
+            "pending_lidar": 0,
+            "pending_image": 3
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 5884,
+          "valid_duration_s": 588.3047490119934,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 5884,
+              "p50_ms": 2.885611,
+              "p95_ms": 5.001776999999999,
+              "p99_ms": 5.662705580000001
+            },
+            "lidar": {
+              "count": 5885,
+              "p50_ms": 4.342281,
+              "p95_ms": 6.3526256000000005,
+              "p99_ms": 8.973143879999993
+            }
+          },
+          "visual_evidence": {
+            "frames": 5884,
+            "frames_with_support": 5615,
+            "median_support_points": 36.0,
+            "frames_with_position_correction_over_1um": 5615,
+            "median_position_correction_mm": 9.123771121101534,
+            "max_position_correction_mm": 59.82240994054617,
+            "median_rotation_correction_deg": 0.1290592014879017
+          },
+          "speed_p99_m_s": 0.8541882405119406,
+          "speed_max_m_s": 1.256572369935685,
+          "max_step_m": 0.12565112535350934,
+          "local_z_range_m": 3.618350292883778,
+          "max_quaternion_norm_error": 3.674838211509268e-14,
+          "start_after_first_record_s": 0.3632164001464844,
+          "end_before_last_record_s": 0.3869607448577881,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 117719,
+              "lidar": 2944,
+              "image": 5889
+            },
+            "estimator_cycles": 11773,
+            "pending_imu": 57,
+            "pending_lidar": 0,
+            "pending_image": 3,
+            "wall_s": 109.214942443,
+            "peak_rss_mib": 2841.796875
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag2245/livo/Log/pcd/all_downsampled_points.pcd",
+              "points": 693406,
+              "size_bytes": 11094680,
+              "binary_size_valid": true
+            },
+            {
+              "path": "rosbag2245/livo/Log/pcd/all_raw_points.pcd",
+              "points": 3079756,
+              "size_bytes": 49276282,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "lidar_scheduled": {
+          "mode": "lidar_scheduled",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 110.1340056900226,
+          "input_counts": {
+            "1": 117719,
+            "2": 2944,
+            "3": 5889
+          },
+          "final_poses": 5884,
+          "trajectory_start_s": 1779373990.2268715,
+          "trajectory_end_s": 1779374578.5316205,
+          "path_length_m": 323.88108373002063,
+          "endpoint_displacement_m": 1.8912583638689267,
+          "z_range_m": 2.4356578374318048,
+          "peak_rss_mib": 2810.60546875,
+          "pending_at_eof": {
+            "pending_imu": 57,
+            "pending_lidar": 0,
+            "pending_image": 3
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 5884,
+          "valid_duration_s": 588.3047490119934,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 5884,
+              "p50_ms": 2.2791895,
+              "p95_ms": 3.4021586999999993,
+              "p99_ms": 4.01356874
+            },
+            "lidar": {
+              "count": 5885,
+              "p50_ms": 4.412674,
+              "p95_ms": 6.292645800000001,
+              "p99_ms": 9.041020079999994
+            }
+          },
+          "visual_evidence": {
+            "frames": 5884,
+            "frames_with_support": 5624,
+            "median_support_points": 28.0,
+            "frames_with_position_correction_over_1um": 0,
+            "median_position_correction_mm": 0.0,
+            "max_position_correction_mm": 0.0,
+            "median_rotation_correction_deg": 0.0
+          },
+          "speed_p99_m_s": 0.8108924797649171,
+          "speed_max_m_s": 1.1993131951609364,
+          "max_step_m": 0.11993292077196181,
+          "local_z_range_m": 2.422061074622257,
+          "max_quaternion_norm_error": 1.8207657603852567e-14,
+          "start_after_first_record_s": 0.3632164001464844,
+          "end_before_last_record_s": 0.3869607448577881,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 117719,
+              "lidar": 2944,
+              "image": 5889
+            },
+            "estimator_cycles": 11773,
+            "pending_imu": 57,
+            "pending_lidar": 0,
+            "pending_image": 3,
+            "wall_s": 109.217445264,
+            "peak_rss_mib": 2810.60546875
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag2245/lidar_scheduled/Log/pcd/all_downsampled_points.pcd",
+              "points": 688706,
+              "size_bytes": 11019480,
+              "binary_size_valid": true
+            },
+            {
+              "path": "rosbag2245/lidar_scheduled/Log/pcd/all_raw_points.pcd",
+              "points": 3083097,
+              "size_bytes": 49329738,
+              "binary_size_valid": true
+            }
+          ]
+        }
+      },
+      "errors": {},
+      "matched_schedule_comparison": {
+        "common_samples": 5884,
+        "identical_final_timestamps": true,
+        "median_relative_path_separation_m": 0.21223307010261652,
+        "endpoint_relative_path_separation_m": 0.3717233176550922,
+        "note": "First-pose-frame trajectory separation; not error versus ground truth."
+      }
+    },
+    {
+      "result": {
+        "bag": "rosbag2_20260415_174148",
+        "duration_s": 1134.192893375,
+        "source_complete": true,
+        "counts": {
+          "imu": 226612,
+          "video_packets": 33945,
+          "lidar": 5671,
+          "decoded_frames": 33942,
+          "image": 11314
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 250.35772151499987
+      },
+      "audit": {
+        "source": {
+          "path": "/home/user/vbot/data/rosbag2_20260415_174148/rosbag2_20260415_174148_0.mcap",
+          "name": "rosbag2_20260415_174148",
+          "duration_s": 1134.192893375,
+          "first_record_ns": 1776246109618756550,
+          "last_record_ns": 1776247243811649925,
+          "size_bytes": 3268362596,
+          "topics": {
+            "/tf_static": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 455
+            },
+            "/tf": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 5671
+            },
+            "/stereo_right/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 227
+            },
+            "/stereo_left/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 227
+            },
+            "/slam/status": {
+              "type": "slam_msgs/msg/SlamStatus",
+              "count": 5671
+            },
+            "/stereo/left/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 33952
+            },
+            "/pct_path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 5245
+            },
+            "/dog_2Dmap_occupancy": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 6255
+            },
+            "/dog_output_global_path_unfinished": {
+              "type": "nav_msgs/msg/Path",
+              "count": 11506
+            },
+            "/image_left_raw/h265_undistort": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 33946
+            },
+            "/stereo/right/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 33951
+            },
+            "/lidar_imu": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 226612
+            },
+            "/dog_output_local_path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 12392
+            },
+            "/semantic_map": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 0
+            },
+            "/grid_map": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 0
+            },
+            "/gnss/fix": {
+              "type": "sensor_msgs/msg/NavSatFix",
+              "count": 1134
+            },
+            "/image_left_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 33945
+            },
+            "/lidar_points": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 5671
+            },
+            "/imu_raw": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 566885
+            },
+            "/odometry": {
+              "type": "nav_msgs/msg/Odometry",
+              "count": 5671
+            },
+            "/image_right_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 33945
+            },
+            "/path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 567
+            }
+          },
+          "calibration": {
+            "width": 1920,
+            "height": 1080,
+            "K": [
+              805.299072265625,
+              0.0,
+              959.1966552734375,
+              0.0,
+              805.8798828125,
+              538.8123779296875,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "D": [
+              7.998585224151611,
+              3.083042860031128,
+              -8.164579776348546e-05,
+              0.0001791279937606305,
+              0.07636485248804092,
+              8.388995170593262,
+              5.921084403991699,
+              0.5596563816070557
+            ],
+            "model": "rational_polynomial",
+            "transforms": {
+              "stereo_left": [
+                [
+                  0.004191981197259775,
+                  -0.02468102824458185,
+                  0.9996865879556613,
+                  0.24471889523405452
+                ],
+                [
+                  -0.9999764174640439,
+                  0.0053347642918529226,
+                  0.004324905285284952,
+                  0.034999920538423004
+                ],
+                [
+                  -0.005439835421971406,
+                  -0.9996811427323917,
+                  -0.0246580829717426,
+                  0.13352849660228427
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "stereo_right": [
+                [
+                  -0.004509607007277122,
+                  -0.02955072992917529,
+                  0.9995531090468845,
+                  0.2443247992674951
+                ],
+                [
+                  -0.99996580244192,
+                  0.007062647104909642,
+                  -0.004302669236503298,
+                  -0.033828257692075564
+                ],
+                [
+                  -0.006932343855230894,
+                  -0.9995383301187226,
+                  -0.029581569129246504,
+                  0.13362487823880237
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "infrared": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.21835
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "body_imu": [
+                [
+                  0.0,
+                  1.0000000000000002,
+                  0.0,
+                  -0.07192
+                ],
+                [
+                  -1.0000000000000002,
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                [
+                  -0.0,
+                  0.0,
+                  1.0000000000000002,
+                  0.04999
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar_imu": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.18544
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.01699
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.18129
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "anchor": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.23494
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.20652
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_pitch": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.13052
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_yaw": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          },
+          "calibration_status": "ok"
+        },
+        "source_complete": true,
+        "limit_seconds": null,
+        "image_stride": 3,
+        "input_counts": {
+          "imu": 226612,
+          "video_packets": 33945,
+          "lidar": 5671,
+          "decoded_frames": 33942,
+          "image": 11314
+        },
+        "expected_source_counts": {
+          "imu": 226612,
+          "lidar": 5671,
+          "video_packets": 33945
+        },
+        "streams": {
+          "imu": {
+            "count": 226612,
+            "first_ns": 1776246109587788032,
+            "last_ns": 1776247243808078080,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.009266176000000001
+          },
+          "lidar": {
+            "count": 5671,
+            "first_ns": 1776246109399958784,
+            "last_ns": 1776247243399559936,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.20941721600000002
+          },
+          "image": {
+            "count": 11314,
+            "first_ns": 1776246109661309775,
+            "last_ns": 1776247243635792548,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.20000756800000002
+          }
+        },
+        "video_errors": [],
+        "gnss_status_counts": {
+          "-1": 1103,
+          "0": 31
+        },
+        "record_minus_sensor_ms": {
+          "imu": {
+            "median": 3.131309,
+            "p95": 6.178366499999993
+          },
+          "image": {
+            "median": 70.03163099999999,
+            "p95": 91.932572
+          },
+          "lidar": {
+            "median": 234.971891,
+            "p95": 237.26874149999998
+          }
+        },
+        "timestamp_policy": "unchanged acquisition timestamps; 1 s bounded reorder; acquisitions outside recording window excluded",
+        "acquisition_window_exclusions_by_type": {
+          "1": 7,
+          "2": 2
+        },
+        "reorder_window_s": 1,
+        "schedule": "all modes receive identical LiDAR/IMU events; visual modes receive the same decoded image events"
+      },
+      "modes": {
+        "lio": {
+          "mode": "lio",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 249.32384731899947,
+          "input_counts": {
+            "1": 226605,
+            "2": 5669
+          },
+          "final_poses": 5668,
+          "trajectory_start_s": 1776246110.194099,
+          "trajectory_end_s": 1776247243.599539,
+          "path_length_m": 557.0930542160194,
+          "endpoint_displacement_m": 169.24258042798712,
+          "z_range_m": 13.88222133189026,
+          "peak_rss_mib": 4243.08203125,
+          "pending_at_eof": {
+            "pending_imu": 42,
+            "pending_lidar": 0,
+            "pending_image": 0
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 5668,
+          "valid_duration_s": 1133.4054400920868,
+          "finite_state": true,
+          "valid_timing": {
+            "lidar": {
+              "count": 5668,
+              "p50_ms": 12.506069,
+              "p95_ms": 23.4563443,
+              "p99_ms": 33.0177735
+            }
+          },
+          "speed_p99_m_s": 0.7638556875140047,
+          "speed_max_m_s": 1.1417535951156539,
+          "max_step_m": 0.2307370125215283,
+          "local_z_range_m": 13.431020171023642,
+          "max_quaternion_norm_error": 1.6542323066914832e-14,
+          "start_after_first_record_s": 0.5753421783447266,
+          "end_before_last_record_s": 0.212111234664917,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 226605,
+              "lidar": 5669,
+              "image": 0
+            },
+            "estimator_cycles": 5669,
+            "pending_imu": 42,
+            "pending_lidar": 0,
+            "pending_image": 0,
+            "wall_s": 248.958995205,
+            "peak_rss_mib": 4243.08203125
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag2_20260415_174148/lio/Log/pcd/all_raw_points.pcd",
+              "points": 33872536,
+              "size_bytes": 1083921407,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "livo": {
+          "mode": "livo",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 249.35067713799071,
+          "input_counts": {
+            "1": 226605,
+            "3": 11314,
+            "2": 5669
+          },
+          "final_poses": 11307,
+          "trajectory_start_s": 1776246110.061301,
+          "trajectory_end_s": 1776247243.3357887,
+          "path_length_m": 4969132.047693459,
+          "endpoint_displacement_m": 4800559.798493922,
+          "z_range_m": 4777033.4186335895,
+          "peak_rss_mib": 675.1796875,
+          "pending_at_eof": {
+            "pending_imu": 75,
+            "pending_lidar": 0,
+            "pending_image": 3
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 11307,
+          "valid_duration_s": 1133.274487733841,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 11307,
+              "p50_ms": 1.79358,
+              "p95_ms": 5.970778499999992,
+              "p99_ms": 11.736216060000002
+            },
+            "lidar": {
+              "count": 11308,
+              "p50_ms": 4.767544,
+              "p95_ms": 6.5941923,
+              "p99_ms": 8.06765558
+            }
+          },
+          "visual_evidence": {
+            "frames": 11307,
+            "frames_with_support": 67,
+            "median_support_points": 0.0,
+            "frames_with_position_correction_over_1um": 67,
+            "median_position_correction_mm": 0.0,
+            "max_position_correction_mm": 40.68174778273067,
+            "median_rotation_correction_deg": 0.0
+          },
+          "speed_p99_m_s": 10307.35387407684,
+          "speed_max_m_s": 10488.535354482812,
+          "max_step_m": 1385.6358621016452,
+          "local_z_range_m": 4780017.698709202,
+          "max_quaternion_norm_error": 3.375077994860476e-14,
+          "start_after_first_record_s": 0.44254422187805176,
+          "end_before_last_record_s": 0.4758615493774414,
+          "first_speed_over_10m_s_after_first_pose_s": 12.000063180923462,
+          "catastrophic_trajectory_flag": true,
+          "quality_note": "Localization failed: catastrophic trajectory scale/speed despite finite states.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 226605,
+              "lidar": 5669,
+              "image": 11314
+            },
+            "estimator_cycles": 22619,
+            "pending_imu": 75,
+            "pending_lidar": 0,
+            "pending_image": 3,
+            "wall_s": 248.648459315,
+            "peak_rss_mib": 675.1796875
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag2_20260415_174148/livo/Log/pcd/all_downsampled_points.pcd",
+              "points": 3400839,
+              "size_bytes": 54413610,
+              "binary_size_valid": true
+            },
+            {
+              "path": "rosbag2_20260415_174148/livo/Log/pcd/all_raw_points.pcd",
+              "points": 3432914,
+              "size_bytes": 54926810,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "lidar_scheduled": {
+          "mode": "lidar_scheduled",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 250.24024414800806,
+          "input_counts": {
+            "1": 226605,
+            "3": 11314,
+            "2": 5669
+          },
+          "final_poses": 11307,
+          "trajectory_start_s": 1776246110.061301,
+          "trajectory_end_s": 1776247243.3357887,
+          "path_length_m": 576.2045193504819,
+          "endpoint_displacement_m": 168.24409332770813,
+          "z_range_m": 37.06011058380528,
+          "peak_rss_mib": 5427.03125,
+          "pending_at_eof": {
+            "pending_imu": 75,
+            "pending_lidar": 0,
+            "pending_image": 3
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 11307,
+          "valid_duration_s": 1133.274487733841,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 11307,
+              "p50_ms": 2.825169,
+              "p95_ms": 4.655660999999998,
+              "p99_ms": 6.666656160000005
+            },
+            "lidar": {
+              "count": 11308,
+              "p50_ms": 6.881277,
+              "p95_ms": 11.049741,
+              "p99_ms": 16.815227680000017
+            }
+          },
+          "visual_evidence": {
+            "frames": 11307,
+            "frames_with_support": 9715,
+            "median_support_points": 25.0,
+            "frames_with_position_correction_over_1um": 0,
+            "median_position_correction_mm": 0.0,
+            "max_position_correction_mm": 0.0,
+            "median_rotation_correction_deg": 0.0
+          },
+          "speed_p99_m_s": 0.8412156723569862,
+          "speed_max_m_s": 1.5697647392869372,
+          "max_step_m": 0.15702086129262333,
+          "local_z_range_m": 38.53676937796276,
+          "max_quaternion_norm_error": 1.9872992140790302e-14,
+          "start_after_first_record_s": 0.44254422187805176,
+          "end_before_last_record_s": 0.4758615493774414,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 226605,
+              "lidar": 5669,
+              "image": 11314
+            },
+            "estimator_cycles": 22619,
+            "pending_imu": 75,
+            "pending_lidar": 0,
+            "pending_image": 3,
+            "wall_s": 248.674159506,
+            "peak_rss_mib": 5427.03125
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag2_20260415_174148/lidar_scheduled/Log/pcd/all_downsampled_points.pcd",
+              "points": 1778825,
+              "size_bytes": 28461386,
+              "binary_size_valid": true
+            },
+            {
+              "path": "rosbag2_20260415_174148/lidar_scheduled/Log/pcd/all_raw_points.pcd",
+              "points": 6996344,
+              "size_bytes": 111941690,
+              "binary_size_valid": true
+            }
+          ]
+        }
+      },
+      "errors": {},
+      "matched_schedule_comparison": {
+        "common_samples": 11307,
+        "identical_final_timestamps": true,
+        "median_relative_path_separation_m": 1172529.9962782895,
+        "endpoint_relative_path_separation_m": 4800517.494390374,
+        "note": "First-pose-frame trajectory separation; not error versus ground truth."
+      }
+    },
+    {
+      "result": {
+        "bag": "20260414_4",
+        "duration_s": 1455.097454475,
+        "source_complete": true,
+        "counts": {
+          "imu": 290816,
+          "video_packets": 43652,
+          "lidar": 7275,
+          "decoded_frames": 43646,
+          "image": 14549
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 379.0880209229945
+      },
+      "audit": {
+        "source": {
+          "path": "/home/user/vbot/data/20260414/4/rosbag2_20260414_164641_0.mcap",
+          "name": "20260414_4",
+          "duration_s": 1455.097454475,
+          "first_record_ns": 1776156401916274000,
+          "last_record_ns": 1776157857013728475,
+          "size_bytes": 4188775562,
+          "topics": {
+            "/tf_static": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 584
+            },
+            "/tf": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 7278
+            },
+            "/stereo_right/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 291
+            },
+            "/stereo_left/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 291
+            },
+            "/slam/status": {
+              "type": "slam_msgs/msg/SlamStatus",
+              "count": 7277
+            },
+            "/stereo/left/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 43654
+            },
+            "/pct_path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 6548
+            },
+            "/dog_2Dmap_occupancy": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 5201
+            },
+            "/dog_output_global_path_unfinished": {
+              "type": "nav_msgs/msg/Path",
+              "count": 9644
+            },
+            "/image_left_raw/h265_undistort": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 43653
+            },
+            "/stereo/right/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 43653
+            },
+            "/lidar_imu": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 290816
+            },
+            "/dog_output_local_path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 9831
+            },
+            "/semantic_map": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 0
+            },
+            "/grid_map": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 0
+            },
+            "/gnss/fix": {
+              "type": "sensor_msgs/msg/NavSatFix",
+              "count": 1456
+            },
+            "/image_left_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 43652
+            },
+            "/lidar_points": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 7275
+            },
+            "/imu_raw": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 727344
+            },
+            "/odometry": {
+              "type": "nav_msgs/msg/Odometry",
+              "count": 7276
+            },
+            "/image_right_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 43652
+            },
+            "/path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 728
+            }
+          },
+          "calibration": {
+            "width": 1920,
+            "height": 1080,
+            "K": [
+              805.299072265625,
+              0.0,
+              959.1966552734375,
+              0.0,
+              805.8798828125,
+              538.8123779296875,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "D": [
+              7.998585224151611,
+              3.083042860031128,
+              -8.164579776348546e-05,
+              0.0001791279937606305,
+              0.07636485248804092,
+              8.388995170593262,
+              5.921084403991699,
+              0.5596563816070557
+            ],
+            "model": "rational_polynomial",
+            "transforms": {
+              "stereo_left": [
+                [
+                  0.004191981197259775,
+                  -0.02468102824458185,
+                  0.9996865879556613,
+                  0.24471889523405452
+                ],
+                [
+                  -0.9999764174640439,
+                  0.0053347642918529226,
+                  0.004324905285284952,
+                  0.034999920538423004
+                ],
+                [
+                  -0.005439835421971406,
+                  -0.9996811427323917,
+                  -0.0246580829717426,
+                  0.13352849660228427
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "stereo_right": [
+                [
+                  -0.004509607007277122,
+                  -0.02955072992917529,
+                  0.9995531090468845,
+                  0.2443247992674951
+                ],
+                [
+                  -0.99996580244192,
+                  0.007062647104909642,
+                  -0.004302669236503298,
+                  -0.033828257692075564
+                ],
+                [
+                  -0.006932343855230894,
+                  -0.9995383301187226,
+                  -0.029581569129246504,
+                  0.13362487823880237
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "infrared": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.21835
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "body_imu": [
+                [
+                  0.0,
+                  1.0000000000000002,
+                  0.0,
+                  -0.07192
+                ],
+                [
+                  -1.0000000000000002,
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                [
+                  -0.0,
+                  0.0,
+                  1.0000000000000002,
+                  0.04999
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar_imu": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.18544
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.01699
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.18129
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "anchor": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.23494
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.20652
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_pitch": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.13052
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_yaw": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          },
+          "calibration_status": "ok"
+        },
+        "source_complete": true,
+        "limit_seconds": null,
+        "image_stride": 3,
+        "input_counts": {
+          "imu": 290816,
+          "video_packets": 43652,
+          "lidar": 7275,
+          "decoded_frames": 43646,
+          "image": 14549
+        },
+        "expected_source_counts": {
+          "imu": 290816,
+          "lidar": 7275,
+          "video_packets": 43652
+        },
+        "streams": {
+          "imu": {
+            "count": 290816,
+            "first_ns": 1776156401884578048,
+            "last_ns": 1776157857009488128,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.009084928
+          },
+          "lidar": {
+            "count": 7275,
+            "first_ns": 1776156401798622720,
+            "last_ns": 1776157856601517824,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.20708198400000002
+          },
+          "image": {
+            "count": 14549,
+            "first_ns": 1776156402064666153,
+            "last_ns": 1776157856906773505,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.133337004
+          }
+        },
+        "video_errors": [],
+        "gnss_status_counts": {
+          "-1": 407,
+          "0": 1049
+        },
+        "record_minus_sensor_ms": {
+          "imu": {
+            "median": 2.9341114999999998,
+            "p95": 5.732813999999999
+          },
+          "image": {
+            "median": 59.4506745,
+            "p95": 74.5553549
+          },
+          "lidar": {
+            "median": 234.70557599999998,
+            "p95": 236.517554
+          }
+        },
+        "timestamp_policy": "unchanged acquisition timestamps; 1 s bounded reorder; acquisitions outside recording window excluded",
+        "acquisition_window_exclusions_by_type": {
+          "1": 7,
+          "2": 1
+        },
+        "reorder_window_s": 1,
+        "schedule": "all modes receive identical LiDAR/IMU events; visual modes receive the same decoded image events"
+      },
+      "modes": {
+        "lio": {
+          "mode": "lio",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 378.8120019880007,
+          "input_counts": {
+            "1": 290809,
+            "2": 7274
+          },
+          "final_poses": 7273,
+          "trajectory_start_s": 1776156402.404355,
+          "trajectory_end_s": 1776157856.801497,
+          "path_length_m": 838.3834177776766,
+          "endpoint_displacement_m": 9.479313970858101,
+          "z_range_m": 27.024907706025758,
+          "peak_rss_mib": 4738.55859375,
+          "pending_at_eof": {
+            "pending_imu": 42,
+            "pending_lidar": 0,
+            "pending_image": 0
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 7273,
+          "valid_duration_s": 1454.3971419334412,
+          "finite_state": true,
+          "valid_timing": {
+            "lidar": {
+              "count": 7273,
+              "p50_ms": 11.378356,
+              "p95_ms": 19.7430996,
+              "p99_ms": 29.272094759999998
+            }
+          },
+          "speed_p99_m_s": 0.8065540725455245,
+          "speed_max_m_s": 1.0142803916800802,
+          "max_step_m": 0.20441105045405547,
+          "local_z_range_m": 36.09263085957698,
+          "max_quaternion_norm_error": 2.6867397195928788e-14,
+          "start_after_first_record_s": 0.4880809783935547,
+          "end_before_last_record_s": 0.21223163604736328,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 290809,
+              "lidar": 7274,
+              "image": 0
+            },
+            "estimator_cycles": 7274,
+            "pending_imu": 42,
+            "pending_lidar": 0,
+            "pending_image": 0,
+            "wall_s": 378.420570523,
+            "peak_rss_mib": 4738.55859375
+          },
+          "map_artifacts": [
+            {
+              "path": "20260414_4/lio/Log/pcd/all_raw_points.pcd",
+              "points": 39877073,
+              "size_bytes": 1276066591,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "livo": {
+          "mode": "livo",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 378.8449675079901,
+          "input_counts": {
+            "1": 290809,
+            "2": 7274,
+            "3": 14549
+          },
+          "final_poses": 14543,
+          "trajectory_start_s": 1776156402.2646408,
+          "trajectory_end_s": 1776157856.5067503,
+          "path_length_m": 9188423.860782145,
+          "endpoint_displacement_m": 9138927.662708577,
+          "z_range_m": 4324169.0209890595,
+          "peak_rss_mib": 934.515625,
+          "pending_at_eof": {
+            "pending_imu": 81,
+            "pending_lidar": 0,
+            "pending_image": 4
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 14543,
+          "valid_duration_s": 1454.2421095371246,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 14543,
+              "p50_ms": 1.508144,
+              "p95_ms": 19.49650529999997,
+              "p99_ms": 34.133203179999995
+            },
+            "lidar": {
+              "count": 14544,
+              "p50_ms": 3.2416415,
+              "p95_ms": 4.411696749999998,
+              "p99_ms": 5.236986589999999
+            }
+          },
+          "visual_evidence": {
+            "frames": 14543,
+            "frames_with_support": 48,
+            "median_support_points": 0.0,
+            "frames_with_position_correction_over_1um": 48,
+            "median_position_correction_mm": 0.0,
+            "max_position_correction_mm": 59.493063484341846,
+            "median_rotation_correction_deg": 0.0
+          },
+          "speed_p99_m_s": 13801.223937127024,
+          "speed_max_m_s": 13945.144852904457,
+          "max_step_m": 1394.5164801594185,
+          "local_z_range_m": 4093951.001887226,
+          "max_quaternion_norm_error": 1.7319479184152442e-14,
+          "start_after_first_record_s": 0.34836673736572266,
+          "end_before_last_record_s": 0.5069782733917236,
+          "first_speed_over_10m_s_after_first_pose_s": 7.300062417984009,
+          "catastrophic_trajectory_flag": true,
+          "quality_note": "Localization failed: catastrophic trajectory scale/speed despite finite states.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 290809,
+              "lidar": 7274,
+              "image": 14549
+            },
+            "estimator_cycles": 29091,
+            "pending_imu": 81,
+            "pending_lidar": 0,
+            "pending_image": 4,
+            "wall_s": 377.847350196,
+            "peak_rss_mib": 934.515625
+          },
+          "map_artifacts": [
+            {
+              "path": "20260414_4/livo/Log/pcd/all_downsampled_points.pcd",
+              "points": 8108606,
+              "size_bytes": 129737882,
+              "binary_size_valid": true
+            },
+            {
+              "path": "20260414_4/livo/Log/pcd/all_raw_points.pcd",
+              "points": 8108606,
+              "size_bytes": 129737882,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "lidar_scheduled": {
+          "mode": "lidar_scheduled",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 378.94250603899127,
+          "input_counts": {
+            "1": 290809,
+            "2": 7274,
+            "3": 14549
+          },
+          "final_poses": 14543,
+          "trajectory_start_s": 1776156402.2646408,
+          "trajectory_end_s": 1776157856.5067503,
+          "path_length_m": 9714767.278594028,
+          "endpoint_displacement_m": 9468067.347418947,
+          "z_range_m": 8095336.822442577,
+          "peak_rss_mib": 1126.8515625,
+          "pending_at_eof": {
+            "pending_imu": 81,
+            "pending_lidar": 0,
+            "pending_image": 4
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 14543,
+          "valid_duration_s": 1454.2421095371246,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 14543,
+              "p50_ms": 1.513241,
+              "p95_ms": 46.1193387,
+              "p99_ms": 79.74327224
+            },
+            "lidar": {
+              "count": 14544,
+              "p50_ms": 3.2140705,
+              "p95_ms": 4.41540145,
+              "p99_ms": 5.397520449999998
+            }
+          },
+          "visual_evidence": {
+            "frames": 14543,
+            "frames_with_support": 47,
+            "median_support_points": 0.0,
+            "frames_with_position_correction_over_1um": 0,
+            "median_position_correction_mm": 0.0,
+            "max_position_correction_mm": 0.0,
+            "median_rotation_correction_deg": 0.0
+          },
+          "speed_p99_m_s": 16141.205363504372,
+          "speed_max_m_s": 16373.07808940326,
+          "max_step_m": 1637.3101511279342,
+          "local_z_range_m": 8360246.9781889785,
+          "max_quaternion_norm_error": 3.6637359812630166e-14,
+          "start_after_first_record_s": 0.34836673736572266,
+          "end_before_last_record_s": 0.5069782733917236,
+          "first_speed_over_10m_s_after_first_pose_s": 17.100102186203003,
+          "catastrophic_trajectory_flag": true,
+          "quality_note": "Localization failed: catastrophic trajectory scale/speed despite finite states.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 290809,
+              "lidar": 7274,
+              "image": 14549
+            },
+            "estimator_cycles": 29091,
+            "pending_imu": 81,
+            "pending_lidar": 0,
+            "pending_image": 4,
+            "wall_s": 378.575892934,
+            "peak_rss_mib": 1126.8515625
+          },
+          "map_artifacts": [
+            {
+              "path": "20260414_4/lidar_scheduled/Log/pcd/all_downsampled_points.pcd",
+              "points": 9692033,
+              "size_bytes": 155072714,
+              "binary_size_valid": true
+            },
+            {
+              "path": "20260414_4/lidar_scheduled/Log/pcd/all_raw_points.pcd",
+              "points": 9992608,
+              "size_bytes": 159881914,
+              "binary_size_valid": true
+            }
+          ]
+        }
+      },
+      "errors": {},
+      "matched_schedule_comparison": {
+        "common_samples": 14543,
+        "identical_final_timestamps": true,
+        "median_relative_path_separation_m": 2196788.824089451,
+        "endpoint_relative_path_separation_m": 12184028.833073864,
+        "note": "First-pose-frame trajectory separation; not error versus ground truth."
+      }
+    },
+    {
+      "result": {
+        "bag": "rosbag2_20260415_162852",
+        "duration_s": 1641.941447675,
+        "source_complete": true,
+        "counts": {
+          "imu": 328072,
+          "video_packets": 49250,
+          "decoded_frames": 49249,
+          "image": 16417,
+          "lidar": 8210
+        },
+        "modes_completed": [
+          "lio",
+          "livo",
+          "lidar_scheduled"
+        ],
+        "failures": {},
+        "wall_s": 355.234608786006
+      },
+      "audit": {
+        "source": {
+          "path": "/home/user/vbot/data/rosbag2_20260415_162852/rosbag2_20260415_162852_0.mcap",
+          "name": "rosbag2_20260415_162852",
+          "duration_s": 1641.941447675,
+          "first_record_ns": 1776241733205700850,
+          "last_record_ns": 1776243375147148525,
+          "size_bytes": 4640514367,
+          "topics": {
+            "/tf_static": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 660
+            },
+            "/tf": {
+              "type": "tf2_msgs/msg/TFMessage",
+              "count": 8210
+            },
+            "/stereo_right/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 329
+            },
+            "/stereo_left/camera_info": {
+              "type": "sensor_msgs/msg/CameraInfo",
+              "count": 329
+            },
+            "/slam/status": {
+              "type": "slam_msgs/msg/SlamStatus",
+              "count": 8210
+            },
+            "/stereo/left/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 49251
+            },
+            "/pct_path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 7562
+            },
+            "/dog_2Dmap_occupancy": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 6290
+            },
+            "/dog_output_global_path_unfinished": {
+              "type": "nav_msgs/msg/Path",
+              "count": 10460
+            },
+            "/image_left_raw/h265_undistort": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 49250
+            },
+            "/stereo/right/isp_status": {
+              "type": "camera_msgs/msg/Isp2AStatus",
+              "count": 49250
+            },
+            "/lidar_imu": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 328072
+            },
+            "/dog_output_local_path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 11202
+            },
+            "/semantic_map": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 0
+            },
+            "/grid_map": {
+              "type": "nav_msgs/msg/OccupancyGrid",
+              "count": 0
+            },
+            "/gnss/fix": {
+              "type": "sensor_msgs/msg/NavSatFix",
+              "count": 1642
+            },
+            "/image_left_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 49250
+            },
+            "/lidar_points": {
+              "type": "sensor_msgs/msg/PointCloud2",
+              "count": 8210
+            },
+            "/imu_raw": {
+              "type": "sensor_msgs/msg/Imu",
+              "count": 820714
+            },
+            "/odometry": {
+              "type": "nav_msgs/msg/Odometry",
+              "count": 8210
+            },
+            "/image_right_raw/h265": {
+              "type": "foxglove_msgs/msg/CompressedVideo",
+              "count": 49249
+            },
+            "/path": {
+              "type": "nav_msgs/msg/Path",
+              "count": 821
+            }
+          },
+          "calibration": {
+            "width": 1920,
+            "height": 1080,
+            "K": [
+              805.299072265625,
+              0.0,
+              959.1966552734375,
+              0.0,
+              805.8798828125,
+              538.8123779296875,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "D": [
+              7.998585224151611,
+              3.083042860031128,
+              -8.164579776348546e-05,
+              0.0001791279937606305,
+              0.07636485248804092,
+              8.388995170593262,
+              5.921084403991699,
+              0.5596563816070557
+            ],
+            "model": "rational_polynomial",
+            "transforms": {
+              "stereo_left": [
+                [
+                  0.004191981197259775,
+                  -0.02468102824458185,
+                  0.9996865879556613,
+                  0.24471889523405452
+                ],
+                [
+                  -0.9999764174640439,
+                  0.0053347642918529226,
+                  0.004324905285284952,
+                  0.034999920538423004
+                ],
+                [
+                  -0.005439835421971406,
+                  -0.9996811427323917,
+                  -0.0246580829717426,
+                  0.13352849660228427
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "stereo_right": [
+                [
+                  -0.004509607007277122,
+                  -0.02955072992917529,
+                  0.9995531090468845,
+                  0.2443247992674951
+                ],
+                [
+                  -0.99996580244192,
+                  0.007062647104909642,
+                  -0.004302669236503298,
+                  -0.033828257692075564
+                ],
+                [
+                  -0.006932343855230894,
+                  -0.9995383301187226,
+                  -0.029581569129246504,
+                  0.13362487823880237
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "infrared": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.21835
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "body_imu": [
+                [
+                  0.0,
+                  1.0000000000000002,
+                  0.0,
+                  -0.07192
+                ],
+                [
+                  -1.0000000000000002,
+                  0.0,
+                  -0.0,
+                  0.0
+                ],
+                [
+                  -0.0,
+                  0.0,
+                  1.0000000000000002,
+                  0.04999
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "lidar_imu": [
+                [
+                  -1.0,
+                  0.0,
+                  0.0,
+                  0.18544
+                ],
+                [
+                  0.0,
+                  -1.0,
+                  0.0,
+                  0.01699
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.18129
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "anchor": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.23494
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.20652
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_pitch": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.13052
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "head_yaw": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.17288
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          },
+          "calibration_status": "ok"
+        },
+        "source_complete": true,
+        "limit_seconds": null,
+        "image_stride": 3,
+        "input_counts": {
+          "imu": 328072,
+          "video_packets": 49250,
+          "decoded_frames": 49249,
+          "image": 16417,
+          "lidar": 8210
+        },
+        "expected_source_counts": {
+          "imu": 328072,
+          "lidar": 8210,
+          "video_packets": 49250
+        },
+        "streams": {
+          "imu": {
+            "count": 328072,
+            "first_ns": 1776241733174580992,
+            "last_ns": 1776243375143342848,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.014882816
+          },
+          "image": {
+            "count": 16417,
+            "first_ns": 1776241733153707787,
+            "last_ns": 1776243375064401780,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.19999724600000002
+          },
+          "lidar": {
+            "count": 8210,
+            "first_ns": 1776241732998596864,
+            "last_ns": 1776243374799698944,
+            "nonmonotonic": 0,
+            "max_gap_s": 0.206005248
+          }
+        },
+        "video_errors": [],
+        "gnss_status_counts": {
+          "-1": 1642
+        },
+        "record_minus_sensor_ms": {
+          "imu": {
+            "median": 3.0884885,
+            "p95": 6.0208079
+          },
+          "image": {
+            "median": 59.4464,
+            "p95": 74.54398915
+          },
+          "lidar": {
+            "median": 234.89048449999999,
+            "p95": 237.01508869999998
+          }
+        },
+        "timestamp_policy": "unchanged acquisition timestamps; 1 s bounded reorder; acquisitions outside recording window excluded",
+        "acquisition_window_exclusions_by_type": {
+          "1": 7,
+          "3": 1,
+          "2": 2
+        },
+        "reorder_window_s": 1,
+        "schedule": "all modes receive identical LiDAR/IMU events; visual modes receive the same decoded image events"
+      },
+      "modes": {
+        "lio": {
+          "mode": "lio",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 353.75477227699594,
+          "input_counts": {
+            "1": 328065,
+            "2": 8208
+          },
+          "final_poses": 8207,
+          "trajectory_start_s": 1776241733.798213,
+          "trajectory_end_s": 1776243374.999678,
+          "path_length_m": 835.1187758266151,
+          "endpoint_displacement_m": 15.773490618500507,
+          "z_range_m": 21.627968310362462,
+          "peak_rss_mib": 5026.6953125,
+          "pending_at_eof": {
+            "pending_imu": 29,
+            "pending_lidar": 0,
+            "pending_image": 0
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 8207,
+          "valid_duration_s": 1641.2014648914337,
+          "finite_state": true,
+          "valid_timing": {
+            "lidar": {
+              "count": 8207,
+              "p50_ms": 12.286442,
+              "p95_ms": 23.642347899999997,
+              "p99_ms": 35.70794358
+            }
+          },
+          "speed_p99_m_s": 0.7384980769916714,
+          "speed_max_m_s": 0.8555435123155708,
+          "max_step_m": 0.17211648597244797,
+          "local_z_range_m": 29.97028952449631,
+          "max_quaternion_norm_error": 3.2862601528904634e-14,
+          "start_after_first_record_s": 0.5925121307373047,
+          "end_before_last_record_s": 0.14747071266174316,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 328065,
+              "lidar": 8208,
+              "image": 0
+            },
+            "estimator_cycles": 8208,
+            "pending_imu": 29,
+            "pending_lidar": 0,
+            "pending_image": 0,
+            "wall_s": 353.372657085,
+            "peak_rss_mib": 5026.6953125
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag2_20260415_162852/lio/Log/pcd/all_raw_points.pcd",
+              "points": 47637905,
+              "size_bytes": 1524413215,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "livo": {
+          "mode": "livo",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 353.7940695369907,
+          "input_counts": {
+            "1": 328065,
+            "3": 16416,
+            "2": 8208
+          },
+          "final_poses": 16409,
+          "trajectory_start_s": 1776241733.6537166,
+          "trajectory_end_s": 1776243374.7644048,
+          "path_length_m": 13839823.017353605,
+          "endpoint_displacement_m": 13569770.493527133,
+          "z_range_m": 11570275.464964828,
+          "peak_rss_mib": 1724.9296875,
+          "pending_at_eof": {
+            "pending_imu": 56,
+            "pending_lidar": 0,
+            "pending_image": 3
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 16409,
+          "valid_duration_s": 1641.1106882095337,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 16409,
+              "p50_ms": 1.821802,
+              "p95_ms": 2.410176199999998,
+              "p99_ms": 2.7663102
+            },
+            "lidar": {
+              "count": 16410,
+              "p50_ms": 4.2351575,
+              "p95_ms": 5.836818399999999,
+              "p99_ms": 7.02916366
+            }
+          },
+          "visual_evidence": {
+            "frames": 16409,
+            "frames_with_support": 140,
+            "median_support_points": 0.0,
+            "frames_with_position_correction_over_1um": 140,
+            "median_position_correction_mm": 0.0,
+            "max_position_correction_mm": 128.49420892662891,
+            "median_rotation_correction_deg": 0.0
+          },
+          "speed_p99_m_s": 14873.224962009552,
+          "speed_max_m_s": 15001.356143316705,
+          "max_step_m": 2986.9861343116672,
+          "local_z_range_m": 11522925.191013703,
+          "max_quaternion_norm_error": 4.196643033083092e-14,
+          "start_after_first_record_s": 0.4480156898498535,
+          "end_before_last_record_s": 0.38274383544921875,
+          "first_speed_over_10m_s_after_first_pose_s": 16.400113821029663,
+          "catastrophic_trajectory_flag": true,
+          "quality_note": "Localization failed: catastrophic trajectory scale/speed despite finite states.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 328065,
+              "lidar": 8208,
+              "image": 16416
+            },
+            "estimator_cycles": 32823,
+            "pending_imu": 56,
+            "pending_lidar": 0,
+            "pending_image": 3,
+            "wall_s": 352.900183336,
+            "peak_rss_mib": 1724.9296875
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag2_20260415_162852/livo/Log/pcd/all_downsampled_points.pcd",
+              "points": 15173586,
+              "size_bytes": 242777564,
+              "binary_size_valid": true
+            },
+            {
+              "path": "rosbag2_20260415_162852/livo/Log/pcd/all_raw_points.pcd",
+              "points": 15173586,
+              "size_bytes": 242777564,
+              "binary_size_valid": true
+            }
+          ]
+        },
+        "lidar_scheduled": {
+          "mode": "lidar_scheduled",
+          "transport": "synchronous CDR/image stream; no DDS sensor delivery",
+          "exit_code": 0,
+          "wall_s": 355.06627558000037,
+          "input_counts": {
+            "1": 328065,
+            "3": 16416,
+            "2": 8208
+          },
+          "final_poses": 16409,
+          "trajectory_start_s": 1776241733.6537166,
+          "trajectory_end_s": 1776243374.7644048,
+          "path_length_m": 860.6784518769672,
+          "endpoint_displacement_m": 16.715213912653898,
+          "z_range_m": 17.870674828352694,
+          "peak_rss_mib": 7210.62109375,
+          "pending_at_eof": {
+            "pending_imu": 56,
+            "pending_lidar": 0,
+            "pending_image": 3
+          },
+          "accuracy_note": "No independent ground truth; trajectory differences are not accuracy errors.",
+          "timing_note": "Concurrent workers share CPU; update timings exclude video decode/input and are not isolated runtime benchmarks.",
+          "valid_final_poses": 16409,
+          "valid_duration_s": 1641.1106882095337,
+          "finite_state": true,
+          "valid_timing": {
+            "visual": {
+              "count": 16409,
+              "p50_ms": 2.94819,
+              "p95_ms": 4.4850119999999984,
+              "p99_ms": 5.7685704
+            },
+            "lidar": {
+              "count": 16410,
+              "p50_ms": 6.9511175000000005,
+              "p95_ms": 11.110048299999997,
+              "p99_ms": 21.119412499999996
+            }
+          },
+          "visual_evidence": {
+            "frames": 16409,
+            "frames_with_support": 16202,
+            "median_support_points": 22.0,
+            "frames_with_position_correction_over_1um": 0,
+            "median_position_correction_mm": 0.0,
+            "max_position_correction_mm": 0.0,
+            "median_rotation_correction_deg": 0.0
+          },
+          "speed_p99_m_s": 0.8140695804351616,
+          "speed_max_m_s": 1.1224881810699765,
+          "max_step_m": 0.1122454995937365,
+          "local_z_range_m": 24.292503425475186,
+          "max_quaternion_norm_error": 4.18554080283684e-14,
+          "start_after_first_record_s": 0.4480156898498535,
+          "end_before_last_record_s": 0.38274383544921875,
+          "first_speed_over_10m_s_after_first_pose_s": null,
+          "catastrophic_trajectory_flag": false,
+          "quality_note": "No catastrophic scale/speed flag; accuracy and accumulated drift remain unverified.",
+          "transport_audit": {
+            "completed": true,
+            "exit_code": 0,
+            "error": "",
+            "input_counts": {
+              "imu": 328065,
+              "lidar": 8208,
+              "image": 16416
+            },
+            "estimator_cycles": 32823,
+            "pending_imu": 56,
+            "pending_lidar": 0,
+            "pending_image": 3,
+            "wall_s": 353.062009563,
+            "peak_rss_mib": 7210.62109375
+          },
+          "map_artifacts": [
+            {
+              "path": "rosbag2_20260415_162852/lidar_scheduled/Log/pcd/all_downsampled_points.pcd",
+              "points": 2730800,
+              "size_bytes": 43692986,
+              "binary_size_valid": true
+            },
+            {
+              "path": "rosbag2_20260415_162852/lidar_scheduled/Log/pcd/all_raw_points.pcd",
+              "points": 10016318,
+              "size_bytes": 160261276,
+              "binary_size_valid": true
+            }
+          ]
+        }
+      },
+      "errors": {},
+      "matched_schedule_comparison": {
+        "common_samples": 16409,
+        "identical_final_timestamps": true,
+        "median_relative_path_separation_m": 3191411.01123029,
+        "endpoint_relative_path_separation_m": 13569772.354089914,
+        "note": "First-pose-frame trajectory separation; not error versus ground truth."
+      }
+    }
+  ],
+  "interpretation": [
+    "Source completeness, transport completion and physical trajectory quality are separate checks.",
+    "All source video packets are decoded; the recorded stride selects visual input frames.",
+    "Acquisition-time reordering and incomplete leading scan exclusion are part of this offline protocol.",
+    "No independent ground truth. Neither vendor odometry nor mode separation establishes accuracy.",
+    "Workers share CPU. Estimator update timings exclude video decoding and are not isolated runtime benchmarks."
+  ],
+  "totals": {
+    "bags": 6,
+    "source_duration_s": 5245.087596325,
+    "completed_modes": 18,
+    "catastrophically_flagged_modes": 4,
+    "source_counts": {
+      "imu": 1048140,
+      "lidar": 26225,
+      "video_packets": 157262,
+      "decoded_frames": 157238,
+      "image": 52414,
+      "video_decode_errors": 0
+    }
+  }
+}

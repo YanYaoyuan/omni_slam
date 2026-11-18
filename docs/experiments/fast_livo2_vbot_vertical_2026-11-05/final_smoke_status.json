@@ -1,0 +1,139 @@
+{
+  "inventory": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/full_20261105/inventory.json",
+  "executable": "/home/user/work/bgyfw/omni_code/omni_slam/install/livo_humble/fast_livo/lib/fast_livo/fastlivo_offline",
+  "executable_sha256": "e2bbe8298686976264d06a171461b2b02537a880dabb0259e034b474689fd8dc",
+  "width": 640,
+  "height": 360,
+  "image_stride": 1,
+  "local_map_half_size": 60,
+  "parameter_overrides": {
+    "vio": {
+      "lidar_timed_fusion": true,
+      "lidar_bootstrap_s": 0.0,
+      "max_image_age_s": 0.04,
+      "exposure_estimate_en": false,
+      "img_point_cov": 10000.0
+    },
+    "imu": {
+      "acceleration_scale": 1.0
+    },
+    "runtime": {
+      "keyframe_archive": true
+    },
+    "pcd_save": {
+      "pcd_save_en": false
+    }
+  },
+  "modes": [
+    "livo"
+  ],
+  "limit_seconds": 30.0,
+  "inventory_sha256": "63ec80d8a50733a73274d76123cf5a6592150085c600b061bee80f29203b518c",
+  "timestamp_policy": "acquisition-order-1s-recording-window-v1",
+  "transport": "synchronous stream",
+  "worker_execution": "1 separate estimator process(es); identical acquisition-time ordering with 1 s bounded reorder",
+  "results": [
+    {
+      "bag": "roabag2336",
+      "duration_s": 187.446105425,
+      "source_complete": false,
+      "counts": {
+        "imu": 6008,
+        "video_packets": 900,
+        "lidar": 150,
+        "decoded_frames": 895,
+        "image": 895
+      },
+      "modes_completed": [
+        "livo"
+      ],
+      "failures": {},
+      "wall_s": 7.172900328994729
+    },
+    {
+      "bag": "rosbag0521_2",
+      "duration_s": 237.35476895,
+      "source_complete": false,
+      "counts": {
+        "imu": 6001,
+        "video_packets": 901,
+        "lidar": 150,
+        "decoded_frames": 899,
+        "image": 899
+      },
+      "modes_completed": [
+        "livo"
+      ],
+      "failures": {},
+      "wall_s": 5.466326777008362
+    },
+    {
+      "bag": "rosbag2245",
+      "duration_s": 589.054926425,
+      "source_complete": false,
+      "counts": {
+        "imu": 5997,
+        "video_packets": 900,
+        "lidar": 150,
+        "decoded_frames": 893,
+        "image": 893
+      },
+      "modes_completed": [
+        "livo"
+      ],
+      "failures": {},
+      "wall_s": 5.962922036007512
+    },
+    {
+      "bag": "rosbag2_20260415_174148",
+      "duration_s": 1134.192893375,
+      "source_complete": false,
+      "counts": {
+        "imu": 5956,
+        "video_packets": 898,
+        "lidar": 150,
+        "decoded_frames": 895,
+        "image": 895
+      },
+      "modes_completed": [
+        "livo"
+      ],
+      "failures": {},
+      "wall_s": 7.709522018994903
+    },
+    {
+      "bag": "20260414_4",
+      "duration_s": 1455.097454475,
+      "source_complete": false,
+      "counts": {
+        "imu": 6002,
+        "video_packets": 900,
+        "lidar": 150,
+        "decoded_frames": 894,
+        "image": 894
+      },
+      "modes_completed": [
+        "livo"
+      ],
+      "failures": {},
+      "wall_s": 7.078922623011749
+    },
+    {
+      "bag": "rosbag2_20260415_162852",
+      "duration_s": 1641.941447675,
+      "source_complete": false,
+      "counts": {
+        "imu": 6000,
+        "video_packets": 901,
+        "decoded_frames": 900,
+        "image": 900,
+        "lidar": 150
+      },
+      "modes_completed": [
+        "livo"
+      ],
+      "failures": {},
+      "wall_s": 7.5177906150056515
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "source": "rosbag2_20260415_174148",
+  "prefix_duration_s": 30,
+  "note": "Same source and estimator parameters except output directory; replay limit only truncates the end. Different outputs do not establish which is accurate.",
+  "modes": {
+    "lio": {
+      "samples": 147,
+      "identical_pose_timestamps": true,
+      "first_difference_over_10um_s": null,
+      "endpoint_separation_m": 0.0,
+      "full_run_prefix_path_m": 18.31817293134083,
+      "probe_path_m": 18.31817293134083
+    },
+    "livo": {
+      "samples": 291,
+      "identical_pose_timestamps": true,
+      "first_difference_over_10um_s": 1.6999917030334473,
+      "endpoint_separation_m": 352.5187888847818,
+      "full_run_prefix_path_m": 388.19651116458624,
+      "probe_path_m": 33.63387922736969
+    },
+    "lidar_scheduled": {
+      "samples": 291,
+      "identical_pose_timestamps": true,
+      "first_difference_over_10um_s": null,
+      "endpoint_separation_m": 0.0,
+      "full_run_prefix_path_m": 20.007598487024303,
+      "probe_path_m": 20.007598487024303
+    }
+  }
+}

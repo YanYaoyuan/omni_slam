@@ -1,0 +1,34 @@
+[
+  {
+    "event": 1,
+    "side": "reference",
+    "target_stamp_s": 1776156748.402459,
+    "image_stamp_ns": 1776156748400081152,
+    "offset_ms": -2.377728,
+    "bounded_seek_succeeded": true
+  },
+  {
+    "event": 1,
+    "side": "revisit",
+    "target_stamp_s": 1776156869.401255,
+    "image_stamp_ns": 1776156869400850176,
+    "offset_ms": -0.404736,
+    "bounded_seek_succeeded": true
+  },
+  {
+    "event": 2,
+    "side": "reference",
+    "target_stamp_s": 1776156407.401787,
+    "image_stamp_ns": 1776156407398039808,
+    "offset_ms": -3.747328,
+    "bounded_seek_succeeded": true
+  },
+  {
+    "event": 2,
+    "side": "revisit",
+    "target_stamp_s": 1776157836.2021613,
+    "image_stamp_ns": 1776157836206633472,
+    "offset_ms": 4.472064,
+    "bounded_seek_succeeded": true
+  }
+]

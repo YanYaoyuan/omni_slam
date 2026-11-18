@@ -1,0 +1,197 @@
+{
+  "experiment": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/vbot_2336_60s",
+  "modes": {
+    "lio": {
+      "mode": "lio",
+      "command": [
+        "/home/user/work/bgyfw/omni_code/omni_slam/build/fast_livo_humble/fastlivo_mapping",
+        "--ros-args",
+        "--params-file",
+        "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/vbot_2336_60s/lio.yaml"
+      ],
+      "replay_rate": 1.0,
+      "domain": 91,
+      "exit_code": 0,
+      "wall_s": 63.36057172701112,
+      "sent": {
+        "/experiment/imu": 11997,
+        "/experiment/lidar": 300
+      },
+      "observed_odometry_count": 298,
+      "final_poses": 298,
+      "trajectory_start_s": 1779377443.401604,
+      "trajectory_end_s": 1779377502.801383,
+      "path_length_m": 20.966818354412137,
+      "endpoint_displacement_m": 18.339647012187623,
+      "z_range_m": 0.7381679197897913,
+      "rss_peak_sampled_mib": 365.37890625,
+      "timing": {
+        "lidar": {
+          "count": 298,
+          "p50_ms": 6.843998,
+          "p95_ms": 9.737882449999995,
+          "p99_ms": 11.91773947999999
+        }
+      },
+      "accuracy_note": "No independent ground truth: these are execution/trajectory statistics, not ATE/RPE.",
+      "valid_final_poses": 298,
+      "valid_duration_s": 59.399779081344604,
+      "finite_state": true,
+      "valid_timing": {
+        "lidar": {
+          "count": 298,
+          "p50_ms": 6.843998,
+          "p95_ms": 9.737882449999995,
+          "p99_ms": 11.91773947999999
+        }
+      }
+    },
+    "livo": {
+      "mode": "livo",
+      "command": [
+        "/home/user/work/bgyfw/omni_code/omni_slam/build/fast_livo_humble/fastlivo_mapping",
+        "--ros-args",
+        "--params-file",
+        "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/vbot_2336_60s/livo.yaml"
+      ],
+      "replay_rate": 1.0,
+      "domain": 92,
+      "exit_code": 0,
+      "wall_s": 63.413663332990836,
+      "sent": {
+        "/experiment/imu": 11997,
+        "/experiment/lidar": 300,
+        "/experiment/image": 599
+      },
+      "observed_odometry_count": 596,
+      "final_poses": 596,
+      "trajectory_start_s": 1779377443.261764,
+      "trajectory_end_s": 1779377502.7622201,
+      "path_length_m": 23.421316985686467,
+      "endpoint_displacement_m": 18.40277885547341,
+      "z_range_m": 0.946045080394753,
+      "rss_peak_sampled_mib": 529.4609375,
+      "timing": {
+        "visual": {
+          "count": 596,
+          "p50_ms": 1.9368504999999998,
+          "p95_ms": 3.0510245,
+          "p99_ms": 3.5446490999999956
+        },
+        "lidar": {
+          "count": 597,
+          "p50_ms": 3.743288,
+          "p95_ms": 6.224039199999999,
+          "p99_ms": 7.362739839999983
+        }
+      },
+      "accuracy_note": "No independent ground truth: these are execution/trajectory statistics, not ATE/RPE.",
+      "valid_final_poses": 596,
+      "valid_duration_s": 59.50045609474182,
+      "finite_state": true,
+      "valid_timing": {
+        "visual": {
+          "count": 596,
+          "p50_ms": 1.9368504999999998,
+          "p95_ms": 3.0510245,
+          "p99_ms": 3.5446490999999956
+        },
+        "lidar": {
+          "count": 597,
+          "p50_ms": 3.743288,
+          "p95_ms": 6.224039199999999,
+          "p99_ms": 7.362739839999983
+        }
+      },
+      "visual_evidence": {
+        "frames": 596,
+        "frames_with_support": 298,
+        "median_support_points": 1.5,
+        "frames_with_position_correction_over_1um": 298,
+        "median_position_correction_mm": 0.5384974625041701,
+        "max_position_correction_mm": 38.27906855191115,
+        "median_rotation_correction_deg": 0.014375124410164796
+      }
+    },
+    "lidar_scheduled": {
+      "mode": "lidar_scheduled",
+      "command": [
+        "/home/user/work/bgyfw/omni_code/omni_slam/build/fast_livo_humble/fastlivo_mapping",
+        "--ros-args",
+        "--params-file",
+        "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/vbot_2336_60s/lidar_scheduled.yaml"
+      ],
+      "replay_rate": 1.0,
+      "domain": 93,
+      "exit_code": 0,
+      "wall_s": 63.41447077598423,
+      "sent": {
+        "/experiment/imu": 11997,
+        "/experiment/lidar": 300,
+        "/experiment/image": 599
+      },
+      "observed_odometry_count": 595,
+      "final_poses": 595,
+      "trajectory_start_s": 1779377443.261764,
+      "trajectory_end_s": 1779377502.7622201,
+      "path_length_m": 23.268405615157437,
+      "endpoint_displacement_m": 18.37947165346089,
+      "z_range_m": 0.8727309752236972,
+      "rss_peak_sampled_mib": 525.765625,
+      "timing": {
+        "visual": {
+          "count": 595,
+          "p50_ms": 1.364158,
+          "p95_ms": 2.1703603,
+          "p99_ms": 2.527910619999997
+        },
+        "lidar": {
+          "count": 596,
+          "p50_ms": 3.4701865,
+          "p95_ms": 5.58443575,
+          "p99_ms": 6.685616949999987
+        }
+      },
+      "accuracy_note": "No independent ground truth: these are execution/trajectory statistics, not ATE/RPE.",
+      "valid_final_poses": 595,
+      "valid_duration_s": 59.50045609474182,
+      "finite_state": true,
+      "valid_timing": {
+        "visual": {
+          "count": 595,
+          "p50_ms": 1.364158,
+          "p95_ms": 2.1703603,
+          "p99_ms": 2.527910619999997
+        },
+        "lidar": {
+          "count": 596,
+          "p50_ms": 3.4701865,
+          "p95_ms": 5.58443575,
+          "p99_ms": 6.685616949999987
+        }
+      },
+      "visual_evidence": {
+        "frames": 595,
+        "frames_with_support": 297,
+        "median_support_points": 0.0,
+        "frames_with_position_correction_over_1um": 0,
+        "median_position_correction_mm": 0.0,
+        "max_position_correction_mm": 0.0,
+        "median_rotation_correction_deg": 0.0
+      }
+    }
+  },
+  "interpretation": [
+    "Execution validation on one segment; not an accuracy benchmark.",
+    "LIO-only and LIVO use different scan-cut/update schedules.",
+    "lidar_scheduled preserves the image-timed scan cuts while disabling the photometric EKF update.",
+    "Processing times exclude input video decode, ROS delivery and IMU propagation.",
+    "No independent ground truth is available. Vendor odometry is not used as ground truth."
+  ],
+  "matched_schedule_comparison": {
+    "common_samples": 596,
+    "median_relative_path_separation_m": 0.05894268764395069,
+    "endpoint_relative_path_separation_m": 0.060794878696501874,
+    "note": "Each trace is expressed in its first-pose frame; separation is not error versus truth."
+  }
+}

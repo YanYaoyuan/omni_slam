@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-16",
+  "task": "Merge current evidence-authorized revision paper into original manuscript",
+  "pages": 24,
+  "main_and_references_pages": 6,
+  "supplement_pages": 18,
+  "pdf_sha256": "393c8100744539d9107b5784dfd05187f684384d33480085060c9302e08bc213",
+  "archived_original_files_verified": 69,
+  "input_hashes_verified": 38,
+  "current_assets_byte_identical": false,
+  "v1_table_numeric_values_preserved": true,
+  "legacy_figure_hashes_preserved": true,
+  "new_experiments": false,
+  "visual_review": {
+    "latest_changes_reviewed": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "other_pages_pixel_identical_to_previously_reviewed_version": true,
+    "clipping_or_overlap_observed": false
+  },
+  "compiler": {
+    "offline_tectonic": true,
+    "undefined_references": false,
+    "horizontal_overflow": false,
+    "remaining_warnings": [
+      "Two output-routine vertical overflow warnings: 2.16492pt and 1.5974pt; pages visually reviewed without clipping.",
+      "Caption hypcap ignored for captions outside floats; caption text and references verified."
+    ]
+  },
+  "legacy_exporter_protected": true,
+  "scope": {
+    "Ours": "Current full_authorization on two KITTI-360 local windows and offline robot geometry",
+    "V1": "Earlier fixed-identity visibility1 on four SceneNN sequences",
+    "archived_rosbags": "Historical qualitative system evidence, distinct revisions and coordinate frames",
+    "scores_not_claimed_as_official_leaderboard": true
+  },
+  "latest_revision": "Page-2 architecture redesign; see architecture_redesign_audit.json",
+  "current_assets_change_scope": "Only current architecture replaced; all tables, frozen data, and other figure assets preserved."
+}

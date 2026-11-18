@@ -1,0 +1,726 @@
+{
+  "bag": "rosbag0521_2",
+  "configuration_equal_except_camera_enable_and_output": true,
+  "identical_state_epochs": true,
+  "native_poses_per_mode": 1185,
+  "backend_sha256": {
+    "optimize_keyframe_map.py": "54be85195133569af2fc2f7342e349afe90678ae931c8e94e156c42f2803bd82",
+    "revisit_geometry.py": "1d23c504932a27af29ec6037677778d36b48e535a84b9c2bf7e7721c45ba7a5f"
+  },
+  "sources": {
+    "LIO": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/map_audit_20261105/lio_full/rosbag0521_2/lio",
+    "LIVO": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/z_20261105/si_full/rosbag0521_2/livo"
+  },
+  "map_results": {
+    "LIO": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/map_audit_20261105/split_maps/LIO/rosbag0521_2/result.json",
+    "LIVO": "/home/user/work/bgyfw/omni_code/omni_slam/build/experiments/map_audit_20261105/split_maps/LIVO/rosbag0521_2/result.json"
+  },
+  "accepted_edges": {
+    "LIO": 22,
+    "LIVO": 22
+  },
+  "excluded_training_scan_epochs": 20,
+  "eligible_reserved_lio_scans": 67,
+  "visit_events_union": 1,
+  "events": [
+    {
+      "event": 1,
+      "anchor_i": 117,
+      "anchor_j": 14,
+      "stamps": [
+        1779359872.801154,
+        1779359702.800127
+      ],
+      "source_elapsed_s": 198.79975080490112,
+      "reference_elapsed_s": 28.798723936080933,
+      "edge_scatter": {
+        "LIO": {
+          "edges": 22,
+          "translation_p90_m": 0.04098672453683875,
+          "rotation_p90_deg": 0.4424881800471675
+        },
+        "LIVO": {
+          "edges": 22,
+          "translation_p90_m": 0.035858220508624125,
+          "rotation_p90_deg": 0.25437316542609
+        }
+      },
+      "mode_checks": {
+        "LIO": {
+          "registration": {
+            "fitness": 0.5740828966174368,
+            "reverse_fitness": 0.7057484348321001,
+            "rmse_m": 0.17178475734617252,
+            "plane_rmse_m": 0.08991845585687909,
+            "observability_ratio": 0.003847097140035476,
+            "vertical_seed_offsets_m": [
+              -6,
+              -3,
+              0,
+              3,
+              6
+            ],
+            "reason": "accepted"
+          },
+          "original_measurement": [
+            [
+              0.29695408842221377,
+              0.9528661136967784,
+              0.062164610010242906,
+              1.1079130548707896
+            ],
+            [
+              -0.9534985165839227,
+              0.29237633961602055,
+              0.0731891720474616,
+              -5.220060944141924
+            ],
+            [
+              0.05156402080509759,
+              -0.08100768729651536,
+              0.9953787753198681,
+              -0.05467123080486985
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "measurement_change_m": 0.008072485730352935,
+          "measurement_change_deg": 0.28805194338172246,
+          "verification_transform": [
+            [
+              0.299828353044348,
+              0.9520010509750371,
+              0.06161945839698569,
+              1.1148511322339318
+            ],
+            [
+              -0.9527921982961591,
+              0.2955856047578374,
+              0.0693986824508602,
+              -5.215988825389036
+            ],
+            [
+              0.04785379375437843,
+              -0.07951823188657181,
+              0.9956841191969202,
+              -0.054003430511228925
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "status": "supported_by_reserved_scans"
+        },
+        "LIVO": {
+          "registration": {
+            "fitness": 0.5740828966174368,
+            "reverse_fitness": 0.7057484348321001,
+            "rmse_m": 0.1717847573461738,
+            "plane_rmse_m": 0.08991845585688009,
+            "observability_ratio": 0.003847097140035461,
+            "vertical_seed_offsets_m": [
+              -6,
+              -3,
+              0,
+              3,
+              6
+            ],
+            "reason": "accepted"
+          },
+          "original_measurement": [
+            [
+              0.2984887041027528,
+              0.9524205357923311,
+              0.061641029550981004,
+              1.113105055786141
+            ],
+            [
+              -0.9530420349531646,
+              0.29397689718981007,
+              0.07272182293494169,
+              -5.2218165950139115
+            ],
+            [
+              0.05114071895650941,
+              -0.08045313492771566,
+              0.9954455886410434,
+              -0.051916548345501135
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "measurement_change_m": 0.006431699537108956,
+          "measurement_change_deg": 0.21207010281426866,
+          "verification_transform": [
+            [
+              0.29982835304434813,
+              0.9520010509750368,
+              0.061619458396985675,
+              1.1148511322339327
+            ],
+            [
+              -0.952792198296161,
+              0.29558560475783874,
+              0.06939868245086069,
+              -5.215988825389049
+            ],
+            [
+              0.04785379375437872,
+              -0.0795182318865718,
+              0.9956841191969232,
+              -0.054003430511235
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "status": "supported_by_reserved_scans"
+        }
+      },
+      "source_interval_s": [
+        195.2005579471588,
+        235.2007179260254
+      ],
+      "reference_interval_s": [
+        14.798847913742065,
+        36.39778399467468
+      ],
+      "reserved_source_ids": [
+        117,
+        115,
+        120,
+        113,
+        122
+      ],
+      "reserved_target_ids": [
+        13,
+        16,
+        17,
+        11,
+        19
+      ],
+      "reserved_stamps": {
+        "source": [
+          1779359872.801154,
+          1779359869.201961,
+          1779359877.003744,
+          1779359865.402506,
+          1779359880.79793
+        ],
+        "target": [
+          1779359701.000001,
+          1779359705.001789,
+          1779359705.801736,
+          1779359697.000567,
+          1779359709.601556
+        ]
+      },
+      "surface_summary": {
+        "ground": {
+          "patches": 0,
+          "variants": {}
+        },
+        "vertical_plane": {
+          "patches": 8,
+          "variants": {
+            "LIO_before": {
+              "median_abs_layer_gap_m": 0.10459053003470273,
+              "p90_abs_layer_gap_m": 0.15848155450991497,
+              "median_balanced_width90_m": 0.15899299298307532
+            },
+            "LIO_after": {
+              "median_abs_layer_gap_m": 0.00941726891765231,
+              "p90_abs_layer_gap_m": 0.059865613850895054,
+              "median_balanced_width90_m": 0.11445638710279131
+            },
+            "LIVO_before": {
+              "median_abs_layer_gap_m": 0.09347745854069409,
+              "p90_abs_layer_gap_m": 0.14607984123160353,
+              "median_balanced_width90_m": 0.1486660792038744
+            },
+            "LIVO_after": {
+              "median_abs_layer_gap_m": 0.007661998255935665,
+              "p90_abs_layer_gap_m": 0.04156744073950218,
+              "median_balanced_width90_m": 0.10572416305939268
+            }
+          }
+        }
+      },
+      "patches": [
+        {
+          "kind": "vertical_plane",
+          "center": [
+            -14.560514624766181,
+            3.9913317220531424,
+            2.073467482034745
+          ],
+          "normal": [
+            0.9001167089057706,
+            0.433171925156961,
+            -0.04638958508605875
+          ],
+          "source_points": 15,
+          "target_points": 35,
+          "values": {
+            "LIO_before": {
+              "signed_layer_gap_m": -0.0342393454456032,
+              "abs_layer_gap_m": 0.0342393454456032,
+              "balanced_width90_m": 0.08695721267158772,
+              "reference_width90_m": 0.07852369142292295,
+              "source_width90_m": 0.08896182215213529,
+              "balanced_points_per_visit": 15
+            },
+            "LIO_after": {
+              "signed_layer_gap_m": 0.0689428626829888,
+              "abs_layer_gap_m": 0.0689428626829888,
+              "balanced_width90_m": 0.1635632100244933,
+              "reference_width90_m": 0.07852369142292295,
+              "source_width90_m": 0.09637677225506011,
+              "balanced_points_per_visit": 15
+            },
+            "LIVO_before": {
+              "signed_layer_gap_m": -0.02054270944623602,
+              "abs_layer_gap_m": 0.02054270944623602,
+              "balanced_width90_m": 0.09245927398556866,
+              "reference_width90_m": 0.07852369142292295,
+              "source_width90_m": 0.08914597148544533,
+              "balanced_points_per_visit": 15
+            },
+            "LIVO_after": {
+              "signed_layer_gap_m": 0.04987786829791198,
+              "abs_layer_gap_m": 0.04987786829791198,
+              "balanced_width90_m": 0.14381795780913376,
+              "reference_width90_m": 0.07852369142292295,
+              "source_width90_m": 0.0953084281059869,
+              "balanced_points_per_visit": 15
+            }
+          }
+        },
+        {
+          "kind": "vertical_plane",
+          "center": [
+            -7.495235405377674,
+            4.280173138436948,
+            1.2278262083131493
+          ],
+          "normal": [
+            -0.5554760932470255,
+            0.8277210326043137,
+            -0.07952485155893306
+          ],
+          "source_points": 33,
+          "target_points": 41,
+          "values": {
+            "LIO_before": {
+              "signed_layer_gap_m": 0.1888411865993477,
+              "abs_layer_gap_m": 0.1888411865993477,
+              "balanced_width90_m": 0.31247147443864426,
+              "reference_width90_m": 0.13493489574952078,
+              "source_width90_m": 0.1897615344780179,
+              "balanced_points_per_visit": 33
+            },
+            "LIO_after": {
+              "signed_layer_gap_m": 0.040906681641518464,
+              "abs_layer_gap_m": 0.040906681641518464,
+              "balanced_width90_m": 0.18169961575951415,
+              "reference_width90_m": 0.13493489574952078,
+              "source_width90_m": 0.18887060491892177,
+              "balanced_points_per_visit": 33
+            },
+            "LIVO_before": {
+              "signed_layer_gap_m": 0.17618577371568608,
+              "abs_layer_gap_m": 0.17618577371568608,
+              "balanced_width90_m": 0.29884929588433906,
+              "reference_width90_m": 0.13493489574952078,
+              "source_width90_m": 0.19028120245957136,
+              "balanced_points_per_visit": 33
+            },
+            "LIVO_after": {
+              "signed_layer_gap_m": 0.028555297141399767,
+              "abs_layer_gap_m": 0.028555297141399767,
+              "balanced_width90_m": 0.17769690158393237,
+              "reference_width90_m": 0.13493489574952078,
+              "source_width90_m": 0.18707187219739063,
+              "balanced_points_per_visit": 33
+            }
+          }
+        },
+        {
+          "kind": "vertical_plane",
+          "center": [
+            -7.071187354160272,
+            7.571733159901028,
+            1.4404482653291728
+          ],
+          "normal": [
+            0.9078789763002154,
+            0.41505745233078456,
+            -0.05901758769003915
+          ],
+          "source_points": 72,
+          "target_points": 113,
+          "values": {
+            "LIO_before": {
+              "signed_layer_gap_m": -0.042052430023617825,
+              "abs_layer_gap_m": 0.042052430023617825,
+              "balanced_width90_m": 0.1019251718219026,
+              "reference_width90_m": 0.07225253428847944,
+              "source_width90_m": 0.09745237501214593,
+              "balanced_points_per_visit": 72
+            },
+            "LIO_after": {
+              "signed_layer_gap_m": 0.05597536435142631,
+              "abs_layer_gap_m": 0.05597536435142631,
+              "balanced_width90_m": 0.12942698634596628,
+              "reference_width90_m": 0.07225253428847944,
+              "source_width90_m": 0.08980071800450079,
+              "balanced_points_per_visit": 72
+            },
+            "LIVO_before": {
+              "signed_layer_gap_m": -0.02873079022952508,
+              "abs_layer_gap_m": 0.02873079022952508,
+              "balanced_width90_m": 0.08928858772877767,
+              "reference_width90_m": 0.07225253428847944,
+              "source_width90_m": 0.09773641083290982,
+              "balanced_points_per_visit": 72
+            },
+            "LIVO_after": {
+              "signed_layer_gap_m": 0.03800582892875513,
+              "abs_layer_gap_m": 0.03800582892875513,
+              "balanced_width90_m": 0.1110206483667423,
+              "reference_width90_m": 0.07225253428847944,
+              "source_width90_m": 0.09093790347267959,
+              "balanced_points_per_visit": 72
+            }
+          }
+        },
+        {
+          "kind": "vertical_plane",
+          "center": [
+            -6.918069681494272,
+            10.234368895068984,
+            1.392369679108385
+          ],
+          "normal": [
+            -0.5033204613835248,
+            0.8637864117953926,
+            0.02327118283020182
+          ],
+          "source_points": 25,
+          "target_points": 43,
+          "values": {
+            "LIO_before": {
+              "signed_layer_gap_m": 0.1454702836144438,
+              "abs_layer_gap_m": 0.1454702836144438,
+              "balanced_width90_m": 0.26289335080672593,
+              "reference_width90_m": 0.12308973663496225,
+              "source_width90_m": 0.20023825041589938,
+              "balanced_points_per_visit": 25
+            },
+            "LIO_after": {
+              "signed_layer_gap_m": 0.006677131589655045,
+              "abs_layer_gap_m": 0.006677131589655045,
+              "balanced_width90_m": 0.13870817768427135,
+              "reference_width90_m": 0.12308973663496225,
+              "source_width90_m": 0.20353806699626123,
+              "balanced_points_per_visit": 25
+            },
+            "LIVO_before": {
+              "signed_layer_gap_m": 0.1331772987384253,
+              "abs_layer_gap_m": 0.1331772987384253,
+              "balanced_width90_m": 0.25033806211606224,
+              "reference_width90_m": 0.12308973663496225,
+              "source_width90_m": 0.2009754804561996,
+              "balanced_points_per_visit": 25
+            },
+            "LIVO_after": {
+              "signed_layer_gap_m": 0.0008518600466239272,
+              "abs_layer_gap_m": 0.0008518600466239272,
+              "balanced_width90_m": 0.13752762968187227,
+              "reference_width90_m": 0.12308973663496225,
+              "source_width90_m": 0.201131633192552,
+              "balanced_points_per_visit": 25
+            }
+          }
+        },
+        {
+          "kind": "vertical_plane",
+          "center": [
+            -4.5984942891785625,
+            11.231086055234604,
+            1.2912255175175287
+          ],
+          "normal": [
+            0.38342614715265394,
+            -0.9233923854627697,
+            -0.018190441144919932
+          ],
+          "source_points": 73,
+          "target_points": 96,
+          "values": {
+            "LIO_before": {
+              "signed_layer_gap_m": -0.13931092556177826,
+              "abs_layer_gap_m": 0.13931092556177826,
+              "balanced_width90_m": 0.1749274609484348,
+              "reference_width90_m": 0.03556252266956543,
+              "source_width90_m": 0.062394729990911724,
+              "balanced_points_per_visit": 73
+            },
+            "LIO_after": {
+              "signed_layer_gap_m": -0.004933273822282161,
+              "abs_layer_gap_m": 0.004933273822282161,
+              "balanced_width90_m": 0.05432073898207646,
+              "reference_width90_m": 0.03556252266956543,
+              "source_width90_m": 0.0622825597700231,
+              "balanced_points_per_visit": 73
+            },
+            "LIVO_before": {
+              "signed_layer_gap_m": -0.1273541413660491,
+              "abs_layer_gap_m": 0.1273541413660491,
+              "balanced_width90_m": 0.16297401398885536,
+              "reference_width90_m": 0.03556252266956543,
+              "source_width90_m": 0.06317860680864182,
+              "balanced_points_per_visit": 73
+            },
+            "LIVO_after": {
+              "signed_layer_gap_m": -0.0011859627436486661,
+              "abs_layer_gap_m": 0.0011859627436486661,
+              "balanced_width90_m": 0.05266823789891591,
+              "reference_width90_m": 0.03556252266956543,
+              "source_width90_m": 0.05876339908361541,
+              "balanced_points_per_visit": 73
+            }
+          }
+        },
+        {
+          "kind": "vertical_plane",
+          "center": [
+            -2.2265183370430175,
+            -4.088185034266957,
+            1.1694522164354144
+          ],
+          "normal": [
+            0.916393299852539,
+            0.39590077504551985,
+            -0.05904147951847967
+          ],
+          "source_points": 48,
+          "target_points": 64,
+          "values": {
+            "LIO_before": {
+              "signed_layer_gap_m": -0.07441745173345472,
+              "abs_layer_gap_m": 0.07441745173345472,
+              "balanced_width90_m": 0.10687087061912984,
+              "reference_width90_m": 0.04492296777185785,
+              "source_width90_m": 0.053731707653433436,
+              "balanced_points_per_visit": 48
+            },
+            "LIO_after": {
+              "signed_layer_gap_m": -0.005855929025393496,
+              "abs_layer_gap_m": 0.005855929025393496,
+              "balanced_width90_m": 0.04576132952099396,
+              "reference_width90_m": 0.04492296777185785,
+              "source_width90_m": 0.04691531776643275,
+              "balanced_points_per_visit": 48
+            },
+            "LIVO_before": {
+              "signed_layer_gap_m": -0.06669502517249117,
+              "abs_layer_gap_m": 0.06669502517249117,
+              "balanced_width90_m": 0.09892671733122671,
+              "reference_width90_m": 0.04492296777185785,
+              "source_width90_m": 0.053907194821263285,
+              "balanced_points_per_visit": 48
+            },
+            "LIVO_after": {
+              "signed_layer_gap_m": -0.005943718436221794,
+              "abs_layer_gap_m": 0.005943718436221794,
+              "balanced_width90_m": 0.04602757309804669,
+              "reference_width90_m": 0.04492296777185785,
+              "source_width90_m": 0.04678120483151106,
+              "balanced_points_per_visit": 48
+            }
+          }
+        },
+        {
+          "kind": "vertical_plane",
+          "center": [
+            2.1081136597426178,
+            9.440589302616624,
+            0.7570214820234139
+          ],
+          "normal": [
+            -0.3868998092750513,
+            0.9220706702781449,
+            -0.009706523360157886
+          ],
+          "source_points": 29,
+          "target_points": 39,
+          "values": {
+            "LIO_before": {
+              "signed_layer_gap_m": 0.13476360833595072,
+              "abs_layer_gap_m": 0.13476360833595072,
+              "balanced_width90_m": 0.21865876463208817,
+              "reference_width90_m": 0.09468886015335584,
+              "source_width90_m": 0.10065159910468918,
+              "balanced_points_per_visit": 29
+            },
+            "LIO_after": {
+              "signed_layer_gap_m": -0.011636281688653348,
+              "abs_layer_gap_m": 0.011636281688653348,
+              "balanced_width90_m": 0.09948578785961634,
+              "reference_width90_m": 0.09468886015335584,
+              "source_width90_m": 0.10297866539703494,
+              "balanced_points_per_visit": 29
+            },
+            "LIVO_before": {
+              "signed_layer_gap_m": 0.12025989190889702,
+              "abs_layer_gap_m": 0.12025989190889702,
+              "balanced_width90_m": 0.2039096960664205,
+              "reference_width90_m": 0.09468886015335584,
+              "source_width90_m": 0.10044961977861103,
+              "balanced_points_per_visit": 29
+            },
+            "LIVO_after": {
+              "signed_layer_gap_m": -0.00926902109559758,
+              "abs_layer_gap_m": 0.00926902109559758,
+              "balanced_width90_m": 0.10042767775204306,
+              "reference_width90_m": 0.09468886015335584,
+              "source_width90_m": 0.10491487265745106,
+              "balanced_points_per_visit": 29
+            }
+          }
+        },
+        {
+          "kind": "vertical_plane",
+          "center": [
+            4.706404828099309,
+            1.321107475375262,
+            0.6275905036643433
+          ],
+          "normal": [
+            0.9350596255499093,
+            0.350174073187733,
+            -0.055150839826569306
+          ],
+          "source_points": 31,
+          "target_points": 50,
+          "values": {
+            "LIO_before": {
+              "signed_layer_gap_m": -0.07091141058439063,
+              "abs_layer_gap_m": 0.07091141058439063,
+              "balanced_width90_m": 0.14305852501771582,
+              "reference_width90_m": 0.06939116115096007,
+              "source_width90_m": 0.10119582599796641,
+              "balanced_points_per_visit": 31
+            },
+            "LIO_after": {
+              "signed_layer_gap_m": 0.007198256146651271,
+              "abs_layer_gap_m": 0.007198256146651271,
+              "balanced_width90_m": 0.08911565720885574,
+              "reference_width90_m": 0.06939116115096007,
+              "source_width90_m": 0.09841050914196645,
+              "balanced_points_per_visit": 31
+            },
+            "LIVO_before": {
+              "signed_layer_gap_m": -0.062002327642906585,
+              "abs_layer_gap_m": 0.062002327642906585,
+              "balanced_width90_m": 0.13435814441889343,
+              "reference_width90_m": 0.06939116115096007,
+              "source_width90_m": 0.10078017220339594,
+              "balanced_points_per_visit": 31
+            },
+            "LIVO_after": {
+              "signed_layer_gap_m": 0.006054975416273749,
+              "abs_layer_gap_m": 0.006054975416273749,
+              "balanced_width90_m": 0.090748821948616,
+              "reference_width90_m": 0.06939116115096007,
+              "source_width90_m": 0.09968110957101595,
+              "balanced_points_per_visit": 31
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "surfaces": {
+    "ground": {
+      "patches": 0,
+      "variants": {}
+    },
+    "vertical_plane": {
+      "patches": 8,
+      "variants": {
+        "LIO_before": {
+          "median_abs_layer_gap_m": 0.10459053003470273,
+          "p90_abs_layer_gap_m": 0.15848155450991497,
+          "median_balanced_width90_m": 0.15899299298307532
+        },
+        "LIO_after": {
+          "median_abs_layer_gap_m": 0.00941726891765231,
+          "p90_abs_layer_gap_m": 0.059865613850895054,
+          "median_balanced_width90_m": 0.11445638710279131
+        },
+        "LIVO_before": {
+          "median_abs_layer_gap_m": 0.09347745854069409,
+          "p90_abs_layer_gap_m": 0.14607984123160353,
+          "median_balanced_width90_m": 0.1486660792038744
+        },
+        "LIVO_after": {
+          "median_abs_layer_gap_m": 0.007661998255935665,
+          "p90_abs_layer_gap_m": 0.04156744073950218,
+          "median_balanced_width90_m": 0.10572416305939268
+        }
+      }
+    }
+  },
+  "trajectory_metrics": {
+    "LIO_before": {
+      "path_m": 108.83888450277408,
+      "speed_p99_m_s": 0.7003114188848071,
+      "end_height_change_m": -0.04611764750673369
+    },
+    "LIO_after": {
+      "path_m": 108.82769390833874,
+      "speed_p99_m_s": 0.7004190068529637,
+      "end_height_change_m": -0.02246239864021542
+    },
+    "LIVO_before": {
+      "path_m": 108.81749238417164,
+      "speed_p99_m_s": 0.6989631573706894,
+      "end_height_change_m": -0.037985648157
+    },
+    "LIVO_after": {
+      "path_m": 108.81456668064722,
+      "speed_p99_m_s": 0.6990094056112947,
+      "end_height_change_m": -0.024584996769
+    }
+  },
+  "protocol": {
+    "event_window_s": 15,
+    "reserved_window_s": 35,
+    "reserved_max_distance_m": 8,
+    "reserved_max_scans_per_side": 5,
+    "loop_measurement_stability_m": 0.3,
+    "loop_measurement_stability_deg": 3,
+    "plane_cell_m": 3,
+    "ground_reference_plane": "target-only RANSAC; threshold .06 m, at least 40 points, at most 3 planes; gravity normal is not forced",
+    "fixed_pair_radius_m": 0.25,
+    "anchor_selection": "maximize minimum reserved scan count, then minimize time extent; no residual-based selection",
+    "loop_fit_half_period_s": 2.0
+  },
+  "note": "Same reserved LIO scan points for all four map variants, excluded from both graphs' fitted loop submaps. Plane fitting/correspondence selection occurs once. No external truth; low overlap or inconsistent local odometry can leave an event unverified. Vertical planes are wall candidates, not semantic labels."
+}

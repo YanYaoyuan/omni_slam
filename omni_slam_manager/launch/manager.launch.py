@@ -29,6 +29,7 @@ def _launch_managed_stack(context):
             launch_arguments={
                 "config_file": tf_profile_path,
                 "mode": "profile",
+                "use_sim_time": LaunchConfiguration("use_sim_time"),
             }.items(),
             condition=IfCondition(LaunchConfiguration("start_tf_manager")),
         ),
@@ -40,6 +41,10 @@ def _launch_managed_stack(context):
             parameters=[
                 {
                     "robot_profile": robot_profile,
+                    "mapping_backend": LaunchConfiguration("mapping_backend"),
+                    **({"mapping_config_file": LaunchConfiguration("mapping_config_file").perform(context)}
+                       if LaunchConfiguration("mapping_config_file").perform(context) else {}),
+                    "use_sim_time": LaunchConfiguration("use_sim_time"),
                     "map_root": LaunchConfiguration("map_root"),
                     "map_source_path": LaunchConfiguration("map_source_path"),
                     "tf_profile_path": tf_profile_path,
@@ -53,6 +58,9 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument("robot_profile", default_value="omni_dog"),
+            DeclareLaunchArgument("mapping_backend", default_value="fast_lio"),
+            DeclareLaunchArgument("mapping_config_file", default_value=""),
+            DeclareLaunchArgument("use_sim_time", default_value="false"),
             DeclareLaunchArgument("map_root", default_value="/var/lib/omni/maps"),
             DeclareLaunchArgument(
                 "map_source_path", default_value="/tmp/omni_slam_work/map.pcd"
