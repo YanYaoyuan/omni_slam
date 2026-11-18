@@ -2,7 +2,7 @@
 
 2026-11-16：新版方法和证据已正式合入此前文稿，`main.tex` 是唯一默认编译入口。采用无会议标识的 A4 双栏正文，补充材料单栏并连续分页。标题为 **OmniSLAM: Evidence-Authorized Revision of Persistent Object Maps**。
 
-2026-11-18 署名更新：Yaoyuan Yan、Haoxiang Jie、Zhiyou Heng、Kailin Wang、Liang Li、Lifeng Liu，按提供顺序排列。共同机构署名为 **Omni AI / AI Lab, Country Garden Services**（碧桂园服务）。作者同时写入 PDF 元数据。完整稿仍为 28 页，保留 23 幅编号图；此次只调整署名与标题区排版。
+2026-11-18 署名修订：**Haoxiang Jie、Yaoyuan Yan、Zhiyou Heng、Liang Li、Lifeng Liu**，按此顺序排列。前四位属于 **AI Lab, Country Garden Services（碧桂园服务）**；Lifeng Liu 属于 **Omni AI**。Haoxiang Jie 与 Yaoyuan Yan 共同贡献、共同第一作者；通讯作者为 Haoxiang Jie，邮箱 **jiehaoxiang@bgyfw.com**。作者顺序同时写入 PDF 元数据。此次只调整署名与标题区排版，保留科学内容与全部图表。
 
 ## 图片恢复（2026-11-16）
 

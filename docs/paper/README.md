@@ -4,8 +4,11 @@
 
 **OmniSLAM: Evidence-Authorized Revision of Persistent Object Maps**
 
-Yaoyuan Yan, Haoxiang Jie, Zhiyou Heng, Kailin Wang, Liang Li, Lifeng Liu
-Omni AI, AI Lab, Country Garden Services（碧桂园服务）
+Haoxiang Jie<sup>1,*,†</sup>, Yaoyuan Yan<sup>1,*</sup>, Zhiyou Heng<sup>1</sup>, Liang Li<sup>1</sup>, Lifeng Liu<sup>2</sup>
+
+<sup>1</sup> AI Lab, Country Garden Services（碧桂园服务）　<sup>2</sup> Omni AI
+
+<sup>*</sup> Haoxiang Jie 与 Yaoyuan Yan 共同贡献、共同第一作者。<sup>†</sup> 通讯作者：Haoxiang Jie（[jiehaoxiang@bgyfw.com](mailto:jiehaoxiang@bgyfw.com)）。
 
 正文、参考文献与补充材料连续分页。当前完整稿 28 页、23 幅编号图，包含原始实验图和历史系统证据。尚未确定投稿会议。
 

@@ -1,6 +1,6 @@
 # omni_slam
 
-**Omni AI · AI Lab, Country Garden Services（碧桂园服务）**
+**AI Lab, Country Garden Services（碧桂园服务） · Omni AI**
 
 ROS 2 Humble 下的激光 / 视觉惯性建图、重定位与对象级语义地图研究工程。项目主线是让机器人保留可查询、可追溯的对象地图：定位提供位姿和实测几何，视觉模型提供掩码与语义，对象关联维护身份，证据驱动的修订模块决定何时修改历史归属与写入新增表面。
 
@@ -140,8 +140,12 @@ ros2 interface show omni_slam_interfaces/msg/LivoSemanticFrame
 ## 论文与实验结果
 
 **OmniSLAM: Evidence-Authorized Revision of Persistent Object Maps**
-Yaoyuan Yan, Haoxiang Jie, Zhiyou Heng, Kailin Wang, Liang Li, Lifeng Liu
-Omni AI, AI Lab, Country Garden Services
+
+Haoxiang Jie<sup>1,*,†</sup>, Yaoyuan Yan<sup>1,*</sup>, Zhiyou Heng<sup>1</sup>, Liang Li<sup>1</sup>, Lifeng Liu<sup>2</sup>
+
+<sup>1</sup> AI Lab, Country Garden Services（碧桂园服务）　<sup>2</sup> Omni AI
+
+<sup>*</sup> Haoxiang Jie 与 Yaoyuan Yan 共同贡献、共同第一作者。<sup>†</sup> 通讯作者：Haoxiang Jie（[jiehaoxiang@bgyfw.com](mailto:jiehaoxiang@bgyfw.com)）。
 
 当前为研究稿，尚未指定投稿会议。完整 LaTeX 主稿与补充材料连续分页，源码及图表可独立编译。[论文入口](docs/paper/README.md)。
 
