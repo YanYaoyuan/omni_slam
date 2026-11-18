@@ -18,10 +18,15 @@ Zhiyou Heng\textsuperscript{1}\quad
 Liang Li\textsuperscript{1}\quad
 Lifeng Liu\textsuperscript{2}\\[5pt]
 {\normalsize \textsuperscript{1}AI Lab, Country Garden Services\qquad
-\textsuperscript{2}Omni AI}\\[3pt]
-{\small \textsuperscript{*}These authors contributed equally (co-first authors).}\\
-{\small \textsuperscript{$\dagger$}Corresponding author:
-\href{mailto:jiehaoxiang@bgyfw.com}{\texttt{jiehaoxiang@bgyfw.com}}}}
+\textsuperscript{2}Omni AI}}
+\AddToHook{cmd/maketitle/after}{%
+  \begingroup
+  \renewcommand{\thefootnote}{\ensuremath{\fnsymbol{footnote}}}%
+  \footnotetext[1]{These authors contributed equally (co-first authors).}%
+  \footnotetext[2]{Corresponding author:
+    \href{mailto:jiehaoxiang@bgyfw.com}{\texttt{jiehaoxiang@bgyfw.com}}.}%
+  \endgroup
+}
 \date{}
 \begin{document}
 \input{sections/merged/current_main}

@@ -1,7 +1,7 @@
 {
   "date": "2026-11-18",
   "entry": "main.tex",
-  "scope": "28-page continuous manuscript; five authors, two affiliations, equal contribution and corresponding author corrected; scientific sections and all figures preserved",
+  "scope": "28-page continuous manuscript; equal-contribution and corresponding-author notes moved to first-page left-column footnotes; authors, affiliations, scientific sections and figures preserved",
   "required_figure_references": [
     "057_threshold_case.pdf",
     "all_object_changes.pdf",
@@ -31,7 +31,7 @@
   ],
   "files_sha256": {
     "FIGURES.md": "be91edaff6f01104c8036f92d66f2ea0f9423cf0e9b76bb178234512f3899569",
-    "README.md": "26e1ba03bf1be0c09990e08643b2d9949ee46d80df63f51e1cb91f8234cf0392",
+    "README.md": "baeefe0e9d1810d85e45eea9e57341e766d176a2ad068ed7203647e9377ed6c5",
     "REVIEW_RESPONSE.md": "2a37fc50719a6e0bd7aea9c8b71dd3cb5717df6cd3836a14377b8ae982fde9c1",
     "architecture_redesign_audit.json": "4aa04e66c8f886112d3f6f59b9de71f6b46ef5ae716b1f76360e017d57b20199",
     "build.sh": "858d5f9b1d18d113fca885e48129ea06fc3a642cea22ec2c466c27dde998f37c",
@@ -103,7 +103,7 @@
     "figures/rosbag_outdoor_semantics.pdf": "807986ce8a9583a279cde3112a797d65b7b2ba9802db7c6a4d3da9c7b713bfa1",
     "figures/rosbag_routes_1.pdf": "1ff6f532692dc6d4857a105e412eec573029fe97dc161476252ea47342c34dca",
     "figures/rosbag_routes_2.pdf": "82b4221a015628f64fb9a654a5ab644349d8fbf521ff5c49ede2dbfb221e8f27",
-    "main.tex": "0e64ddae529f965f1f092ef860b9103e0405deb6bc44b5db7395771bf345aa9f",
+    "main.tex": "0d9907037c2146cc0862120c6fca1e612053479f4af97862e44a7ed20d185f15",
     "merge_delivery_audit.json": "7dd96afd4b19c5ec5d7b5a94c8b24a167bd45eec4f4705a7cf3341e00e029a02",
     "merged_version.json": "ec430595e3beb4bbb30f65586daf1f03dafc681194e56e4ee1b79b4d50892009",
     "omni_paper.sty": "e971a941b8f99ded81b5b5848fa7787283cff731b1d9ab1f6d6838f54f8f3f6c",
