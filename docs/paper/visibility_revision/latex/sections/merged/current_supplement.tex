@@ -25,12 +25,12 @@ Development and diagnostic results remain separate from prospective primary resu
 Unconditional and history-only share new coordinates, source IDs, labels, and scores; only old labels change. History-only and \ours{} share authorized history; \ours{} further restricts and relabels additions. In development, ``history + witness'' retains parent new labels and applies witness filtering. Its mean nearly equals \ours{} (28.047974 versus 28.048252), so independent benefit from local reassignment was not established there. The original prospective comparison supports the combined write policy. The later exposed-window audit in Appendix~\ref{app:causal} separates local assignment from the additional certificate on new writes.
 
 \subsection{Fixed acceptance rule}
-The gate requires two finite windows; per-window AP/AP50 nonregression; at least one mean AP point; a mean exceeding both controls; at least one added canonical AP50 match and zero lost matches; and nonzero historical edits. Missing-class windows remain NA, without replacement. All conditions passed; the original development failure remains unchanged.
+The gate requires two finite windows; per-window AP/AP50 nonregression; at least one mean AP point; a mean exceeding both controls; at least one added canonical AP50 match and zero lost matches; and nonzero historical edits. Missing-class windows remain NA, without replacement. The two prospective windows satisfy this rule. Development and four-window extension outcomes are reported separately.
 
 \subsection{Evaluation-domain and implementation checks}
 Primary IDs reproduce the pinned upstream train-ID encoding. The canonical diagnostic voids noncanonical aliases while retaining reference positions and confidence weights. The adapter fixes the reference-helper interface and compiles the hash-verified public AP/matching kernel. Different inputs, training, and spatial scope prevent direct ranking against official leaderboard entries.
 
-All eight original prospective maps were sealed before their semantic-reference decoding. The later causal controls use already-exposed windows and make no fresh-independence claim. Export arrays and source coordinates were verified. Readout was independently checked by brute force at 16 fixed reference indices per map (128 samples), not exhaustively. All 24 score records and 628 object-by-method IoU entries were replayed; four robot maps and shared kernels were hash verified. Cache-path and environment-import failures were resolved without changing scientific parameters.
+All eight original prospective maps were sealed before their semantic-reference decoding. The later causal controls use already-exposed windows and make no fresh-independence claim. Export arrays and source coordinates were verified. Readout was independently checked by brute force at 16 fixed reference indices per map (128 samples), not exhaustively. All 24 score records and 628 object-by-method IoU entries were replayed; four robot maps and shared kernels were hash verified.
 
 \subsection{Data and execution scope}
 The public inputs contain 6,007,585 measured sources. The minimum raw-measurement bound separation from prior inputs and between the new windows is 1,140.14\,m. This checks local spatial overlap, not pretraining overlap. Metadata-based selection excluded seven exposed sequences. Full-sequence and multi-dataset generalization remain untested.
@@ -55,7 +55,7 @@ The table reports best same-class confidence-weighted IoU over the full canonica
 \end{center}
 
 \clearpage
-\section{Garage Integration and Claim Boundaries}\label{app:robot}
+\section{Garage Integration}\label{app:robot}
 \begin{center}\small\input{tables/current/robot}\end{center}
 The table uses the same 330 frames and LIVO output. Figure~\ref{fig:robot-current} supplies the exact four-method visual comparison. The retained legacy panels below show baseline, unconditional, \emph{identity-only}, and full \ours. Identity-only is not the history-only control in the table. \ours{} authorizes no historical donor merge here. More points or IDs do not establish higher accuracy.
 
@@ -66,14 +66,11 @@ The table uses the same 330 frames and LIVO output. Figure~\ref{fig:robot-curren
 \captionof{figure}{Actual garage vehicle-map comparison. Archive visibility is offline; no claim of causal online semantics, S100 runtime, or semantic-accuracy improvement follows.}
 \end{center}
 
-\subsection{Claims supported by the present evidence}
-The combined policy improves mean AP over the baseline and both prospective controls, retains measurement provenance, and produces robot outputs. This does not establish new-object discovery, state-of-the-art generalization, or robot semantic accuracy.
-
-\subsection{Remaining publication evidence}
-The bounded causal audit is complete; external full-pipeline comparison, wider executed fixed-scene coverage, pose/depth perturbations, and independent robot references remain evidence gaps. A limited external core adaptation and the unexecuted extension protocol appear in Appendix~\ref{app:extension}. This draft retains positive prospective results and earlier failures without selecting per-scene winners.
+\subsection{Evaluation scope}
+The garage comparison demonstrates that the same revision kernels operate on LIVO outputs. Independent vehicle contours and cross-frame identities are unavailable, so semantic accuracy cannot be measured here. Public-data comparisons, including the completed spatial extension, appear in Appendix~\ref{app:extension}.
 \clearpage
 \subsection{Current table-aligned garage comparison}
-The following figure reads the exact four sealed maps used by the garage table. The frame is the same previously published frame 126. History-only uses the authorized old-label prefix and unconditional new geometry; it is not the identity-only control in the retained panels. No new inference or robot accuracy evaluation is performed here.
+The following figure uses the four sealed maps in the garage table and the same recorded frame 126. History-only uses the authorized old-label prefix and unconditional new geometry; it is not the identity-only control in the retained panels.
 
 \begin{center}
 \includegraphics[width=.97\textwidth]{robot_current_four.png}

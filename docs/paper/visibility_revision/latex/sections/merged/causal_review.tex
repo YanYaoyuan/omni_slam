@@ -1,6 +1,6 @@
 \clearpage
-\section{Post-Review Mechanism Interventions}\label{app:causal}
-Frozen on November 17, 2026, this post-hoc audit changes no weights, thresholds, proposals, or original maps. It specifies five exports per exposed window and three scoring protocols before audit scoring. It is not another independent test or acceptance gate; all outcomes are retained.
+\section{Controlled Output Interventions}\label{app:causal}
+The interventions were fixed on November 17, 2026, before their scores were computed. Five exports per previously evaluated window vary selected output decisions while holding weights, thresholds, proposals, and the original maps fixed. They measure conditional effects on the existing windows.
 
 \subsection{Interventions and their estimands}
 Old-point coordinates and ordering are invariant. ``Ours new'' copies Ours appended sources, coordinates, labels, and ranking metadata. Two controls replace only the old-label prefix with baseline or unconditional labels. They estimate historical-label effects conditional on fixed additions, not the total effect of rerunning dependent stages.
@@ -29,9 +29,9 @@ For known GT and mapped endpoints, wrong-to-correct is a correction; correct-to-
 The two authorized transitions in 0009 are $27\!\to\!17$ (8,745 sources; both mapped to building 2168) and $36\!\to\!48$ (4,110 sources; both mapped to building 2486). They consolidate fragments. Zero measured damage under this correspondence is not proof that every edited source is correct: 2.736 reference mass remains wrongly assigned. The unconditional 0010 transition targets ID 6, absent from the baseline correspondence, so its 3,552.226 mass is unknown here. Its AP cost is established by the fixed-new-geometry intervention, not by calling those unmapped points erroneous.
 
 \clearpage
-\section{Execution Details and Fixed Extension}\label{app:extension}
+\section{Execution Details and Spatial Extension}\label{app:extension}
 \subsection{Frozen backbone and timing scope}
-The shared backbone uses SAM3, SigLIP, history2 association, SegFormer, and intrinsic-geometry weights fitted on exposed 0000/0002 data. The selected weight directory carries a robot name; training provenance determines the split. This audit performs no fitting or model inference. Artifact paths and hashes are in \texttt{data/current/protocol.json} and \texttt{data/review\_20261117/}. Scientific thresholds, observations, and transforms are shared.
+The shared backbone uses SAM3, SigLIP, history2 association, SegFormer, and intrinsic-geometry weights fitted on exposed 0000/0002 data. This audit performs no fitting or model inference. Artifact paths and hashes are in \texttt{data/current/protocol.json} and \texttt{data/review\_20261117/}. Scientific thresholds, observations, and transforms are shared.
 
 The CPU replay uses an AMD Ryzen 9 9950X. The graph column includes both native multi-source distance searches and the certificate calculation on a cached graph; the pair column replays decisions on cached per-view evidence. These are one-shot component timings, not averaged end-to-end latency. The preparation column comes from the earlier observation-preparation run and is not added to the new timers as if measured in one execution.
 
@@ -43,18 +43,29 @@ The CPU replay uses an AMD Ryzen 9 9950X. The graph column includes both native 
 The audit driver's peak resident memory is 198.4\,MiB, a process-wide high-water mark across the two cached replays, not isolated module memory. Exporting each controlled map takes approximately 0.286--0.290\,s in 0009 and 0.088--0.089\,s in 0010. The native nearest-owner distances and certificate arrays reproduce the archived arrays exactly. All ten export hashes and original inputs are verified, with an independent brute-force readout check at 16 fixed reference positions per export (160 checks total). These checks verify implementation and provenance, not semantic accuracy or S100 performance.
 
 \subsection{External algorithm-core diagnostic}
-We additionally run the official MaskClustering graph construction, iterative view-consensus clustering, and postprocessing code through a shared-source CPU adapter. Six upstream files are pinned; device replacements and the unused backprojection import are the only code substitutions. Inputs are disjoint highest-score native SAM3 query tokens on the same measured sources, using the existing causal visibility cache. Query-mask scores supply the building/car class readout. This differs from the original CropFormer/OpenCLIP frontend and from the internal backbone's classification readout. It is an external algorithm-core diagnostic, not a native full-pipeline reproduction or an official benchmark entry.
+We additionally run the official MaskClustering graph construction, iterative view-consensus clustering, and postprocessing code through a shared-source CPU adapter. Six upstream files are pinned; device replacements and the unused backprojection import are the only code substitutions. Inputs are disjoint highest-score native SAM3 query tokens on the same measured sources, using the existing causal visibility cache. Query-mask scores supply the building/car class readout. This differs from the original CropFormer~\cite{cropformer}/OpenCLIP~\cite{openclip} frontend and from the internal backbone's classification readout. It is an external algorithm-core diagnostic, not a native full-pipeline reproduction or an official benchmark entry.
 
 The upstream ScanNet defaults are fixed: visible/undersegmentation ratios 0.3, consensus 0.9, contained-mask ratio 0.8, point-filter ratio 0.5, DBSCAN radius 0.1\,m with four minimum points, two supporting masks, and overlap merge ratio 0.8. Empty graphs export no clusters. No outdoor threshold sweep is performed. Native overlapping supports are saved separately; the same nearest-map readout resolves exported source ties in stable object order.
 
 \begin{center}\small
 \input{tables/current/external_core}
-\captionof{table}{MaskClustering core with shared source-token adaptation, AP in percent. This is deliberately not labeled a full external strong-baseline comparison.}
+\captionof{table}{MaskClustering core with shared source-token adaptation, AP in percent. The frontend and class readout differ from the native pipeline.}
 \end{center}
 
-The adapter yields 2,542 / 662 intermediate clusters and 98 / 23 final objects. Severe fragmentation and low AP indicate an adaptation limitation, not superiority to native MaskClustering. Indoor defaults and changed inputs/readout can disadvantage it. A JSON serialization failure was recovered using sealed predictions and sorted matched-ID sets, without changing maps or parameters: six unique score conditions, twelve kernel calls including replay.
+The adapter yields 2,542 / 662 intermediate clusters and 98 / 23 final objects. Severe fragmentation and low AP indicate an adaptation limitation, not superiority to native MaskClustering. Indoor defaults and changed inputs/readout can disadvantage it.
 
-\subsection{Reserved expansion: no results yet}
-Four windows are reserved, with 61 uniformly sampled posed image--LiDAR pairs each: 0003 [617,738], 0004 [5930,6119], 0005 [2,357], and 0006 [3251,3634]. They come from the official annotated static train/validation pool and exclude geometry-training sequences 0000/0002. Metadata selection requires the full candidate trajectory bound to be more than 300\,m from all exposed raw-source bounds and earlier selected windows; their selected minimum distances are 448.96, 428.48, 542.49, and 359.98\,m. Actual measured-source separation must still be checked after download. These are spatial holdouts within previously exposed sequences, not unseen sequences or a validation-only benchmark.
+\clearpage
+\subsection{Four-window spatial holdouts}
+The extension uses 61 uniformly sampled image--LiDAR pairs in each of four windows: 0003 [617,738], 0004 [5930,6119], 0005 [2,357], and 0006 [3251,3634]. Selection used trajectory metadata from the annotated static train/validation pool, excluding geometry-training sequences 0000/0002. The selected trajectory bounds were more than 300\,m from exposed source bounds and earlier selected windows; their minimum metadata distances were 448.96, 428.48, 542.49, and 359.98\,m. These are spatial holdouts within previously exposed sequences. They are reported separately from the two prospective windows.
 
-Two validation-only metadata selections found no qualifying windows; their records and the pool amendment are retained. No new RGB or GT was inspected. The budget is four windows, 244 input pairs, seven methods, 28 exports, and 84 scores, with no tuning or replacement of missing-class windows. GPU devices are currently unavailable; download checks, the isolated runner, and inference preflight remain prerequisites. This reservation supplies no new result or generalization claim.
+The original validation-only search found no qualifying windows; the pool amendment and selection records are retained. The method and budget were fixed before extension inference: four windows, 244 input pairs, seven methods, 28 maps, and 84 scores. All conditions completed without threshold tuning or replacement of windows lacking a class. Window 0003 contains one eligible building and no eligible car; its class mean therefore includes only the building class, rather than imputing a zero car score.
+
+\begin{center}\small
+\input{tables/current/spatial_holdout}
+\captionof{table}{Completed spatial extension: primary AP50:90 (\%). All seven methods are included. The shaded row is Ours. MaskClustering uses the shared-source core adaptation described above. Missing classes are excluded from the window class mean; the final column averages the four windows equally.}
+\label{tab:extension}
+\end{center}
+
+Ours improves mean AP by 2.908 points over the strong baseline, gains four canonical AP50 matches, and loses none. It performs 44,276 historical source-label edits. However, its AP falls by 0.557 points in 0004, and its mean is 0.080 points below unconditional revision. Thus the extension fails the predeclared requirements for per-window nonregression and superiority to both controls. Nearest-seed assignment has the same primary AP as Ours in all four windows. The result supports an average gain over the backbone, with no additional AP benefit from the new-write certificate.
+
+The complete result file, including primary, canonical-class, and uniform-score protocols, is supplied as \texttt{data/review\_20261119/extension.json}. It records the frozen protocol and map-seal hashes. The extension includes 448 sampled brute-force checks of reference readout. These checks establish implementation consistency rather than statistical independence or semantic correctness.

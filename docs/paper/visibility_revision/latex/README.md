@@ -6,7 +6,7 @@
 
 ## 图片恢复（2026-11-16）
 
-2026-11-16 恢复版为 **24 页、22 幅编号图**；本次审稿修订后为 **28 页、23 幅编号图**。上一次合并漏编的 6 张图已恢复，两张 SceneNN 图恢复为各占一页，并收录三张历史架构图。见 [图表页码索引](FIGURES.md) 与 `figure_restore_audit.json`。旧的 15 页版及其完整源码已另存到 `docs/paper/archives/merged_before_figure_restore_2026-11-16/`。后续完整性核验包含活动入口的必需图片引用，不再只检查文件是否存在。
+2026-11-16 恢复版为 **24 页、22 幅编号图**；2026-11-17 审稿修订为 **28 页、23 幅编号图**；2026-11-19 全文与参考文献复核后为 **30 页、23 幅编号图、24 条参考文献**。上一次合并漏编的 6 张图已恢复，两张 SceneNN 图恢复为各占一页，并收录三张历史架构图。见 [图表页码索引](FIGURES.md) 与 `figure_restore_audit.json`。旧的 15 页版及其完整源码已另存到 `docs/paper/archives/merged_before_figure_restore_2026-11-16/`。后续完整性核验包含活动入口的必需图片引用，不再只检查文件是否存在。
 
 ## 合入内容
 
@@ -25,7 +25,7 @@
 ## 文件布局
 
 - `main.tex`：默认主入口。
-- `sections/merged/current_main.tex`：当前正文、参考文献及室内研究说明入口。
+- `sections/merged/current_main.tex`：当前正文及室内研究说明入口。
 - `sections/merged/current_supplement.tex`：当前结果补充材料及旧证据附录入口。
 - `sections/merged/version_scope.tex`：版本、数据、操作范围和指标对照。
 - `sections/merged/indoor_context.tex`：正文中的 V1 室内结果。
@@ -68,6 +68,12 @@ TECTONIC_BIN=/path/to/tectonic bash build.sh
 
 已完成两个已暴露窗口的五项输出干预：共 10 份新地图、30 个评分条件。原 Ours、原始结果与全部旧图保持不变。主文新增固定新增几何下的历史修改/保护对照，补充材料新增完整消融表、固定 GT 对应的历史变化诊断、CPU 组件计时与内存范围。结论集中于身份保护、同对象碎片合并和局部归属；新点双帧认证相对最近种子未获得 AP 增量，不作为独立涨点贡献。
 
-新增车库四方法图直接读取表格对应的四份封存地图，修正旧面板 identity-only 与表格 history-only 不对应的问题；旧图保留并标为历史控制。外部 MaskClustering 仅完成共享源点 token 的算法核心适配，不能视为原版完整强基线。四个空间留出窗口已按元数据封存预算，尚未执行；当前环境无可用 NVIDIA 设备，数据检查与独立运行器也仍是扩展前置条件。
+新增车库四方法图直接读取表格对应的四份封存地图，修正旧面板 identity-only 与表格 history-only 不对应的问题；旧图保留并标为历史控制。外部 MaskClustering 仅完成共享源点 token 的算法核心适配，不能视为原版完整强基线。该版曾预留四个空间留出窗口；扩展后来已完成，并在 2026-11-19 全文复核时按封存结果加入当前稿，见下。
 
 当前图表页码和页数以 `FIGURES.md` 为准。新增证据副本在 `data/review_20261117/`，正文在 `sections/merged/causal_review.tex`，修订记录见 `REVIEW_RESPONSE.md`。源码包可脱离 GPU、模型和原始数据独立编译；其中实验脚本用于追溯，完整重跑仍需要仓库模块、冻结模型及外部大数据缓存，并不包含在文稿源码包中。
+
+## 全文与参考文献复核（2026-11-19）
+
+已修订摘要、引言、相关工作、讨论和各活动附录，减少重复限定与过程日志。加入 FusionMapper 和 Sparse Deep Interaction Fusion 两篇 ICCAI 2025 论文，并补齐相关方法、数据和指标出处；当前使用 `references_current.bib`，旧 `references.bib` 不参与本稿。24 条文献均有实际引用，核对依据见 [参考文献复核](REFERENCE_AUDIT.md)。
+
+已完成的四窗口扩展按原始 JSON 加入正文及附录 E.3，保留全部七种方法和未达门槛的结果；没有重新训练或运行实验。原有图像、旧数值表、作者信息和摘要代码链接保留。完整稿共 30 页，正文与参考文献为第 1–8 页，补充材料从第 9 页开始。

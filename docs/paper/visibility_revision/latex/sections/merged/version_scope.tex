@@ -9,7 +9,7 @@ Table~\ref{tab:versions} separates the method versions and evidence roles. Both 
 Evidence branch & Allowed map changes & Inputs and backbone & Evaluation and role \\
 \midrule
 V1: fixed identity & Delete contradicted points; preserve IDs and observation ownership & RGB-D / given poses; SAM2.1, SigLIP, history-augmented association & Four SceneNN scenes; observed-domain class-agnostic PQ. Earlier geometric-refinement study. \\
-\textbf{Ours: current} & Authorize selected historical ID edits; append witnessed, certified measured sources & RGB + LiDAR / given poses; SAM3, SigLIP, frozen geometry and SegFormer & Two new KITTI-360 windows; building/car AP50:90. Current primary comparison. \\
+\textbf{Ours: current} & Authorize selected historical ID edits; append witnessed, certified measured sources & RGB + LiDAR / given poses; SAM3, SigLIP, frozen geometry and SegFormer & Two prospective KITTI-360 windows and four spatial holdouts; building/car AP50:90. \\
 Current robot & Same revision kernels; four fixed outputs & 330 garage frames with existing LIVO geometry & Qualitative integration; no independent semantic reference. \\
 Archived system & Earlier object/ground interfaces and route maps & Six ROS recordings with distinct stored map revisions & Qualitative sensing coverage; not six independent tests of either revision method. \\
 \bottomrule

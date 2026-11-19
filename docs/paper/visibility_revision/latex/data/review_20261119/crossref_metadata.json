@@ -1,0 +1,214 @@
+{
+  "accessed": "2026-11-19",
+  "endpoint": "https://api.crossref.org/works/",
+  "records": {
+    "10.1109/ICCAI66501.2025.00013": {
+      "title": [
+        "FusionMapper: Vectorized Map Construction by Multi-modal and Temporal Fusion based on Transformer"
+      ],
+      "author": [
+        {
+          "given": "Haoxiang",
+          "family": "Jie"
+        },
+        {
+          "given": "Yaoyuan",
+          "family": "Yan"
+        },
+        {
+          "given": "Xinyi",
+          "family": "Zuo"
+        }
+      ],
+      "container-title": [
+        "2025 11th International Conference on Computing and Artificial Intelligence (ICCAI)"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            3,
+            28
+          ]
+        ]
+      },
+      "published-print": {
+        "date-parts": [
+          [
+            2025,
+            3,
+            28
+          ]
+        ]
+      },
+      "published-online": null,
+      "page": "31-38",
+      "volume": null
+    },
+    "10.1109/ICCAI66501.2025.00017": {
+      "title": [
+        "Sparse Deep Interaction Fusion for 3D Object Detection"
+      ],
+      "author": [
+        {
+          "given": "Yaoyuan",
+          "family": "Yan"
+        },
+        {
+          "given": "Haoxiang",
+          "family": "Jie"
+        }
+      ],
+      "container-title": [
+        "2025 11th International Conference on Computing and Artificial Intelligence (ICCAI)"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025,
+            3,
+            28
+          ]
+        ]
+      },
+      "published-print": {
+        "date-parts": [
+          [
+            2025,
+            3,
+            28
+          ]
+        ]
+      },
+      "published-online": null,
+      "page": "64-69",
+      "volume": null
+    },
+    "10.1109/TRO.2024.3502198": {
+      "title": [
+        "FAST-LIVO2: Fast, Direct LiDAR\u2013Inertial\u2013Visual Odometry"
+      ],
+      "author": [
+        {
+          "given": "Chunran",
+          "family": "Zheng"
+        },
+        {
+          "given": "Wei",
+          "family": "Xu"
+        },
+        {
+          "given": "Zuhao",
+          "family": "Zou"
+        },
+        {
+          "given": "Tong",
+          "family": "Hua"
+        },
+        {
+          "given": "Chongjian",
+          "family": "Yuan"
+        },
+        {
+          "given": "Dongjiao",
+          "family": "He"
+        },
+        {
+          "given": "Bingyang",
+          "family": "Zhou"
+        },
+        {
+          "given": "Zheng",
+          "family": "Liu"
+        },
+        {
+          "given": "Jiarong",
+          "family": "Lin"
+        },
+        {
+          "given": "Fangcheng",
+          "family": "Zhu"
+        },
+        {
+          "given": "Yunfan",
+          "family": "Ren"
+        },
+        {
+          "given": "Rong",
+          "family": "Wang"
+        },
+        {
+          "given": "Fanle",
+          "family": "Meng"
+        },
+        {
+          "given": "Fu",
+          "family": "Zhang"
+        }
+      ],
+      "container-title": [
+        "IEEE Transactions on Robotics"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2025
+          ]
+        ]
+      },
+      "published-print": {
+        "date-parts": [
+          [
+            2025
+          ]
+        ]
+      },
+      "published-online": null,
+      "page": "326-346",
+      "volume": "41"
+    },
+    "10.1109/TPAMI.2022.3179507": {
+      "title": [
+        "KITTI-360: A Novel Dataset and Benchmarks for Urban Scene Understanding in 2D and 3D"
+      ],
+      "author": [
+        {
+          "given": "Yiyi",
+          "family": "Liao"
+        },
+        {
+          "given": "Jun",
+          "family": "Xie"
+        },
+        {
+          "given": "Andreas",
+          "family": "Geiger"
+        }
+      ],
+      "container-title": [
+        "IEEE Transactions on Pattern Analysis and Machine Intelligence"
+      ],
+      "published": {
+        "date-parts": [
+          [
+            2023,
+            3,
+            1
+          ]
+        ]
+      },
+      "published-print": {
+        "date-parts": [
+          [
+            2023,
+            3,
+            1
+          ]
+        ]
+      },
+      "published-online": null,
+      "page": "3292-3310",
+      "volume": "45"
+    }
+  }
+}

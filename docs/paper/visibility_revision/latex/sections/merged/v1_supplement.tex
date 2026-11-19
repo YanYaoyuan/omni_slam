@@ -8,10 +8,10 @@ For source point $p$ assigned to object $o$, V1 projects into frames with an ass
 R_o(p)\geq1\quad\land\quad R_o(p)\geq2S_o(p).
 \label{eq:v1-rule}
 \end{equation}
-For nonzero evidence this is equivalent to support share $S/(S+R)\leq1/3$; zero-evidence points remain. It cannot append surfaces, create objects, split mergers, or revise identity. SOR uses each object's mean 20-neighbor distance with a mean-plus-two-standard-deviations cutoff. These are separate point-selection mechanisms.
+For nonzero evidence this is equivalent to support share $S/(S+R)\leq1/3$; zero-evidence points remain. It cannot append surfaces, create objects, split mergers, or revise identity. Statistical outlier removal (SOR)~\cite{sor} uses each object's mean 20-neighbor distance with a mean-plus-two-standard-deviations cutoff. These are separate point-selection mechanisms.
 
-\subsection{Development chronology and selection}
-Replica office\_0/office\_1 and SceneNN 014/015 were exposed development data. The pilot primary required three refutations. Before processing the four new SceneNN scenes, the existing one-refutation arm was selected empirically: its dataset-mean gains were +2.018 and +1.034 points, versus +2.002 and +0.656 for three refutations. Only the minimum count changed; the depth gate, boundaries, and refutation/support ratio remained fixed. This did not make the original two-point-per-dataset pilot requirement pass. The subsequent new-scene beats-SOR condition also failed. No configuration was selected after those new-scene scores.
+\subsection{Configuration selection}
+Replica~\cite{replica} office\_0/office\_1 and SceneNN 014/015 were exposed development data. The pilot primary required three refutations. Before processing the four new SceneNN scenes, the existing one-refutation arm was selected empirically: its dataset-mean gains were +2.018 and +1.034 points, versus +2.002 and +0.656 for three refutations. Only the minimum count changed; the depth gate, boundaries, and refutation/support ratio remained fixed. This did not make the original two-point-per-dataset pilot requirement pass. V1 also remained below SOR in the subsequent four-scene mean. No configuration was selected after those new-scene scores.
 
 \begin{center}\small
 \input{tables/v1/development}
@@ -28,7 +28,7 @@ Replica office\_0/office\_1 and SceneNN 014/015 were exposed development data. T
 \end{minipage}
 
 \subsection{Matched-set and assignment interpretation}
-V1's 66 SceneNN matches are unchanged. At GT 136313 in scene 057, V1 gives IoU 0.496947 while SOR reaches 0.535340. V1 removes 92 source points and SOR removes 97: deletion count alone does not explain the ranking. Of 410 excess baseline reference voxels, 304 have owners with support but no refutation. Under locked baseline source ownership, V1 instead reaches IoU 0.501247; ordinary reassignment adds five correct and 17 excess voxels. This is a geometric/evaluator interaction, not a new current-method result.
+V1's 66 SceneNN matches are unchanged. At GT 136313 in scene 057, V1 gives IoU 0.496947 while SOR reaches 0.535340. V1 removes 92 source points and SOR removes 97: deletion count alone does not explain the ranking. Of 410 excess baseline reference voxels, 304 have owners with support but no refutation. Under locked baseline source ownership, V1 instead reaches IoU 0.501247; ordinary reassignment adds five correct and 17 excess voxels. Nearest-source reassignment therefore changes the measured effect of point deletion.
 
 
 \clearpage
@@ -42,7 +42,7 @@ The diagram below preserves the complete fixed-identity architecture and its evi
 \subsection{Reading the two architectures together}
 V1 asks whether a point already assigned to an object should remain in that object. Depth gating defines eligible observations; support and refutation determine deletion. It does not grant permission to change the historical identity of a point or append missing measurements.
 
-The current method separates those two additional decisions: authorization of an old-label edit and admission of a directly witnessed measured surface. The V1 diagram is retained to explain the earlier mechanism and its limitations, not as a diagram of current SAM3-based processing. Neither diagram asserts a new odometry estimator.
+The current method adds historical relabeling and measured-surface admission to the available updates. Figure~\ref{fig:architecture} shows this extension; the pose source remains fixed in both studies.
 
 \clearpage
 \section{Retained Indoor Image and Object Evidence}
@@ -50,7 +50,7 @@ The current method separates those two additional decisions: authorization of an
 \includegraphics[width=\textwidth]{object_comparison_real.pdf}
 \captionof{figure}{Actual SceneNN 057 observations and same-object geometry from V1. Embedded ``Ours'' labels mean V1. The monitor improves from IoU 0.6343 to 0.7423; the second object remains below 0.5 while SOR crosses it. These were post-evaluation explanatory selections, not random samples.}
 \end{center}
-These indoor images use supplied RGB-D poses and the SAM2.1/SigLIP branch. The following two pages retain each scene at full width so that RGB, masks, colored geometry, and predicted object boundaries can be inspected separately. No RGB model or mapping job was rerun for this integration.
+These indoor images use supplied RGB-D poses and the SAM2.1/SigLIP branch. The following two pages retain each scene at full width so that RGB, masks, colored geometry, and predicted object boundaries can be inspected separately.
 
 \clearpage
 \section{SceneNN 057: Observations and V1 Map}
