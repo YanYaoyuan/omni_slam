@@ -11,6 +11,9 @@ on:
         default: main
         type: string
   workflow_call:
+    secrets:
+      OMNI_CI_REPO_TOKEN:
+        required: true
     inputs:
       version:
         required: false
@@ -109,7 +112,7 @@ jobs:
           cp -a install "dist/${name}/install"
           .github/ci/write_manifest.sh aarch64 jetson-orin-nx "${version}" "dist/${name}"
           tar -C dist -czf "dist/${name}.tar.gz" "${name}"
-          sha256sum "dist/${name}.tar.gz" > "dist/${name}.tar.gz.sha256"
+          (cd dist && sha256sum "${name}.tar.gz" > "${name}.tar.gz.sha256")
 
       - uses: actions/upload-artifact@v7.0.1
         with:
@@ -128,3 +131,4 @@ jobs:
           docker builder prune --all --force
           docker image prune --all --force
           df -h
+

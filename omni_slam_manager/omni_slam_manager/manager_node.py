@@ -280,6 +280,7 @@ class SlamManagerNode(Node):
         )
         self._fitness = FitnessTracker()
         self._active_asset: Optional[MapAsset] = None
+        self._localization_session = None
         self._mapping_dirty = False
         self._mapping_session_id = ""
         self._external_runtime_mode = str(
@@ -533,6 +534,7 @@ class SlamManagerNode(Node):
                 self._machine.transition(SlamState.STOPPING)
             else:
                 self._machine.transition(SlamState.STOPPING)
+            self._localization_session = None
             self._process.stop(self._stop_timeout)
             self._machine.transition(SlamState.STOPPED)
             self._mapping_dirty = False
@@ -566,7 +568,7 @@ class SlamManagerNode(Node):
                 SlamState.ERROR,
             ):
                 return self._service_reject(response, "localization is not running")
-        self._stop_localization(REASON_NONE, "localization stopped by request")
+            self._stop_localization(REASON_NONE, "localization stopped by request")
         response.accepted = True
         response.reason_code = REASON_NONE
         response.message = "localization stopped"
@@ -759,6 +761,7 @@ class SlamManagerNode(Node):
                 return self._finish_localization_failure(
                     goal_handle, result, REASON_INVALID_STATE, "SLAM is not stopped"
                 )
+            session = self._localization_session = object()
             self._reset_telemetry()
             self._active_asset = asset
             self._machine.transition(SlamState.STARTING_LOCALIZATION)
@@ -786,47 +789,57 @@ class SlamManagerNode(Node):
                     goal_handle, result, REASON_PROCESS_START_FAILED, str(error)
                 )
         while rclpy.ok():
-            if goal_handle.is_cancel_requested:
-                self._stop_localization(REASON_LOCALIZATION_CANCELLED, "localization cancelled")
-                result.success = False
-                result.final_state = int(SlamState.STOPPED)
-                result.reason_code = REASON_LOCALIZATION_CANCELLED
-                result.message = "localization cancelled"
-                goal_handle.canceled()
-                return result
             with self._lock:
+                # A stopped Action must never observe or stop a replacement runtime.
+                if session is not self._localization_session:
+                    return self._finish_localization_failure(
+                        goal_handle,
+                        result,
+                        REASON_LOCALIZATION_CANCELLED,
+                        "localization stopped",
+                        final_state=SlamState.STOPPED,
+                    )
+                if goal_handle.is_cancel_requested:
+                    self._stop_localization(REASON_LOCALIZATION_CANCELLED, "localization cancelled")
+                    result.success = False
+                    result.final_state = int(SlamState.STOPPED)
+                    result.reason_code = REASON_LOCALIZATION_CANCELLED
+                    result.message = "localization cancelled"
+                    goal_handle.canceled()
+                    return result
                 snapshot = self._machine.snapshot
                 fitness = self._fitness.value
-            if snapshot.state == SlamState.LOCALIZED:
-                result.success = True
-                result.final_state = int(snapshot.state)
-                result.reason_code = REASON_NONE
-                result.message = "localization established"
-                goal_handle.succeed()
-                return result
-            if snapshot.state == SlamState.ERROR:
-                return self._finish_localization_failure(
-                    goal_handle,
-                    result,
-                    snapshot.reason_code or REASON_PROCESS_EXITED,
-                    snapshot.reason_text or "localization process failed",
-                )
-            elapsed = self._now_steady() - started
-            if elapsed >= timeout:
-                self._stop_localization(
-                    REASON_LOCALIZATION_TIMEOUT, "localization timed out"
-                )
-                return self._finish_localization_failure(
-                    goal_handle,
-                    result,
-                    REASON_LOCALIZATION_TIMEOUT,
-                    "localization timed out",
-                )
+                initial_pose_received = self._last_initial_pose is not None
+                if snapshot.state == SlamState.LOCALIZED:
+                    result.success = True
+                    result.final_state = int(snapshot.state)
+                    result.reason_code = REASON_NONE
+                    result.message = "localization established"
+                    goal_handle.succeed()
+                    return result
+                if snapshot.state == SlamState.ERROR:
+                    return self._finish_localization_failure(
+                        goal_handle,
+                        result,
+                        snapshot.reason_code or REASON_PROCESS_EXITED,
+                        snapshot.reason_text or "localization process failed",
+                    )
+                elapsed = self._now_steady() - started
+                if elapsed >= timeout:
+                    self._stop_localization(
+                        REASON_LOCALIZATION_TIMEOUT, "localization timed out"
+                    )
+                    return self._finish_localization_failure(
+                        goal_handle,
+                        result,
+                        REASON_LOCALIZATION_TIMEOUT,
+                        "localization timed out",
+                    )
             feedback = StartLocalization.Feedback()
             feedback.state = int(snapshot.state)
             feedback.elapsed_sec = float(elapsed)
             feedback.fitness_score = float(fitness)
-            if self._last_initial_pose is not None:
+            if initial_pose_received:
                 stage = "ICP succeeded; waiting for fresh pose"
             elif math.isfinite(fitness):
                 stage = "ICP relocalizing"
@@ -846,6 +859,7 @@ class SlamManagerNode(Node):
 
     def _stop_localization(self, reason: int, message: str) -> None:
         with self._lock:
+            self._localization_session = None
             state = self._machine.snapshot.state
             if state not in (SlamState.STOPPED, SlamState.STOPPING):
                 try:
@@ -860,9 +874,15 @@ class SlamManagerNode(Node):
                 self._machine.transition(SlamState.STOPPED)
 
     @staticmethod
-    def _finish_localization_failure(goal_handle, result, reason: int, message: str):
+    def _finish_localization_failure(
+        goal_handle,
+        result,
+        reason: int,
+        message: str,
+        final_state: SlamState = SlamState.ERROR,
+    ):
         result.success = False
-        result.final_state = int(SlamState.ERROR)
+        result.final_state = int(final_state)
         result.reason_code = reason
         result.message = message
         if goal_handle.status not in (GoalStatus.STATUS_CANCELED, GoalStatus.STATUS_ABORTED):
@@ -1022,3 +1042,4 @@ def main(args=None) -> None:
                     # 整个清理流程完成后由 with 语句最后释放。
                     if initialized and rclpy.ok():
                         rclpy.shutdown()
+

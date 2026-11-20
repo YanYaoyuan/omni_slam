@@ -6,6 +6,7 @@ import os
 import shlex
 import signal
 import subprocess
+import time
 from typing import Dict, List, Optional
 
 
@@ -60,39 +61,45 @@ class ProcessSupervisor:
         self._command = arguments
 
     @staticmethod
-    def _signal_process_group(process: subprocess.Popen, signum: int) -> None:
-        """只向本 Supervisor 创建的进程组发信号，不扫描或误杀外部进程."""
+    def _signal_process_group(process: subprocess.Popen, signum: int) -> bool:
+        """只向本 Supervisor 创建的进程组发信号，返回组是否仍存在."""
         try:
             os.killpg(process.pid, signum)
         except ProcessLookupError:
             # 父进程状态与内核进程表之间允许存在一个很短的退出竞态。
-            pass
+            return False
         except OSError as error:
             raise ProcessSupervisorError(
                 f"failed to signal SLAM process group {process.pid}: {error}"
             ) from error
-
-    @staticmethod
-    def _wait_for_exit(process: subprocess.Popen, timeout_sec: float) -> bool:
-        try:
-            process.wait(timeout=timeout_sec)
-        except subprocess.TimeoutExpired:
-            return False
         return True
+
+    @classmethod
+    def _wait_for_exit(cls, process: subprocess.Popen, timeout_sec: float) -> bool:
+        deadline = time.monotonic() + timeout_sec
+        while True:
+            # 及时回收组长，但不能把组长退出当作整个进程组退出。
+            process.poll()
+            if not cls._signal_process_group(process, 0):
+                return True
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return False
+            time.sleep(min(0.05, remaining))
 
     def stop(self, timeout_sec: float = 5.0) -> Optional[int]:
         process = self._process
         if process is None:
             return None
         timeout = max(0.0, float(timeout_sec))
-        if process.poll() is None:
-            # ROS launch 把 SIGINT 作为正常关闭协议；仅在子进程未按时退出时逐级
-            # 升级到 SIGTERM、SIGKILL。每一阶段均作用于完整进程组。
-            self._signal_process_group(process, signal.SIGINT)
-            if not self._wait_for_exit(process, timeout):
-                self._signal_process_group(process, signal.SIGTERM)
-                if not self._wait_for_exit(process, timeout):
-                    self._signal_process_group(process, signal.SIGKILL)
+        # 组长可能已经退出；只要组仍存在，就必须清理同组的后代进程。
+        # 一旦 ESRCH 表示组已消失便停止发信号，避免继续使用旧的组 ID。
+        for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGKILL):
+            if not self._signal_process_group(process, signum):
+                break
+            # 孤儿僵尸只能由其父进程回收；SIGKILL 后不再等待组 ID 消失。
+            if signum == signal.SIGKILL or self._wait_for_exit(process, timeout):
+                break
         return_code = process.wait()
         self._process = None
         self._command = []
@@ -102,7 +109,5 @@ class ProcessSupervisor:
         process = self._process
         if process is None or process.poll() is None:
             return None
-        return_code = process.wait()
-        self._process = None
-        self._command = []
-        return return_code
+        return self.stop()
+

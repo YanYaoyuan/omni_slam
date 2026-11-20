@@ -451,9 +451,10 @@ test -x ../sysroot_docker/usr_s100/lib/qt5/bin/moc
 test -x ../sysroot_docker/usr_s100/bin/pvtkpython
 test -f ../sysroot_docker/usr_s100/lib/aarch64-linux-gnu/libvtkCommonCore-9.1.so.1
 
-echo "=== Complete ARM64 ROS PCL packages in target TROS ==="
+echo "=== Complete ARM64 ROS PCL and GTSAM packages in target TROS ==="
 pcl_ros_config=/opt/ros/humble/share/pcl_ros/cmake/pcl_rosConfig.cmake
-if [[ ! -f "${pcl_ros_config}" ]]; then
+gtsam_config=/opt/ros/humble/lib/cmake/GTSAM/GTSAMConfig.cmake
+if [[ ! -f "${pcl_ros_config}" || ! -f "${gtsam_config}" ]]; then
   ros_deb_dir=/mnt/s100-cross/cache/ros-pcl-arm64
   ros_extract_root=/tmp/s100-ros-pcl-root
   ros_arm64_apt_dir=/tmp/s100-ros-arm64-apt
@@ -462,7 +463,10 @@ if [[ ! -f "${pcl_ros_config}" ]]; then
     "${ros_extract_root}" \
     "${ros_arm64_apt_dir}/lists/partial"
 
-  if ! compgen -G "${ros_deb_dir}/ros-humble-pcl-ros_*_arm64.deb" >/dev/null; then
+  # Older caches only contain PCL. GTSAM must also be downloaded for ARM64;
+  # installing the host package cannot satisfy the cross-toolchain.
+  if ! compgen -G "${ros_deb_dir}/ros-humble-pcl-ros_*_arm64.deb" >/dev/null || \
+    ! compgen -G "${ros_deb_dir}/ros-humble-gtsam_*_arm64.deb" >/dev/null; then
     curl --fail --location \
       https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
       --output "${ros_arm64_apt_dir}/ros.key"
@@ -482,7 +486,8 @@ if [[ ! -f "${pcl_ros_config}" ]]; then
     cd "${ros_deb_dir}"
     apt-get "${ros_arm64_apt_options[@]}" download \
       ros-humble-pcl-conversions:arm64 \
-      ros-humble-pcl-ros:arm64
+      ros-humble-pcl-ros:arm64 \
+      ros-humble-gtsam:arm64
   fi
 
   while IFS= read -r -d '' deb; do
@@ -497,6 +502,10 @@ test -f "${pcl_ros_config}"
 test -f /opt/ros/humble/share/pcl_conversions/cmake/pcl_conversionsConfig.cmake
 test -f /opt/ros/humble/lib/libpcl_ros_tf.a
 file /opt/ros/humble/lib/libpcd_to_pointcloud_lib.so \
+  | grep -Eq 'ARM aarch64|ARM64'
+test -f "${gtsam_config}"
+test -f /opt/ros/humble/include/gtsam/nonlinear/ISAM2.h
+file -L /opt/ros/humble/lib/libgtsam.so \
   | grep -Eq 'ARM aarch64|ARM64'
 
 echo "=== Cross-compile GTSAM into the S100 system directory ==="
@@ -618,3 +627,4 @@ CONTAINER
 
 log "build output: ${TROS_ROOT}/install"
 log "runtime bundle: ${TROS_ROOT}/runtime"
+
