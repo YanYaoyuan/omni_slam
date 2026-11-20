@@ -44,6 +44,7 @@ from .telemetry_monitor import (
     FitnessTracker,
     PoseJumpTracker,
     PoseSample,
+    PostSaveMotionDetector,
     yaw_from_quaternion,
 )
 from .tf_profile import load_tf_frames
@@ -208,6 +209,10 @@ class SlamManagerNode(Node):
         self.declare_parameter("pose_jump_position_threshold_m", 0.5)
         self.declare_parameter("pose_jump_yaw_threshold_deg", 45.0)
         self.declare_parameter("pose_jump_refractory_sec", 0.5)
+        # A saved map becomes dirty again once mapping continues and the robot
+        # moves this far (or turns this much) from the save snapshot pose.
+        self.declare_parameter("mapping_dirty_motion_m", 0.3)
+        self.declare_parameter("mapping_dirty_yaw_deg", 10.0)
         self.declare_parameter("external_runtime_mode", "none")
         self.declare_parameter("external_map_id", "")
         self.declare_parameter("external_map_version", 0)
@@ -279,6 +284,15 @@ class SlamManagerNode(Node):
             ),
         )
         self._fitness = FitnessTracker()
+        self._latest_pose: Optional[PoseSample] = None
+        self._post_save_motion = PostSaveMotionDetector(
+            position_threshold_m=float(
+                self.get_parameter("mapping_dirty_motion_m").value
+            ),
+            yaw_threshold_rad=math.radians(
+                float(self.get_parameter("mapping_dirty_yaw_deg").value)
+            ),
+        )
         self._active_asset: Optional[MapAsset] = None
         self._mapping_dirty = False
         self._mapping_session_id = ""
@@ -439,20 +453,33 @@ class SlamManagerNode(Node):
             covariance = message.pose.covariance
             self._pose_covariance_norm = math.sqrt(sum(value * value for value in covariance))
             pose = message.pose.pose
-            self._pose_jumps.observe(
-                PoseSample(
-                    x=pose.position.x,
-                    y=pose.position.y,
-                    z=pose.position.z,
-                    yaw=yaw_from_quaternion(
-                        pose.orientation.x,
-                        pose.orientation.y,
-                        pose.orientation.z,
-                        pose.orientation.w,
-                    ),
-                    stamp=now,
-                )
+            sample = PoseSample(
+                x=pose.position.x,
+                y=pose.position.y,
+                z=pose.position.z,
+                yaw=yaw_from_quaternion(
+                    pose.orientation.x,
+                    pose.orientation.y,
+                    pose.orientation.z,
+                    pose.orientation.w,
+                ),
+                stamp=now,
             )
+            self._pose_jumps.observe(sample)
+            self._latest_pose = sample
+            # FAST-LIO keeps mapping after the save snapshot. Once the robot
+            # moves, the saved map no longer contains everything; restore dirty
+            # so StopMapping without discard cannot silently drop that data.
+            if (
+                self._machine.snapshot.state == SlamState.MAP_READY
+                and not self._mapping_dirty
+                and self._post_save_motion.observe(sample)
+            ):
+                self._mapping_dirty = True
+                self._machine.transition(
+                    SlamState.MAPPING,
+                    reason_text="mapping continued after save; unsaved data exists",
+                )
 
     def _initial_pose_callback(self, _: Odometry) -> None:
         with self._lock:
@@ -603,6 +630,10 @@ class SlamManagerNode(Node):
             return self._save_failed(
                 goal_handle, result, REASON_MAP_SAVE_UNAVAILABLE, "map_save service unavailable"
             )
+        with self._lock:
+            # FAST-LIO snapshots the map when it serves this request; motion
+            # after this pose is not part of the saved asset.
+            self._post_save_motion.arm(self._latest_pose)
         future = self._map_save_client.call_async(Trigger.Request())
         # rclpy exposes is_cancel_requested as a *property*: pass a
         # zero-arg callable, not the bool value.
@@ -933,6 +964,8 @@ class SlamManagerNode(Node):
         self._pose_covariance_norm = math.nan
         self._pose_jumps.reset()
         self._fitness.reset()
+        self._latest_pose = None
+        self._post_save_motion.disarm()
 
     def _age_ms(self, stamp: Optional[float], now: float) -> float:
         return math.nan if stamp is None else max(0.0, (now - stamp) * 1000.0)

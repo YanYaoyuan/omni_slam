@@ -107,6 +107,72 @@ class PoseJumpTracker:
         return True
 
 
+class PostSaveMotionDetector:
+    """Detect that mapping kept integrating new data after a map save.
+
+    FAST-LIO keeps mapping after ``map_save`` snapshots the cloud, so a saved
+    map becomes stale as soon as the sensor moves. A stationary robot still
+    streams clouds, so data arrival alone is not a useful dirty signal (it
+    would make every save immediately dirty). ``arm`` records the pose at the
+    snapshot; ``observe`` returns True once the robot has moved at least
+    ``position_threshold_m`` or turned ``yaw_threshold_rad`` away from it.
+    Without a baseline, the first finite sample becomes the baseline.
+    """
+
+    def __init__(
+        self,
+        position_threshold_m: float = 0.3,
+        yaw_threshold_rad: float = math.radians(10.0),
+    ) -> None:
+        if position_threshold_m <= 0.0:
+            raise ValueError("position_threshold_m must be positive")
+        if yaw_threshold_rad <= 0.0:
+            raise ValueError("yaw_threshold_rad must be positive")
+        self._position_threshold_m = position_threshold_m
+        self._yaw_threshold_rad = yaw_threshold_rad
+        self._armed = False
+        self._baseline: Optional[PoseSample] = None
+
+    @property
+    def armed(self) -> bool:
+        return self._armed
+
+    def arm(self, baseline: Optional[PoseSample]) -> None:
+        self._armed = True
+        self._baseline = baseline if baseline is not None and _finite(baseline) else None
+
+    def disarm(self) -> None:
+        self._armed = False
+        self._baseline = None
+
+    def observe(self, sample: PoseSample) -> bool:
+        """Return True (and disarm) once motion since the snapshot is detected."""
+        if not self._armed or not _finite(sample):
+            return False
+        if self._baseline is None:
+            self._baseline = sample
+            return False
+        dx = sample.x - self._baseline.x
+        dy = sample.y - self._baseline.y
+        dz = sample.z - self._baseline.z
+        displacement = math.sqrt(dx * dx + dy * dy + dz * dz)
+        heading_change = abs(_angle_delta(sample.yaw - self._baseline.yaw))
+        if (
+            displacement < self._position_threshold_m
+            and heading_change < self._yaw_threshold_rad
+        ):
+            return False
+        self.disarm()
+        return True
+
+
+def _finite(sample: PoseSample) -> bool:
+    return all(
+        math.isfinite(value)
+        for value in (sample.x, sample.y, sample.z, sample.yaw, sample.stamp)
+    )
+
+
 class FitnessTracker:
     """Remember the newest finite ICP fitness score (NaN until then)."""
 
