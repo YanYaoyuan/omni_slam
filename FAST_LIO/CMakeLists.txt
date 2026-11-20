@@ -244,6 +244,9 @@ if(BUILD_TESTING)
   ament_add_pytest_test(phase2_regressions
     test/test_phase2_regressions.py
   )
+  ament_add_pytest_test(scan_buffer_bounds
+    test/test_scan_buffer_bounds.py
+  )
 endif()
 
 # ROSIDL 会把本包的公共 include 根导出为 include/fast_lio。公共工具头也安装
