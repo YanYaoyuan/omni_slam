@@ -76,3 +76,6 @@ node_modules/
 # The port links vikit_common only; unused ROS 1/Python 2 wrappers stay local.
 /FAST_LIVO2/third_party/rpg_vikit/vikit_ros/
 /FAST_LIVO2/third_party/rpg_vikit/vikit_py/
+
+# Local publication author details are delivered separately from GitHub.
+/docs/paper/visibility_revision/latex/authors.local.tex

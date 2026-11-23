@@ -1,7 +1,7 @@
 {
-  "date": "2026-11-19",
+  "date": "2026-11-23",
   "entry": "main.tex",
-  "scope": "Current manuscript and connected supplement; author names and contribution/contact notes without affiliations.",
+  "scope": "GitHub default source: author names and contribution/contact notes; optional local publication author block is excluded.",
   "required_figure_references": [
     "057_threshold_case.pdf",
     "all_object_changes.pdf",
@@ -31,7 +31,7 @@
   ],
   "files_sha256": {
     "FIGURES.md": "57fc1816763390b22f496bf2c0e5e21e9c6efcae4c0d5d6830dd74755b1d7c4b",
-    "README.md": "ea6a9fb233b82540a715658212b411d92e8472af9dcddd8c56df7736d622540b",
+    "README.md": "4c9708da91363ec5e5748ed9131e3a83cce8549a9c7d439037d04874d254e10b",
     "REVIEW_RESPONSE.md": "2a37fc50719a6e0bd7aea9c8b71dd3cb5717df6cd3836a14377b8ae982fde9c1",
     "architecture_redesign_audit.json": "4aa04e66c8f886112d3f6f59b9de71f6b46ef5ae716b1f76360e017d57b20199",
     "build.sh": "858d5f9b1d18d113fca885e48129ea06fc3a642cea22ec2c466c27dde998f37c",
@@ -103,7 +103,7 @@
     "figures/rosbag_outdoor_semantics.pdf": "807986ce8a9583a279cde3112a797d65b7b2ba9802db7c6a4d3da9c7b713bfa1",
     "figures/rosbag_routes_1.pdf": "1ff6f532692dc6d4857a105e412eec573029fe97dc161476252ea47342c34dca",
     "figures/rosbag_routes_2.pdf": "82b4221a015628f64fb9a654a5ab644349d8fbf521ff5c49ede2dbfb221e8f27",
-    "main.tex": "b40166b92dee6722a11de4df72876e8c2590af35d739c04cb6516df3e8d9edbc",
+    "main.tex": "db9049a0d032c640a0d70a0bcd14c054692e8594c9b1aa8dbf56997c0032bdd4",
     "merge_delivery_audit.json": "7dd96afd4b19c5ec5d7b5a94c8b24a167bd45eec4f4705a7cf3341e00e029a02",
     "merged_version.json": "ec430595e3beb4bbb30f65586daf1f03dafc681194e56e4ee1b79b4d50892009",
     "omni_paper.sty": "e971a941b8f99ded81b5b5848fa7787283cff731b1d9ab1f6d6838f54f8f3f6c",
@@ -148,8 +148,8 @@
     "tools/review_maskclustering_control.py": "880be47bf67c7b35d3c9d961fb27c0c6a532da82bfa8f9dd7dcff79e0d7e7056",
     "verify_sources.py": "7f3a71f71c48be14773089e694cd1b89628ef12a0efce1dcf3f79f4ca69a9e3a",
     "references_current.bib": "6dc97be67687f7057bc34d9f7cffc74b108c65674df6a9acf10264be200888fb",
-    "REFERENCE_AUDIT.md": "d330150cc0b4d144a8b53ad51d29274199bb3ad32b9f6de24ceb4b84234cd3f5",
-    "EDITORIAL_CHECKS.json": "327b9cc27df656a8ab5cdb89cddf72e9fd9f540fa01e4a76fe1094651f6abbbf",
+    "REFERENCE_AUDIT.md": "f839413f9b27ffc2024dea88d37ddecad599fefe380618d92875a7ac9f5425f8",
+    "EDITORIAL_CHECKS.json": "892f45c3c8a06af28850f2aba47336ca127e8f5287168158e4f6204967cd4b42",
     "data/review_20261119/extension.json": "5dc28cda94a93cd6fef0f8feab1c3f5f8a7c4c7c5b9944bd42669736d3600d47",
     "data/review_20261119/crossref_metadata.json": "42f7e3aa34dc46f9f73ef4aa2df2ea634858f82f2de78898fed27ce9bcbad7c5",
     "tables/current/spatial_holdout.tex": "dfac76b6898b7657959ee792907cd12955d569ba61b96a6513445b985936a040",

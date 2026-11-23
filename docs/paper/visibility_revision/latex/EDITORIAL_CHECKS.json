@@ -99,6 +99,15 @@
       28,
       29,
       30
-    ]
+    ],
+    "profile": "github-default"
+  },
+  "publication_profile": {
+    "date": "2026-11-23",
+    "optional_author_file": "authors.local.tex",
+    "excluded_from_git": true,
+    "delivered_separately": true,
+    "public_fallback_compiled_and_verified": true,
+    "public_fallback_pixel_identical_to_previous_no_affiliation_pdf": true
   }
 }

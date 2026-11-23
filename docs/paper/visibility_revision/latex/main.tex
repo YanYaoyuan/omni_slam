@@ -12,12 +12,15 @@
 \newcommand{\eps}{\varepsilon}
 \hypersetup{pdftitle={OmniSLAM: Evidence-Authorized Revision of Persistent Object Maps},pdfauthor={Haoxiang Jie, Yaoyuan Yan, Zhiyou Heng, Liang Li, Zhaosong Li, Lifeng Liu}}
 \title{OmniSLAM: Evidence-Authorized Revision\\of Persistent Object Maps}
+% The repository uses names only; local publication details are optional.
+\InputIfFileExists{authors.local.tex}{}{
 \author{Haoxiang Jie\textsuperscript{*,$\dagger$}\quad
 Yaoyuan Yan\textsuperscript{*}\quad
 Zhiyou Heng\quad
 Liang Li\quad
 Zhaosong Li\quad
 Lifeng Liu}
+}
 \AddToHook{cmd/maketitle/after}{%
   \begingroup
   \renewcommand{\thefootnote}{\ensuremath{\fnsymbol{footnote}}}%

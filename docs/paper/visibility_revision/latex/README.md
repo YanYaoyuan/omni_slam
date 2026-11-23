@@ -2,7 +2,7 @@
 
 2026-11-16：新版方法和证据已正式合入此前文稿，`main.tex` 是唯一默认编译入口。采用无会议标识的 A4 双栏正文，补充材料单栏并连续分页。标题为 **OmniSLAM: Evidence-Authorized Revision of Persistent Object Maps**。
 
-2026-11-19 署名修订：**Haoxiang Jie、Yaoyuan Yan、Zhiyou Heng、Liang Li、Zhaosong Li、Lifeng Liu**，按此顺序排列。不展示机构名称或机构编号。Haoxiang Jie 与 Yaoyuan Yan 共同贡献、共同第一作者；通讯作者为 Haoxiang Jie，邮箱 **jiehaoxiang@bgyfw.com**。作者顺序同时写入 PDF 元数据。共同一作说明与通讯邮箱放在首页左栏底部脚注，姓名旁保留对应上标。作者栏仅保留姓名、共同一作及通讯标记，保留科学内容与全部图表。
+2026-11-19 署名修订：**Haoxiang Jie、Yaoyuan Yan、Zhiyou Heng、Liang Li、Zhaosong Li、Lifeng Liu**，按此顺序排列。GitHub 默认版本不展示机构名称或机构编号。Haoxiang Jie 与 Yaoyuan Yan 共同贡献、共同第一作者；通讯作者为 Haoxiang Jie，邮箱 **jiehaoxiang@bgyfw.com**。作者顺序同时写入 PDF 元数据。共同一作说明与通讯邮箱放在首页左栏底部脚注，姓名旁保留对应上标。GitHub 默认作者栏仅保留姓名、共同一作及通讯标记。论文交付版可使用独立的本地署名文件，保留科学内容与全部图表。
 
 ## 图片恢复（2026-11-16）
 
@@ -77,3 +77,9 @@ TECTONIC_BIN=/path/to/tectonic bash build.sh
 已修订摘要、引言、相关工作、讨论和各活动附录，减少重复限定与过程日志。加入 FusionMapper 和 Sparse Deep Interaction Fusion 两篇 ICCAI 2025 论文，并补齐相关方法、数据和指标出处；当前使用 `references_current.bib`，旧 `references.bib` 不参与本稿。24 条文献均有实际引用，核对依据见 [参考文献复核](REFERENCE_AUDIT.md)。
 
 已完成的四窗口扩展按原始 JSON 加入正文及附录 E.3，保留全部七种方法和未达门槛的结果；没有重新训练或运行实验。原有图像、旧数值表、作者信息和摘要代码链接保留。完整稿共 30 页，正文与参考文献为第 1–8 页，补充材料从第 9 页开始。
+
+## 论文署名与 GitHub 展示（2026-11-23）
+
+仓库默认只显示作者姓名、共同一作和通讯信息。`main.tex` 会优先读取可选的 `authors.local.tex`；本地论文交付版通过该文件提供完整署名，文件已由 `.gitignore` 排除，不上传 GitHub。完整论文源码包包含该文件，因此解压后仍可直接编译带完整署名的版本。
+
+仓库 `source_manifest.json` 核验公开源码；论文源码包使用独立清单，同时核验本地署名文件。请勿将交付包中的本地署名文件强制添加到仓库。
