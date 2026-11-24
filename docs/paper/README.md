@@ -4,6 +4,8 @@
 
 **OmniSLAM: Evidence-Authorized Revision of Persistent Object Maps**
 
+[arXiv:2611.30184](https://arxiv.org/abs/2611.30184) · [PDF](https://arxiv.org/pdf/2611.30184)
+
 Haoxiang Jie<sup>*,†</sup>, Yaoyuan Yan<sup>*</sup>, Zhiyou Heng, Liang Li, Zhaosong Li, Lifeng Liu
 
 <sup>*</sup> Haoxiang Jie 与 Yaoyuan Yan 共同贡献、共同第一作者。<sup>†</sup> 通讯作者：Haoxiang Jie（[jiehaoxiang@bgyfw.com](mailto:jiehaoxiang@bgyfw.com)）。

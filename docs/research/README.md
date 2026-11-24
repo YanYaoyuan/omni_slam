@@ -28,7 +28,7 @@
 
 ### 核心演示
 
-按[根目录说明](../../README.md#快速开始)安装后执行：
+按[根目录说明](../../README.zh-CN.md#快速开始)安装后执行：
 
 ```bash
 python examples/revision_core_demo.py --output build/demo/revision_core.json

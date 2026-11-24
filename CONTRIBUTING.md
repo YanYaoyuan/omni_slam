@@ -30,7 +30,7 @@ PYTHONPATH=omni_semantic_map:scripts/benchmarks \
 
 ## ROS 构建与测试
 
-加载 ROS Humble 与所需 Omni 依赖 overlay，按[根目录说明](README.md#快速开始)构建后执行：
+加载 ROS Humble 与所需 Omni 依赖 overlay，按[根目录说明](README.zh-CN.md#快速开始)构建后执行：
 
 ```bash
 source install/livo_humble/setup.bash

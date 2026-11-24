@@ -1,79 +1,83 @@
 # OmniSLAM
 
-OmniSLAM 是一个基于 ROS 2 Humble 的对象级语义建图项目，集成激光 / 视觉惯性定位、跨帧对象关联和地图查询。地图中的每个对象保存三维点集、位置和图像观测，可按类别或 ID 查询。
+**English** | [简体中文](README.zh-CN.md)
 
-对象地图修订模块利用多帧掩码判断历史对象是否应合并，再根据局部几何将新增实测点分配给对象。定位与在线语义节点用于机器人接入，修订模块提供独立的离线评测入口。
+**[Paper · arXiv:2611.30184](https://arxiv.org/abs/2611.30184)**
 
-[实验展示](#实验展示) · [快速开始](#快速开始) · [实验结果](#论文与实验结果) · [文档](#文档与目录)
+OmniSLAM is an object-centric semantic mapping project built on ROS 2 Humble. It combines LiDAR / visual-inertial odometry, cross-frame object association, and map queries. Each object stores a 3D point set, location, and image observations, accessible by category or ID.
 
-## 实验展示
+The map revision module uses multi-view masks to decide whether existing objects should merge, then assigns new measured points through local geometric competition. ROS nodes support robot integration; the revision module has a separate offline evaluation pipeline.
 
-### 车库建图
+[Demos](#demos) · [Quick start](#quick-start) · [Results](#paper-and-results) · [Documentation](#documentation-and-layout)
 
-`rosbag2245` 回放：相机图像、LIVO 视觉关键点、车辆识别和点云累积。
+## Demos
 
-![车库实验加速回放：相机、视觉关键点、车辆识别和逐帧点云地图](docs/assets/readme/garage_mapping.gif)
+### Garage mapping
 
-*约 20 秒，相对采集时间加速约 30×；右下点云按高度着色。*
+Replay of `rosbag2245`: camera images, LIVO visual keypoints, vehicle detections, and accumulated point clouds.
 
-![Ours candidate 的车库车辆对象地图，不同颜色表示预测对象身份，灰色为环境点云](docs/assets/readme/garage_vehicle_objects.png)
+![Garage replay with camera images, visual keypoints, vehicle detections, and point-cloud mapping](docs/assets/readme/garage_mapping.gif)
 
-早期车库实验的车辆对象地图。彩色点区分预测对象，灰色点表示环境，调色板循环使用。图中的 `Ours candidate` 为该次实验版本；当前修订方法的四组对照见[论文补充材料](docs/paper/README.md)。
+*About 20 seconds, approximately 30× faster than acquisition time. The bottom-right point cloud is colored by height.*
 
-### 室外目标与地面分割
+![Vehicle object map from an earlier garage experiment; colors distinguish predicted objects and gray shows the environment](docs/assets/readme/garage_vehicle_objects.png)
 
-图像中的目标和地面候选投影到实测点云，生成三维观测框与地面图层。
+Vehicle object map from an earlier garage experiment. Colored points distinguish predicted objects, gray points show the environment, and the palette repeats. `Ours candidate` refers to that experiment's method version; the current revision method's four-way comparison is in the [paper supplement](docs/paper/README.md).
 
-![室外实验加速回放：目标识别、地面分割、三维观测框和地图累积](docs/assets/readme/outdoor_objects_ground.gif)
+### Outdoor objects and ground segmentation
 
-*约 21 秒，相对采集时间加速约 80×。两段 GIF 来自 2026-11-06 的 LIVO 语义集成实验，播放速度不表示处理帧率。*
+Image detections and ground candidates are projected onto measured points to produce 3D observation boxes and a ground layer.
+
+![Outdoor replay with object detections, ground segmentation, 3D observation boxes, and map accumulation](docs/assets/readme/outdoor_objects_ground.gif)
+
+*About 21 seconds, approximately 80× faster than acquisition time. Both GIFs come from the November 6, 2026 LIVO semantic integration experiments. Playback speed does not indicate processing throughput.*
 
 <details>
-<summary>对象查询示例</summary>
+<summary>Object query example</summary>
 
-![门入口对象的三维观测框、世界坐标、观测次数及对应图像证据](docs/assets/readme/object_query_3d.png)
+![Doorway object with a 3D observation box, world coordinates, observation count, and source image](docs/assets/readme/object_query_3d.png)
 
-选择对象可查看位置、观测次数与原始图像。三维框包围已观测表面。
+Select an object to inspect its location, observation count, and source images. The 3D box encloses the observed surface.
 
 </details>
 
-### 新金桥全局语义地图
+### Xinjinqiao global semantic map
 
-地图包含 5,345,591 个点，其中地面点 120,529 个。左侧为全局语义地图，右侧为地面图层；类别包括建筑 / 结构、车辆、植被和地面。
+The map contains 5,345,591 points, including 120,529 ground points. The left panel shows the global semantic map; the right panel shows the ground layer. Categories include buildings / structures, vehicles, vegetation, and ground.
 
-![新金桥真实 ROSBAG 全局语义地图和地面图层](docs/assets/readme/global_semantic_ground.png)
+![Global semantic map and ground layer reconstructed from the Xinjinqiao ROS recording](docs/assets/readme/global_semantic_ground.png)
 
-*离线建图结果。地面按图像与几何共同支持、仅几何支持分别着色，尚未用于导航可通行性评测。[图片来源与 GIF 制作参数](docs/assets/readme/README.md)。*
+*Offline reconstruction. Ground points supported by both images and geometry are distinguished from those supported by geometry alone. The layer has not been evaluated for navigation traversability. [Media sources and GIF export settings](docs/assets/readme/README.md).*
 
-## 功能
+## Features
 
-- **定位与重定位**：FAST-LIO 建图、地图保存与 ICP 重定位；FAST-LIVO2 提供视觉辅助定位。
-- **对象地图**：掩码投影、跨帧关联、三维观测框，以及按类别 / ID 查询位置与图像。
-- **地图修订**：多视角合并判断、历史点标签修改和新增点分配，提供 CPU 核心演示与离线评测。
-- **地面提取**：结合图像分割和局部重力几何生成地面图层。
+- **Odometry and relocalization:** FAST-LIO mapping, map saving, and ICP relocalization; FAST-LIVO2 adds visual observations.
+- **Object maps:** mask projection, cross-frame association, 3D observation boxes, and location / image queries by category or ID.
+- **Map revision:** multi-view merge decisions, historical point relabeling, and new-point assignment, with a CPU demo and offline evaluation.
+- **Ground extraction:** image segmentation combined with local gravity-aligned geometry.
 
-默认定位后端为 FAST-LIO。LIVO 回环目前仅修正离线地图，论文修订模块也通过离线入口运行。S100 采用板端 LIVO、电脑端语义推理，尚未完成 BPU 部署或语义实时性能评测。
+FAST-LIO is the default odometry backend. LIVO loop closure currently corrects offline maps; the paper's revision module also runs offline. The S100 setup runs LIVO onboard and semantic inference on a companion computer. BPU deployment and real-time semantic performance evaluation remain pending.
 
-### 系统结构
+### Architecture
 
 ```mermaid
 flowchart LR
-    Sensors[相机 / 雷达 / IMU] --> LIVO["FAST-LIVO2<br/>位姿、图像与实测点"]
-    Dataset[公开数据集给定位姿与几何] --> Observations
-    LIVO --> Observations["掩码与描述子<br/>关键帧观测"]
-    Observations --> Backbone["对象关联<br/>CG + history2"]
-    Backbone --> Revision["Ours 离线修订<br/>历史合并判断与局部点分配"]
-    Revision --> Map[对象 ID、点集、位置与证据]
-    LIVO --> Ground["图像分割 + 几何核验<br/>地面图层"]
+    Sensors[Camera / LiDAR / IMU] --> LIVO["FAST-LIVO2<br/>Poses, images, measured points"]
+    Dataset[Dataset poses and geometry] --> Observations
+    LIVO --> Observations["Masks and descriptors<br/>Keyframe observations"]
+    Observations --> Backbone["Object association<br/>CG + history2"]
+    Backbone --> Revision["Ours: offline revision<br/>Merge decisions and local assignment"]
+    Revision --> Map[Object IDs, points, locations, observations]
+    LIVO --> Ground["Image segmentation + geometry<br/>Ground layer"]
 ```
 
-当前 KITTI-360 实验使用 SAM3、SigLIP 和 SegFormer；ROS 语义节点使用 Mask R-CNN，地面分割可选 SegFormer。各入口的输入与依赖见[研究说明](docs/research/README.md)。
+The current KITTI-360 experiments use SAM3, SigLIP, and SegFormer. The ROS semantic node uses Mask R-CNN, with optional SegFormer ground segmentation. See the [research guide](docs/research/README.md) for inputs and dependencies.
 
-## 快速开始
+## Quick start
 
-### 1. 对象修订核心
+### 1. Object revision core
 
-依赖 Python 3.10+ 和 `g++`。此演示在 CPU 上运行，无需 ROS、模型权重或数据集。
+Requires Python 3.10+ and `g++`. This CPU demo needs no ROS installation, model weights, or dataset.
 
 ```bash
 git clone git@github.com:YanYaoyuan/omni_slam.git
@@ -86,11 +90,11 @@ python examples/revision_core_demo.py --output build/demo/revision_core.json
 bash scripts/test_research_core.sh
 ```
 
-演示使用合成对象图，运行多帧合并判断和局部点分配。数据集评测需要另行准备数据与模型，见[复现说明](docs/research/README.md)。
+The demo runs multi-view merge decisions and local point assignment on a synthetic object graph. Dataset evaluation requires separate data and model preparation; see the [reproduction guide](docs/research/README.md).
 
-### 2. 构建 LIVO 与语义消息（ROS 2 Humble）
+### 2. Build LIVO and semantic messages (ROS 2 Humble)
 
-参考环境为 Ubuntu 22.04 / ROS 2 Humble。依赖包括 PCL、Eigen、OpenCV、OpenMP、cv_bridge、rosidl 和 colcon。Sophus 与 Vikit 的固定版本已包含在 `FAST_LIVO2/third_party/`。
+Reference environment: Ubuntu 22.04 / ROS 2 Humble. Dependencies include PCL, Eigen, OpenCV, OpenMP, cv_bridge, rosidl, and colcon. Pinned Sophus and Vikit sources are included in `FAST_LIVO2/third_party/`.
 
 ```bash
 source /opt/ros/humble/setup.bash
@@ -106,72 +110,74 @@ source install/livo_humble/setup.bash
 ros2 interface show omni_slam_interfaces/msg/LivoSemanticFrame
 ```
 
-传感器话题、相机内外参和时间单位必须按实际设备配置。VBot H.265 录包需要先解码为带原始时间戳的校正图像，不能直接当作 LIVO 图像输入。[FAST-LIVO2 移植说明](FAST_LIVO2/README.md)。
+Configure sensor topics, camera calibration, extrinsics, and time units for your hardware. VBot H.265 recordings must first be decoded into rectified images with their original timestamps. See the [FAST-LIVO2 port documentation](FAST_LIVO2/README.md).
 
-### 3. 接入机器人管理器与语义试跑
+### 3. Robot manager and semantic nodes
 
-管理器依赖相邻项目 `omni_tf_manager` 与 `omni_robot_interfaces`，启动前需构建并加载其 overlay。
+The manager depends on the sibling projects `omni_tf_manager` and `omni_robot_interfaces`. Build and source their overlays before launching it.
 
-- [S100 / 电脑分工、标定检查、启动和录包](docs/deployment/s100_livo_semantic_trial.md)
-- [现有 LIO 管理器、VBot 建图与重定位](docs/deployment/lio_manager_quickstart.md)
-- [Manager 接口与后端选择](omni_slam_manager/README.md)
-- [对象查询、三维框与证据重投影](omni_semantic_map/README.md)
-- [Orin 部署](DEPLOY_ORIN.md)
+- [S100 / companion setup, calibration, launch, and recording](docs/deployment/s100_livo_semantic_trial.md)
+- [LIO manager, VBot mapping, and relocalization](docs/deployment/lio_manager_quickstart.md)
+- [Manager interfaces and backend selection](omni_slam_manager/README.md)
+- [Object queries, 3D boxes, and observation reprojection](omni_semantic_map/README.md)
+- [Orin deployment](DEPLOY_ORIN.md)
 
-巡检系统由 Mission 启动 SLAM Manager 与 TF Manager。独立调试可用 `omni_slam_ctl`；已有 Manager 运行时，不要重复启动。
+In the inspection system, Mission starts the SLAM Manager and TF Manager. Use `omni_slam_ctl` for standalone debugging; do not start a second manager while one is running.
 
-## 文档与目录
+## Documentation and layout
 
-| 目录 | 用途 |
+| Directory | Contents |
 | --- | --- |
-| `FAST_LIO/` | 既有 LIO、回环与重定位相关接口 |
-| `FAST_LIVO2/` | 原生 Humble 移植、配置、录包转换与离线地图工具 |
-| `omni_slam_interfaces/` | 管理接口、关键帧与原子语义帧消息 |
-| `omni_slam_manager/` | 后端进程管理、地图资产和状态 |
-| `omni_semantic_map/` | 在线语义消费者、离线对象算法、评测适配与测试 |
-| `examples/` | 无数据集的小型机制演示 |
-| `scripts/benchmarks/` | 数据准备、建图、消融和评分脚本 |
-| `docs/research/` | 当前方法、协议和可复现范围 |
-| `docs/benchmarks/`、`docs/experiments/` | 历史实验文字记录，日期代表当时状态 |
-| `docs/paper/visibility_revision/latex/` | 当前论文、补充材料、固定图表及编译入口 |
-| `docs/deployment/`、`scripts/` | 部署、构建、录包与打包工具 |
+| `FAST_LIO/` | LIO, loop closure, and relocalization interfaces |
+| `FAST_LIVO2/` | Humble port, configuration, recording conversion, and offline map tools |
+| `omni_slam_interfaces/` | Manager interfaces, keyframe messages, and atomic semantic-frame messages |
+| `omni_slam_manager/` | Backend process management, map storage, and status |
+| `omni_semantic_map/` | Online semantic nodes, offline object algorithms, evaluation adapters, and tests |
+| `examples/` | Small demos without dataset dependencies |
+| `scripts/benchmarks/` | Data preparation, mapping, ablations, and scoring |
+| `docs/research/` | Method, protocols, and reproduction requirements |
+| `docs/benchmarks/`, `docs/experiments/` | Dated experiment records |
+| `docs/paper/visibility_revision/latex/` | Paper, supplement, figures, tables, and build entry point |
+| `docs/deployment/`, `scripts/` | Deployment, build, recording, and packaging tools |
 
-## 论文与实验结果
+Most detailed guides are currently in Chinese; commands and configuration names match both README versions.
+
+## Paper and results
 
 **OmniSLAM: Evidence-Authorized Revision of Persistent Object Maps**
 
 Haoxiang Jie<sup>*,†</sup>, Yaoyuan Yan<sup>*</sup>, Zhiyou Heng, Liang Li, Zhaosong Li, Lifeng Liu
 
-<sup>*</sup> Haoxiang Jie 与 Yaoyuan Yan 共同贡献、共同第一作者。<sup>†</sup> 通讯作者：Haoxiang Jie（[jiehaoxiang@bgyfw.com](mailto:jiehaoxiang@bgyfw.com)）。
+<sup>*</sup> Equal contribution, co-first authors. <sup>†</sup> Corresponding author: Haoxiang Jie ([jiehaoxiang@bgyfw.com](mailto:jiehaoxiang@bgyfw.com)).
 
-论文草稿及补充材料提供完整 LaTeX 源码，尚未确定投稿会议。
+[arXiv preprint](https://arxiv.org/abs/2611.30184) · [Paper PDF](https://arxiv.org/pdf/2611.30184). LaTeX sources for the paper and supplement are included in the repository.
 
-[论文与编译入口](docs/paper/README.md) · [图表索引](docs/paper/visibility_revision/latex/FIGURES.md) · [文献核对记录](docs/paper/visibility_revision/latex/REFERENCE_AUDIT.md) · [四窗口完整结果](docs/research/results/reviewer_extension_20261117.json)
+[Paper sources and build](docs/paper/README.md) · [Figure index](docs/paper/visibility_revision/latex/FIGURES.md) · [Reference audit](docs/paper/visibility_revision/latex/REFERENCE_AUDIT.md) · [Four-window results](docs/research/results/reviewer_extension_20261117.json)
 
-KITTI-360 上的建筑 / 车辆实例 AP50:90（百分制）：
+Building / car instance AP50:90 on KITTI-360, reported as percentages:
 
-| 方法 | 0009 / 0010 两窗口均值 | 0003–0006 四窗口均值 |
+| Method | Mean over two windows: 0009 / 0010 | Mean over four windows: 0003–0006 |
 | --- | ---: | ---: |
-| 对象图基线 | 17.259 | 20.263 |
-| 无条件修订 | 17.050 | 23.251 |
+| Object-map baseline | 17.259 | 20.263 |
+| Unconditional revision | 17.050 | 23.251 |
 | **Ours** | **18.762** | **23.171** |
-| Ours 相对基线 | +1.503 | +2.908 |
+| Ours minus baseline | +1.503 | +2.908 |
 
-两组窗口独立统计，使用本地评测适配器，未提交官方测试服务器。四窗口来自开发阶段已使用的序列。收益主要来自建筑；四窗口中无条件修订的均值略高，0004 上 Ours 低于基线。消融中，额外种子帧稳定性检查未带来独立 AP 增益。
+The two groups are evaluated separately with a local adapter; these are not official test-server results. The four spatial holdouts come from sequences used during development. Gains mainly come from buildings. Unconditional revision has a slightly higher four-window mean, and Ours falls below the baseline in 0004. The additional seed-frame stability check gives no independent AP gain in the ablations.
 
-真实录包用于检查地图与系统接入，尚无独立对象标注。Replica、SceneNN 及早期方法的结果见[研究记录](docs/research/README.md#结果与来源)。
+Robot recordings demonstrate mapping and system integration; independent object annotations are not available. Replica, SceneNN, and earlier method results are listed in the [research records](docs/research/README.md#结果与来源).
 
-## 数据、模型与复现范围
+## Data, models, and reproduction
 
-仓库包含代码、配置、测试、论文源码和展示素材。数据集、ROSBAG、模型权重、完整点云和预测缓存需单独准备。
+The repository contains code, configurations, tests, paper sources, and preview media. Datasets, ROS recordings, model weights, full point clouds, and prediction caches must be prepared separately.
 
-现有评测脚本读取实验协议、缓存与文件哈希，部分路径对应原实验环境。复现实验所需输入和适配步骤见[研究说明](docs/research/README.md#复现层级)。
+Evaluation scripts read experiment protocols, caches, and file hashes. Some paths refer to the original experiment environment. See the [reproduction requirements](docs/research/README.md#复现层级) for inputs and adaptation steps.
 
-## 测试与贡献
+## Tests and contributing
 
-- 核心 CPU 回归：`bash scripts/test_research_core.sh`
-- 完整语义研究测试：`PYTHONPATH=omni_semantic_map:scripts/benchmarks python3 -m pytest -q omni_semantic_map/test`，可选依赖与数据集测试见研究说明。
-- ROS / Manager 测试和源码发布检查见 [开发指南](CONTRIBUTING.md)。
-- 已完成的构建与测试见 [验证记录](docs/research/VALIDATION.md)。
+- CPU core tests: `bash scripts/test_research_core.sh`.
+- Full semantic research tests: `PYTHONPATH=omni_semantic_map:scripts/benchmarks python3 -m pytest -q omni_semantic_map/test`. Optional dependencies and dataset tests are described in the research guide.
+- ROS / Manager tests and source checks: [contributing guide](CONTRIBUTING.md).
+- Completed builds and tests: [validation record](docs/research/VALIDATION.md).
 
-各模块沿用其许可证与版权声明，见[第三方来源](THIRD_PARTY.md)。
+Modules retain their respective licenses and copyright notices. See [third-party sources](THIRD_PARTY.md).
