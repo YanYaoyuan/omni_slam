@@ -1,6 +1,6 @@
 # 对象级语义建图研究与复现
 
-截至 2026-11-19，当前方法名为 **Ours / `full_authorization`**。定位支撑对象建图，论文评分单独评价对象地图。本文区分可独立运行的算法内核、依赖外部输入的完整系统，以及已封存的实验记录。
+截至 2026-11-24，当前方法名为 **Ours / `full_authorization`**。定位支撑对象建图，论文评分单独评价对象地图。本文区分可独立运行的算法内核、依赖外部输入的完整系统，以及已封存的实验记录。
 
 ## 方法与代码
 
@@ -73,9 +73,9 @@ python scripts/benchmarks/run_revision_robot.py --help
 | 当前 Ours | KITTI-360 0009 / 0010 | 17.259 提升到 18.762 AP，+1.503 | [主表](../paper/visibility_revision/latex/tables/current/primary.tex) |
 | 因果干预 | 同一预固定输出 | 历史保护与局部归属有收益，额外认证 AP 增量为零 | [消融正文](../paper/visibility_revision/latex/sections/merged/causal_review.tex) |
 | 空间留出扩展 | 已用序列 0003–0006 内新窗口 | +2.908 AP，无条件均值更高 0.080，0004 有退步 | [全部方法摘要](results/reviewer_extension_20261117.json) |
-| 真实机器人 | 车库与室外录包 | 对象地图、图像证据、三维框与地面展示 | [论文机器人档案](../paper/visibility_revision/latex/sections/merged/recording_atlas.tex) |
+| 真实机器人 | 车库与室外录包 | 对象地图、图像证据、三维框与地面展示 | [当前车库对照](../paper/visibility_revision/latex/sections/merged/current_supplement.tex) / [历史录包档案](../paper/visibility_revision/latex/sections/merged/recording_atlas.tex) |
 
-KITTI-360 报告 building/car、本地适配 AP50:90 × 100，未提交官方测试服务器。扩展窗口不是全新序列。不同前端、保留规则、评价域与指标不能直接合并排名。2026-11-19 全文复核已将四窗口扩展合入论文正文和附录 E.3，保持独立表格与协议说明。
+KITTI-360 报告 building/car、本地适配 AP50:90 × 100，未提交官方测试服务器。扩展窗口不是全新序列。不同前端、保留规则、评价域与指标不能直接合并排名。2026-11-24 论文精简版将当前方法的两组窗口结果放入同一张分组表，保留独立协议说明；历史 V1 和系统展示继续在本研究索引保留，未编入当前方法论文。
 
 ## 测试范围
 

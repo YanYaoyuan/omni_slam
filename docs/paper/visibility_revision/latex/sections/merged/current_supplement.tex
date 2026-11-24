@@ -1,85 +1,78 @@
 \clearpage\nobalance\onecolumn
-
 \appendix
 \begin{center}\Large\bfseries Supplementary Material\end{center}
-\section{Controls, Scope, and Reproducibility}\label{app:controls}
-Development and diagnostic results remain separate from prospective primary results. Values are local AP50:90 in percent, not official leaderboard scores.
 
-\begin{minipage}[t]{.49\textwidth}
-\vspace{0pt}
-\centering\small
-\input{tables/current/development}
-\captionof{table}{Exposed development windows. The original gate failed. Identity-only$^*$ also changes local labels of new points; history-only is the cleaner intervention on the old-label prefix. The last two controls were completed in the subsequent factorial audit.}
-\end{minipage}\hfill
-\begin{minipage}[t]{.48\textwidth}
-\vspace{0pt}
-\centering\small
+\section{Surface Proposals and Assignment Details}\label{app:proposals}
+For component $C$ and selected query set $\mathcal Q$ in frame $t$, let $U_{t,\mathcal Q}$ be the union of query masks over the visible measured-source domain $V_t$. A visible cell contributes unit mass, divided among its source pixels through weights $w_{tp}$. The shared proposal score is
+\begin{align}
+F_t(C,\mathcal Q)={}&\sum_{p\in V_t}w_{tp}\,[p\in U_{t,\mathcal Q}]
+             (2[p\in C]-1) \nonumber\\
+ &-\sum_{q\in\mathcal Q}\left[\log_2(1+Q_t)-\log_2 s_{tq}\right],
+\end{align}
+where $Q_t$ is the number of positive-score native queries of the same class. Queries are added greedily while their marginal gain is positive; overlapping masks count a source once. A component is accepted when its pooled utility exceeds $\log_2(K+1)$, where $K$ is the number of geometric components, and it has positive utility in at least three frames. All internal controls use the same accepted components and receiver proposals.
+
+The graph uses 0.20\,m cells, 16-neighbor proposals, and a strict 0.40\,m edge bound. Old-ID footprints require a pure cell. Mixed cells supply no historical identity evidence. A component with old footprints but no usable seed abstains. Mask support is evaluated on measured projections; unobserved space is excluded from the evidence domain. Source additions within 0.05\,m of prior geometry are rejected by the shared proposal stage.
+
+\paragraph{Stability under seed-frame removal.}
+Equation~\ref{eq:certificate} requires two distinct frame groups whose winning-identity seeds are closer than every competing identity. Removing one group leaves at least one winning seed. Removing competing seeds can only increase their nearest distance. The winning label is therefore unchanged under deletion of one seed-frame group, provided the graph and edge weights remain fixed. Pose error, graph changes, and incorrect masks are outside this guarantee.
+
+\section{Evaluation Protocol}\label{app:protocol}
+\paragraph{Prospective windows.}
+Sequences 0009 [778,1026] and 0010 [1872,2033] contain 50 and 34 sampled image--LiDAR pairs. Metadata selection excluded all seven sequences used during development. The full inputs contain 6,007,585 measured sources, with a minimum raw-measurement bound separation of 1,140.14\,m from prior inputs and between the selected windows. Method settings and windows were fixed before processing their images; the eight primary maps were saved before semantic-reference decoding.
+
+The primary adapter follows the upstream train-ID reference encoding and confidence weighting. Nearest-source transfer uses a strict 0.20\,m radius. A canonical raw-class check voids noncanonical aliases while retaining positions and weights. A uniform-score check replaces prediction scores with one. The primary domain has 83 eligible instances and the canonical domain has 74, including uncovered instances in both cases.
+
+\begin{minipage}[t]{.48\textwidth}\vspace{0pt}\centering\small
 \input{tables/current/diagnostics}
-\captionof{table}{New-window diagnostic means. Canonical reference voids noncanonical raw aliases but retains reference positions. Uniform changes only prediction scores to one. Neither replaces primary scoring.}
-\medskip
+\captionof{table}{Prospective-window means under the primary and two diagnostic protocols. AP50:90 in percent.}
+\end{minipage}\hfill
+\begin{minipage}[t]{.48\textwidth}\vspace{0pt}\centering\small
 \input{tables/current/classes}
-\captionof{table}{New-window per-class AP. Building gains account for the aggregate improvement. Car behavior is unchanged in 0010 and slightly worse in 0009.}
+\captionof{table}{Prospective-window per-class AP. Building gains dominate; car AP is unchanged in 0010 and slightly lower in 0009.}
 \end{minipage}
 
-\subsection{Paired interventions}
-Unconditional and history-only share new coordinates, source IDs, labels, and scores; only old labels change. History-only and \ours{} share authorized history; \ours{} further restricts and relabels additions. In development, ``history + witness'' retains parent new labels and applies witness filtering. Its mean nearly equals \ours{} (28.047974 versus 28.048252), so independent benefit from local reassignment was not established there. The original prospective comparison supports the combined write policy. The later exposed-window audit in Appendix~\ref{app:causal} separates local assignment from the additional certificate on new writes.
+\paragraph{Spatial holdouts.}\label{app:extension}
+The extension uses 61 uniformly sampled image--LiDAR pairs per window: 0003 [617,738], 0004 [5930,6119], 0005 [2,357], and 0006 [3251,3634]. These windows come from the annotated static train/validation pool, excluding geometry-training sequences 0000/0002. Their selected trajectory bounds are respectively 448.96, 428.48, 542.49, and 359.98\,m from exposed source bounds and earlier selected windows, exceeding the 300\,m metadata threshold. They are spatial holdouts within used sequences. The pool was expanded after a validation-only metadata search found no qualifying windows.
 
-\subsection{Fixed acceptance rule}
-The gate requires two finite windows; per-window AP/AP50 nonregression; at least one mean AP point; a mean exceeding both controls; at least one added canonical AP50 match and zero lost matches; and nonzero historical edits. Missing-class windows remain NA, without replacement. The two prospective windows satisfy this rule. Development and four-window extension outcomes are reported separately.
+The budget was fixed at four windows, 244 pairs, seven methods, and three scoring protocols. All 28 maps and 84 scores were completed without threshold tuning or window replacement. Window 0003 has one eligible building and no eligible car; its mean uses the building class alone. The four-window mean weights windows equally. Ours performs 44,276 historical source-label edits, gains four canonical AP50 matches, and loses none; all seven methods appear in Table~\ref{tab:results}b.
 
-\subsection{Evaluation-domain and implementation checks}
-Primary IDs reproduce the pinned upstream train-ID encoding. The canonical diagnostic voids noncanonical aliases while retaining reference positions and confidence weights. The adapter fixes the reference-helper interface and compiles the hash-verified public AP/matching kernel. Different inputs, training, and spatial scope prevent direct ranking against official leaderboard entries.
+\section{Development and Selection}\label{app:development}
+The exposed development windows in sequences 0000/0002 yielded the results below. Identity-only$^*$ also changes local labels of new points. History-only changes only the historical-label prefix and is therefore the cleaner control for that decision. ``History + witness'' keeps parent labels on mask-supported additions.
 
-All eight original prospective maps were sealed before their semantic-reference decoding. The later causal controls use already-exposed windows and make no fresh-independence claim. Export arrays and source coordinates were verified. Readout was independently checked by brute force at 16 fixed reference indices per map (128 samples), not exhaustively. All 24 score records and 628 object-by-method IoU entries were replayed; four robot maps and shared kernels were hash verified.
-
-\subsection{Data and execution scope}
-The public inputs contain 6,007,585 measured sources. The minimum raw-measurement bound separation from prior inputs and between the new windows is 1,140.14\,m. This checks local spatial overlap, not pretraining overlap. Metadata-based selection excluded seven exposed sequences. Full-sequence and multi-dataset generalization remain untested.
-
-No new model was trained. All methods share geometry weights fit on exposed 0000/0002 data and cached SAM3, SigLIP, and SegFormer outputs. Inference, mapping, and evaluation run as separate stages; individual timers do not establish system FPS.
-
-\clearpage
-\section{Actual Outdoor Images and Object Geometry}
-\begin{center}\small\input{tables/current/objects}\end{center}
-The table reports best same-class confidence-weighted IoU over the full canonical reference. These cases explain both new AP50 matches and one control-favored outcome; their selection is post hoc. All 74 canonical and 83 primary objects, including uncovered ones, are retained in the accompanying \texttt{data/current/per\_object.json}.
-
-\begin{center}
-\includegraphics[width=\textwidth]{kitti360_0009_rgb_1026.png}
-\includegraphics[width=\textwidth]{kitti360_0010_rgb_2033.png}
-\captionof{figure}{Actual final sampled RGB frames, with visible measured-source projections from all four maps. Colors are predicted IDs, not GT masks. Display transfer uses 0.05\,m; evaluation uses 0.20\,m. A better-looking car overlay in 0010 does not imply improved car AP, which is identical across methods.}
+\begin{center}\small
+\input{tables/current/development}
+\captionof{table}{Development AP50:90. All evaluated variants are retained. These results are separate from the prospective windows and spatial holdouts.}
 \end{center}
 
+The development criterion was not met: Ours improves by only 0.036 mean AP points over the baseline and remains below history-only. The prospective comparison was registered as a bounded replication after that result. Its acceptance rule required finite scores in both windows, per-window AP/AP50 nonregression, at least one mean AP point over the baseline, a higher mean than both controls, an added canonical AP50 match without lost matches, and nonzero historical edits. The two prospective windows satisfy the rule. The spatial extension fails the per-window nonregression and control-superiority conditions. No window was substituted and no per-window winner was chosen as Ours.
+
+The multi-mask cover and best-single-mask control accept the same number of components in the prospective windows (46 and 5). Higher coverage utility on individual frames therefore does not establish an independent map-level gain. During development, history + witness and Ours also have nearly equal means (28.047974 and 28.048252).
+
+\input{sections/merged/causal_review}
+
+\clearpage
+\section{Image Projections and Complete Maps}\label{app:maps}
+The figure compares the same four primary outputs over each complete prospective window. All 74 canonical and 83 primary reference objects remain in the accompanying per-object result file. For the qualitative cases in Figure~\ref{fig:cases}, full-domain IoUs are listed below.
+\begin{center}\small\input{tables/current/objects}\end{center}
+
 \begin{center}
-\includegraphics[width=.94\textwidth]{kitti360_0009_maps.png}
-\includegraphics[width=.94\textwidth]{kitti360_0010_maps.png}
-\captionof{figure}{Full-window maps with shared measured-source bounds within each row. Gray is measured context; colors are predicted objects. Fixed-stride display subsampling limits context to 60,000 and objects to 40,000 points; scoring uses all exported points.}
+\includegraphics[width=.95\textwidth]{kitti360_0009_rgb_1026.png}
+\includegraphics[width=.95\textwidth]{kitti360_0010_rgb_2033.png}
+\includegraphics[width=.90\textwidth]{kitti360_0009_maps.png}
+\includegraphics[width=.90\textwidth]{kitti360_0010_maps.png}
+\captionof{figure}{Prospective KITTI-360 windows. Top: recorded final sampled images and visible measured-source projections for baseline, unconditional, history-only, and Ours. Bottom: the corresponding full-window object maps. Colors denote predicted IDs; gray denotes measured context. Image display uses a 0.05\,m transfer radius, while evaluation uses 0.20\,m. Map display uses fixed-stride subsampling of at most 60,000 context and 40,000 object points; scores use all exported points. Bounds are shared within each window.}
+\label{fig:maps}
 \end{center}
 
 \clearpage
 \section{Garage Integration}\label{app:robot}
+All four methods use the same 330 recorded frames and LIVO outputs. Ours authorizes no historical donor merge in this run. The table counts all exported points and nonempty IDs; the figure's map panels show the vehicle-class subset. The recording has no independent contours or cross-frame object annotations, so these outputs are qualitative integration evidence.
 \begin{center}\small\input{tables/current/robot}\end{center}
-The table uses the same 330 frames and LIVO output. Figure~\ref{fig:robot-current} supplies the exact four-method visual comparison. The retained legacy panels below show baseline, unconditional, \emph{identity-only}, and full \ours. Identity-only is not the history-only control in the table. \ours{} authorizes no historical donor merge here. More points or IDs do not establish higher accuracy.
-
 \begin{center}
-\includegraphics[width=.74\textwidth]{robot_frame_000126.png}
-\captionof{figure}{Actual garage frame and measured projection diagnostic. A qualitative integration example without independent contours or identity GT.}
-\includegraphics[width=.74\textwidth]{robot_vehicles.png}
-\captionof{figure}{Actual garage vehicle-map comparison. Archive visibility is offline; no claim of causal online semantics, S100 runtime, or semantic-accuracy improvement follows.}
-\end{center}
-
-\subsection{Evaluation scope}
-The garage comparison demonstrates that the same revision kernels operate on LIVO outputs. Independent vehicle contours and cross-frame identities are unavailable, so semantic accuracy cannot be measured here. Public-data comparisons, including the completed spatial extension, appear in Appendix~\ref{app:extension}.
-\clearpage
-\subsection{Current table-aligned garage comparison}
-The following figure uses the four sealed maps in the garage table and the same recorded frame 126. History-only uses the authorized old-label prefix and unconditional new geometry; it is not the identity-only control in the retained panels.
-
-\begin{center}
-\includegraphics[width=.97\textwidth]{robot_current_four.png}
-\captionof{figure}{Current baseline, unconditional, history-only, and Ours on the same 330-frame garage map. Left: actual RGB with all-class, measured-depth-gated point projections. Right: predicted vehicle-class points on shared map bounds; gray context is deterministically subsampled to 60,000 points, while vehicle points are unthinned. The repeated identity palette does not establish cross-method physical correspondence. Archive visibility is offline. Vehicle-point counts are 65,189 / 69,458 / 78,074 / 69,776; greater support is not an accuracy measurement.}
+\includegraphics[width=.91\textwidth]{robot_current_four.png}
+\captionof{figure}{Garage frame 126 and the corresponding object maps. Left: RGB with measured-depth-gated point projections. Right: predicted vehicle points within shared map bounds. Context is subsampled to 60,000 points; vehicle points are unthinned. Vehicle counts are 65,189 / 69,458 / 78,074 / 69,776 for baseline / unconditional / history-only / Ours. Colors distinguish predicted IDs within each map and do not establish cross-method physical correspondence. The offline run uses the full measurement archive.}
 \label{fig:robot-current}
 \end{center}
 
-\input{sections/merged/causal_review}
-\input{sections/merged/v1_supplement}
-\input{sections/merged/recording_atlas}
-
-\input{sections/merged/historical_architectures}
+\paragraph{Reproducibility and tool use.}
+Tables and visualizations use saved predictions; protocol hashes and per-object results accompany the source. OpenAI Codex assisted with implementation, experiment orchestration, result inspection, literature checks, figures, and writing. Photographs and point clouds are recorded data.

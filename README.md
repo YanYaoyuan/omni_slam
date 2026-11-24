@@ -4,7 +4,7 @@ ROS 2 Humble 下的激光 / 视觉惯性建图、重定位与对象级语义地�
 
 [论文与最新结果](#论文与实验结果) · [实验展示](#实验展示) · [系统结构](#系统结构) · [快速开始](#快速开始)
 
-**更新（2026-11-19）**：已完成主稿与补充材料的全文修订，合入四个 KITTI-360 空间留出窗口结果，并核对 24 条参考文献。[论文入口](docs/paper/README.md) · [文献核对记录](docs/paper/visibility_revision/latex/REFERENCE_AUDIT.md)
+**更新（2026-11-24）**：论文已围绕历史身份修订与新增点归属重新组织，完整稿精简为 10 页、4 幅论证图、15 条参考文献。两组 KITTI-360 评测、机制对照和车库实验保留。[论文入口](docs/paper/README.md) · [精简说明](docs/paper/visibility_revision/latex/FOCUS_REVISION.md)
 
 ## 实验展示
 
@@ -145,7 +145,7 @@ Haoxiang Jie<sup>*,†</sup>, Yaoyuan Yan<sup>*</sup>, Zhiyou Heng, Liang Li, Zh
 
 <sup>*</sup> Haoxiang Jie 与 Yaoyuan Yan 共同贡献、共同第一作者。<sup>†</sup> 通讯作者：Haoxiang Jie（[jiehaoxiang@bgyfw.com](mailto:jiehaoxiang@bgyfw.com)）。
 
-当前为研究稿，尚未指定投稿会议。主稿与补充材料连续分页，保留 **23 幅实验与架构图**，共有 **24 条参考文献**。四窗口扩展已合入正文及附录，完整 LaTeX 源码可独立编译。
+当前为研究稿，尚未指定投稿会议。主稿与补充材料连续分页，包含 **4 幅方法与实验图**、**15 条参考文献**。完整稿共 **10 页**。四窗口扩展与两窗口主评测分别报告，完整 LaTeX 源码可独立编译。
 
 [论文与编译入口](docs/paper/README.md) · [图表索引](docs/paper/visibility_revision/latex/FIGURES.md) · [文献核对记录](docs/paper/visibility_revision/latex/REFERENCE_AUDIT.md) · [四窗口完整结果](docs/research/results/reviewer_extension_20261117.json)
 

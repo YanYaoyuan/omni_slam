@@ -1,71 +1,50 @@
-\clearpage
 \section{Controlled Output Interventions}\label{app:causal}
-The interventions were fixed on November 17, 2026, before their scores were computed. Five exports per previously evaluated window vary selected output decisions while holding weights, thresholds, proposals, and the original maps fixed. They measure conditional effects on the existing windows.
+The five interventions per prospective window were specified after the primary results were inspected and before intervention scoring. They hold weights, thresholds, proposals, and original predictions fixed. Their effects are conditional on those decisions.
 
-\subsection{Interventions and their estimands}
-Old-point coordinates and ordering are invariant. ``Ours new'' copies Ours appended sources, coordinates, labels, and ranking metadata. Two controls replace only the old-label prefix with baseline or unconditional labels. They estimate historical-label effects conditional on fixed additions, not the total effect of rerunning dependent stages.
+\paragraph{Historical-label controls.}
+``Ours new'' copies Ours appended sources, coordinates, labels, and ranking metadata. Replacing only the historical-label prefix with either baseline or unconditional labels measures the effect of old assignments at fixed new geometry. Old-point coordinates and ordering are unchanged.
 
-``Witness'' keeps direct witnessed parent additions with parent labels, paired with either baseline or Ours history. ``Nearest'' fixes Ours history and assigns witnessed additions to the unique nearest seed identity, without the second seed-frame requirement on new writes. Historical authorization and its local certificate remain fixed. All controls share Ours classification metadata and postprocessing.
+\paragraph{New-point controls.}
+``Witness'' keeps directly mask-supported parent additions with their parent labels, paired with either preserved or authorized history. ``Nearest'' fixes Ours history and assigns supported additions to the unique nearest seed identity without the second seed-frame requirement on new points. Historical authorization, including its local check, remains fixed. All controls share the Ours classification metadata and postprocessing.
 
 \begin{center}\small
 \input{tables/current/causal_controls}
-\captionof{table}{All additional export interventions and the fixed Ours result. Values are primary AP50:90 in percent. These interventions supplement the original four-method table; none replaces the predeclared method.}
+\captionof{table}{All controlled output interventions, AP50:90 in percent. Only the operations specified above vary.}
 \end{center}
 
-Ours minus preserved-history/Ours-new is +0.161 / +0.000 AP points in 0009/0010. Ours minus unconditional-history/Ours-new is +0.073 / +2.778. The witness-history versus witness-preservation contrast is +0.141 / +0.000. These conditional effects need not sum to the original baseline-to-Ours gain. In particular, abstaining from an old edit can be useful even when the number of executed old edits is zero.
+For 0009, the nearest-seed control retains 35 sources rejected by Ours and differs at five reference positions, yet AP is equal. For 0010, its source set, labels, and reference predictions are identical to Ours. The witness-history versus witness-preservation contrast is +0.141 / +0.000 AP points in 0009/0010. These paired effects depend on which additions are held fixed and need not sum to the total baseline-to-Ours change.
 
-Ours versus witness-history improves by +0.097 / +1.389 points. The nearest control attains the same AP as Ours in both windows. In 0009 it retains 35 sources that Ours rejects and differs at five reference positions; in 0010 its source set, labels, and reference predictions are identical. Equal scores therefore have different explanations across the two windows. The audit establishes no extra AP value for the new-write stability certificate; it does not remove the certificate from historical authorization or test pose-noise robustness.
+\subsection{Interpreting historical edits}
+Each baseline predicted ID is matched to the same-class canonical reference instance with maximum confidence-weighted intersection; ties use the lower reference ID. Multiple fragments may match the same instance, and IDs without same-class overlap remain unmapped. This correspondence is then held fixed across variants. Each reference point retains its nearest baseline source within 0.20\,m, and only the historical label at that source changes.
 
-\subsection{Historical changes against a fixed reference correspondence}
-We first map each baseline predicted ID to the same-class canonical GT instance with maximum confidence-weighted intersection, using the lower GT ID to break ties. Multiple predicted fragments may map to the same GT. A prediction with no same-class overlap is unmapped. This correspondence is frozen and is never fitted separately to each variant. Each reference point also retains its nearest baseline source within the strict 0.20\,m transfer radius. Only the historical label at that fixed source is changed in this diagnostic.
-
-For known GT and mapped endpoints, wrong-to-correct is a correction; correct-to-wrong is damage; correct-to-correct is same-object consolidation; wrong-to-wrong remains unresolved. Missing endpoint correspondence and reference void are separate categories. The numbers below are confidence-weighted reference masses, \emph{not} direct source-point correctness rates. No GT correspondence is used to generate a map.
+For mapped endpoints, wrong-to-correct transitions are corrections, correct-to-wrong transitions are damage, and correct-to-correct transitions consolidate fragments of the same reference object. Wrong-to-wrong transitions remain unresolved. Missing endpoint correspondences and void reference points are reported separately. Counts other than ``Old edits'' are confidence-weighted reference mass, rather than source-point accuracy.
 
 \begin{center}\footnotesize
 \input{tables/current/history_correctness}
-\captionof{table}{Fixed-correspondence historical outcomes. ``Old edits'' counts source points; all remaining numeric columns measure reference confidence mass. Reference void mass is zero in these rows. Unknown endpoints are not treated as correct or incorrect.}
+\captionof{table}{Historical outcomes under a fixed baseline-to-reference correspondence. Unknown endpoints are excluded from correct/incorrect categories.}
 \end{center}
 
-The two authorized transitions in 0009 are $27\!\to\!17$ (8,745 sources; both mapped to building 2168) and $36\!\to\!48$ (4,110 sources; both mapped to building 2486). They consolidate fragments. Zero measured damage under this correspondence is not proof that every edited source is correct: 2.736 reference mass remains wrongly assigned. The unconditional 0010 transition targets ID 6, absent from the baseline correspondence, so its 3,552.226 mass is unknown here. Its AP cost is established by the fixed-new-geometry intervention, not by calling those unmapped points erroneous.
+The authorized 0009 transitions are $27\!\to\!17$ (8,745 sources, building 2168) and $36\!\to\!48$ (4,110 sources, building 2486). Both consolidate fragments of the same object; 2.736 reference mass remains wrongly assigned. The unconditional 0010 transition targets ID 6, which is absent from the baseline correspondence, leaving 3,552.226 reference mass unknown in this diagnostic. Its effect on AP is measured by the fixed-new-geometry intervention in Table~\ref{tab:causal}.
 
-\clearpage
-\section{Execution Details and Spatial Extension}\label{app:extension}
-\subsection{Frozen backbone and timing scope}
-The shared backbone uses SAM3, SigLIP, history2 association, SegFormer, and intrinsic-geometry weights fitted on exposed 0000/0002 data. This audit performs no fitting or model inference. Artifact paths and hashes are in \texttt{data/current/protocol.json} and \texttt{data/review\_20261117/}. Scientific thresholds, observations, and transforms are shared.
-
-The CPU replay uses an AMD Ryzen 9 9950X. The graph column includes both native multi-source distance searches and the certificate calculation on a cached graph; the pair column replays decisions on cached per-view evidence. These are one-shot component timings, not averaged end-to-end latency. The preparation column comes from the earlier observation-preparation run and is not added to the new timers as if measured in one execution.
+\section{Runtime and External Comparison}\label{app:runtime}
+\subsection{Revision runtime}
+On an AMD Ryzen 9 9950X, cached graph assignment takes 117.66\,ms for 0009 and 17.33\,ms for 0010. The graph timer includes both native multi-source distance searches and the certificate calculation. The pair timer evaluates merge decisions from cached per-view evidence. Model inference, projection, proposal construction, loading, and export are excluded. These are single CPU runs rather than end-to-end latency estimates.
 
 \begin{center}\small
 \input{tables/current/runtime_review}
-\captionof{table}{Current revision computation and problem sizes. Graph edges are directed. The graph and seed inputs are already prepared; model inference, projection, proposal construction, loading, and export are excluded from the graph timer.}
+\captionof{table}{Revision input sizes and component timings. Edges are directed. Prior preparation was measured in a separate run and is not added to the replay timers.}
 \end{center}
 
-The audit driver's peak resident memory is 198.4\,MiB, a process-wide high-water mark across the two cached replays, not isolated module memory. Exporting each controlled map takes approximately 0.286--0.290\,s in 0009 and 0.088--0.089\,s in 0010. The native nearest-owner distances and certificate arrays reproduce the archived arrays exactly. All ten export hashes and original inputs are verified, with an independent brute-force readout check at 16 fixed reference positions per export (160 checks total). These checks verify implementation and provenance, not semantic accuracy or S100 performance.
+The replay driver's peak resident memory is 198.4\,MiB across the two cached runs. Map export takes 0.286--0.290\,s for 0009 and 0.088--0.089\,s for 0010. Native distances and certificate arrays reproduce the archived results exactly. The geometry weights were fitted on exposed 0000/0002 data; neither the replay nor the extension refits them.
 
-\subsection{External algorithm-core diagnostic}
-We additionally run the official MaskClustering graph construction, iterative view-consensus clustering, and postprocessing code through a shared-source CPU adapter. Six upstream files are pinned; device replacements and the unused backprojection import are the only code substitutions. Inputs are disjoint highest-score native SAM3 query tokens on the same measured sources, using the existing causal visibility cache. Query-mask scores supply the building/car class readout. This differs from the original CropFormer~\cite{cropformer}/OpenCLIP~\cite{openclip} frontend and from the internal backbone's classification readout. It is an external algorithm-core diagnostic, not a native full-pipeline reproduction or an official benchmark entry.
+\subsection{MaskClustering core adaptation}\label{app:external}
+We run the official MaskClustering graph construction, iterative view-consensus clustering, and postprocessing code through a CPU adapter. Six upstream files are pinned; only device substitutions and an unused backprojection import are changed. Inputs are disjoint highest-score SAM3 query supports on the same measured sources, using the causal visibility cache. Query scores provide the building/car readout. This replaces the native CropFormer~\cite{cropformer}/OpenCLIP~\cite{openclip} frontend and also differs from the internal backbone's semantic readout.
 
-The upstream ScanNet defaults are fixed: visible/undersegmentation ratios 0.3, consensus 0.9, contained-mask ratio 0.8, point-filter ratio 0.5, DBSCAN radius 0.1\,m with four minimum points, two supporting masks, and overlap merge ratio 0.8. Empty graphs export no clusters. No outdoor threshold sweep is performed. Native overlapping supports are saved separately; the same nearest-map readout resolves exported source ties in stable object order.
+We retain the upstream ScanNet defaults: visible and undersegmentation ratios 0.3, consensus 0.9, contained-mask ratio 0.8, point-filter ratio 0.5, DBSCAN radius 0.1\,m with four minimum points, two supporting masks, and overlap merge ratio 0.8. Empty graphs export no clusters. Source ties use stable object order in the nearest-map readout.
 
 \begin{center}\small
 \input{tables/current/external_core}
-\captionof{table}{MaskClustering core with shared source-token adaptation, AP in percent. The frontend and class readout differ from the native pipeline.}
+\captionof{table}{MaskClustering core adaptation on the prospective windows. AP is reported in percent; the four-window extension is included in Table~\ref{tab:results}b.}
 \end{center}
 
-The adapter yields 2,542 / 662 intermediate clusters and 98 / 23 final objects. Severe fragmentation and low AP indicate an adaptation limitation, not superiority to native MaskClustering. Indoor defaults and changed inputs/readout can disadvantage it.
-
-\clearpage
-\subsection{Four-window spatial holdouts}
-The extension uses 61 uniformly sampled image--LiDAR pairs in each of four windows: 0003 [617,738], 0004 [5930,6119], 0005 [2,357], and 0006 [3251,3634]. Selection used trajectory metadata from the annotated static train/validation pool, excluding geometry-training sequences 0000/0002. The selected trajectory bounds were more than 300\,m from exposed source bounds and earlier selected windows; their minimum metadata distances were 448.96, 428.48, 542.49, and 359.98\,m. These are spatial holdouts within previously exposed sequences. They are reported separately from the two prospective windows.
-
-The original validation-only search found no qualifying windows; the pool amendment and selection records are retained. The method and budget were fixed before extension inference: four windows, 244 input pairs, seven methods, 28 maps, and 84 scores. All conditions completed without threshold tuning or replacement of windows lacking a class. Window 0003 contains one eligible building and no eligible car; its class mean therefore includes only the building class, rather than imputing a zero car score.
-
-\begin{center}\small
-\input{tables/current/spatial_holdout}
-\captionof{table}{Completed spatial extension: primary AP50:90 (\%). All seven methods are included. The shaded row is Ours. MaskClustering uses the shared-source core adaptation described above. Missing classes are excluded from the window class mean; the final column averages the four windows equally.}
-\label{tab:extension}
-\end{center}
-
-Ours improves mean AP by 2.908 points over the strong baseline, gains four canonical AP50 matches, and loses none. It performs 44,276 historical source-label edits. However, its AP falls by 0.557 points in 0004, and its mean is 0.080 points below unconditional revision. Thus the extension fails the predeclared requirements for per-window nonregression and superiority to both controls. Nearest-seed assignment has the same primary AP as Ours in all four windows. The result supports an average gain over the backbone, with no additional AP benefit from the new-write certificate.
-
-The complete result file, including primary, canonical-class, and uniform-score protocols, is supplied as \texttt{data/review\_20261119/extension.json}. It records the frozen protocol and map-seal hashes. The extension includes 448 sampled brute-force checks of reference readout. These checks establish implementation consistency rather than statistical independence or semantic correctness.
+The adapter yields 2,542 / 662 intermediate clusters and 98 / 23 final objects on 0009/0010. Fragmentation is severe and AP is low. Because the inputs and readout have changed and indoor defaults are retained, this comparison diagnoses the adaptation; it cannot establish superiority over the native MaskClustering pipeline.

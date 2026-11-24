@@ -1,4 +1,4 @@
-\begin{thebibliography}{24}
+\begin{thebibliography}{15}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -103,15 +103,6 @@ Chunran Zheng, Wei Xu, Zuhao Zou, Tong Hua, Chongjian Yuan, Dongjiao He,
 \newblock \emph{IEEE Transactions on Robotics}, 41:\penalty0 326--346, 2025.
 \newblock \doi{10.1109/TRO.2024.3502198}.
 
-\bibitem[Liu et~al.(2024)Liu, Zeng, Ren, Li, Zhang, Yang, Jiang, Li, Yang, Su,
-  Zhu, and Zhang]{gdino}
-Shilong Liu, Zhaoyang Zeng, Tianhe Ren, Feng Li, Hao Zhang, Jie Yang, Qing
-  Jiang, Chunyuan Li, Jianwei Yang, Hang Su, Jun Zhu, and Lei Zhang.
-\newblock {Grounding DINO}: Marrying {DINO} with grounded pre-training for
-  open-set object detection.
-\newblock In \emph{European Conference on Computer Vision}, 2024.
-\newblock URL \url{https://arxiv.org/abs/2303.05499}.
-
 \bibitem[Liao et~al.(2023)Liao, Xie, and Geiger]{kitti}
 Yiyi Liao, Jun Xie, and Andreas Geiger.
 \newblock {KITTI-360}: A novel dataset and benchmarks for urban scene
@@ -120,29 +111,6 @@ Yiyi Liao, Jun Xie, and Andreas Geiger.
   Intelligence}, 45:\penalty0 3292--3310, 2023.
 \newblock \doi{10.1109/TPAMI.2022.3179507}.
 \newblock URL \url{https://www.cvlibs.net/datasets/kitti-360/}.
-
-\bibitem[Hua et~al.(2016)Hua, Pham, Nguyen, Tran, Yu, and Yeung]{scenenn}
-Binh-Son Hua, Quang-Hieu Pham, Duc~Thanh Nguyen, Minh-Khoi Tran, Lap-Fai Yu,
-  and Sai-Kit Yeung.
-\newblock {SceneNN}: A scene meshes dataset with annotations.
-\newblock In \emph{International Conference on 3D Vision (3DV)}, 2016.
-\newblock URL \url{https://hkust-vgd.github.io/scenenn/}.
-
-\bibitem[Ravi et~al.(2025)]{sam2}
-Nikhila Ravi et~al.
-\newblock {SAM 2}: Segment anything in images and videos.
-\newblock In \emph{International Conference on Learning Representations}, 2025.
-\newblock URL \url{https://arxiv.org/abs/2408.00714}.
-
-\bibitem[Kirillov et~al.(2019)Kirillov, He, Girshick, Rother, and
-  Doll{\'a}r]{pq}
-Alexander Kirillov, Kaiming He, Ross Girshick, Carsten Rother, and Piotr
-  Doll{\'a}r.
-\newblock Panoptic segmentation.
-\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
-  Recognition}, pages 9404--9413, 2019.
-\newblock URL
-  \url{https://openaccess.thecvf.com/content_CVPR_2019/html/Kirillov_Panoptic_Segmentation_CVPR_2019_paper.html}.
 
 \bibitem[Qi et~al.(2023)Qi, Kuen, Shen, Gu, Li, Guo, Jia, Lin, and
   Yang]{cropformer}
@@ -160,45 +128,5 @@ Lu~Qi, Jason Kuen, Tiancheng Shen, Jiuxiang Gu, Wenbo Li, Weidong Guo, Jiaya
 \newblock Software, n.d.
 \newblock URL \url{https://github.com/mlfoundations/open_clip}.
 \newblock Accessed November 19, 2026.
-
-\bibitem[{Point Cloud Library}(n.d.)]{sor}
-{Point Cloud Library}.
-\newblock Removing outliers using a {StatisticalOutlierRemoval} filter.
-\newblock PCL documentation, n.d.
-\newblock URL
-  \url{https://pointclouds.org/documentation/tutorials/statistical_outlier.html}.
-\newblock Accessed November 19, 2026.
-
-\bibitem[Straub et~al.(2019)]{replica}
-Julian Straub et~al.
-\newblock The {Replica} dataset: A digital replica of indoor spaces.
-\newblock arXiv:1906.05797, 2019.
-\newblock URL \url{https://arxiv.org/abs/1906.05797}.
-
-\bibitem[Cordts et~al.(2016)Cordts, Omran, Ramos, Rehfeld, Enzweiler, Benenson,
-  Franke, Roth, and Schiele]{cityscapes}
-Marius Cordts, Mohamed Omran, Sebastian Ramos, Timo Rehfeld, Markus Enzweiler,
-  Rodrigo Benenson, Uwe Franke, Stefan Roth, and Bernt Schiele.
-\newblock The {Cityscapes} dataset for semantic urban scene understanding.
-\newblock In \emph{IEEE Conference on Computer Vision and Pattern Recognition},
-  2016.
-\newblock URL \url{https://www.cityscapes-dataset.com/}.
-
-\bibitem[Schmid et~al.(2022)Schmid, Delmerico, Sch{\"o}nberger, Nieto,
-  Pollefeys, Siegwart, and Cadena]{flat}
-Lukas Schmid, Jeffrey Delmerico, Johannes Sch{\"o}nberger, Juan Nieto, Marc
-  Pollefeys, Roland Siegwart, and Cesar Cadena.
-\newblock Panoptic multi-{TSDFs}: A flexible representation for online
-  multi-resolution volumetric mapping and long-term dynamic scene consistency.
-\newblock In \emph{IEEE International Conference on Robotics and Automation},
-  pages 8018--8024, 2022.
-\newblock \doi{10.1109/ICRA46639.2022.9811877}.
-\newblock URL \url{https://github.com/ethz-asl/panoptic_mapping}.
-
-\bibitem[Oquab et~al.(2023)]{dinov2}
-Maxime Oquab et~al.
-\newblock {DINOv2}: Learning robust visual features without supervision.
-\newblock arXiv:2304.07193, 2023.
-\newblock URL \url{https://arxiv.org/abs/2304.07193}.
 
 \end{thebibliography}
