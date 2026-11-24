@@ -1,21 +1,23 @@
-# Benchmark 执行器索引
+# 评测脚本
 
-本目录保存按实验日期和假设演进的执行器。当前主线见 [研究说明](../../docs/research/README.md)，不要按文件名相似程度选择“最新算法”。大部分脚本绑定封存协议、缓存和输出哈希，历史文件名不是通用配置接口。
+当前对象地图修订实验使用以下入口。运行条件与数据准备见[研究说明](../../docs/research/README.md)。
 
-## 当前主线
+| 脚本 | 用途 |
+| --- | --- |
+| `run_revision_authorization.py` | 开发窗口上的历史合并判断与局部点分配 |
+| `run_revision_assessment.py` | 两个预先选定的新窗口评测 |
+| `review_causal_revision.py` | 固定地图输出的机制消融 |
+| `run_reviewer_extension.py` | 四窗口扩展、内部对照与外部方法核心适配 |
+| `run_revision_robot.py` | 车库录包离线评测 |
+| `evaluate_kitti360_development.py` | KITTI-360 本地评分适配 |
 
-- `run_revision_assessment.py`：两个预固定新窗口的完整修订验证。
-- `run_revision_authorization.py`：历史身份授权与局部写入的核心实验驱动。
-- `review_causal_revision.py`：固定地图输出的机制干预。
-- `run_reviewer_extension.py`：四窗口扩展，内部机制对照与外部核心适配。
-- `run_revision_robot.py`：机器人车库的同版本离线验证。
-- `evaluate_kitti360_development.py`：本地评价适配器。
+这些脚本读取对应实验的协议、缓存和文件哈希，部分路径指向原运行环境。先通过 `--help` 查看参数，再准备输入；新数据或新配置使用独立输出目录。`build/` 和 `docs/reports/` 中的缓存、生成报告不随 Git 分发。
 
-## 历史与辅助
+## 其他实验
 
-- `run_visibility_cleanup.py`、`visibility_independent_*`：早期固定身份 V1。
-- `run_public_history_graph.py`、共享前端相关脚本：对象图强基线研究。
-- `train_*memory*`、`run_vggt_*`、DINO 相关脚本：独立研究分支。
-- `prepare_*`、`verify_*`、`audit_*`、`build_*report*`：数据准备、封存检查、诊断与报告。
+- `run_visibility_cleanup.py`、`visibility_independent_*`：固定身份的 V1 几何修订。
+- `run_public_history_graph.py` 及共享前端脚本：对象图基线对比。
+- `train_*memory*`、`run_vggt_*` 及 DINO 脚本：学习式记忆与视觉特征实验。
+- `prepare_*`、`verify_*`、`audit_*`、`build_*report*`：数据准备、完整性检查、诊断和报告生成。
 
-保留原路径和源码是为了核对已运行实验的哈希。新环境首先运行仓库根目录的核心演示与测试，再按外部输入准备情况适配完整执行器。`build/`、`docs/reports/` 中的缓存和生成报告不随 Git 提交。
+历史脚本保留原版本，用于核对已有结果。

@@ -1,59 +1,58 @@
-# omni_slam
+# OmniSLAM
 
-ROS 2 Humble 下的激光 / 视觉惯性建图、重定位与对象级语义地图研究工程。项目主线是让机器人保留可查询、可追溯的对象地图：定位提供位姿和实测几何，视觉模型提供掩码与语义，对象关联维护身份，证据驱动的修订模块决定何时修改历史归属与写入新增表面。
+OmniSLAM 是一个基于 ROS 2 Humble 的对象级语义建图项目，集成激光 / 视觉惯性定位、跨帧对象关联和地图查询。地图中的每个对象保存三维点集、位置和图像观测，可按类别或 ID 查询。
 
-[论文与最新结果](#论文与实验结果) · [实验展示](#实验展示) · [系统结构](#系统结构) · [快速开始](#快速开始)
+对象地图修订模块利用多帧掩码判断历史对象是否应合并，再根据局部几何将新增实测点分配给对象。定位与在线语义节点用于机器人接入，修订模块提供独立的离线评测入口。
 
-**更新（2026-11-24）**：论文已围绕历史身份修订与新增点归属重新组织，完整稿精简为 10 页、4 幅论证图、15 条参考文献。两组 KITTI-360 评测、机制对照和车库实验保留。[论文入口](docs/paper/README.md) · [精简说明](docs/paper/visibility_revision/latex/FOCUS_REVISION.md)
+[实验展示](#实验展示) · [快速开始](#快速开始) · [实验结果](#论文与实验结果) · [文档](#文档与目录)
 
 ## 实验展示
 
-### 车库 · 从视觉观测到对象地图
+### 车库建图
 
-相机图像、LIVO 视觉关键点、车辆识别与逐帧点云累积，同屏展示真实 **rosbag2245** 回放。
+`rosbag2245` 回放：相机图像、LIVO 视觉关键点、车辆识别和点云累积。
 
 ![车库实验加速回放：相机、视觉关键点、车辆识别和逐帧点云地图](docs/assets/readme/garage_mapping.gif)
 
-*约 20 秒循环；原汇报视频再加速 6×，相对采集时间约 30×。右下地图按高度着色，车辆对象地图见下图。*
+*约 20 秒，相对采集时间加速约 30×；右下点云按高度着色。*
 
 ![Ours candidate 的车库车辆对象地图，不同颜色表示预测对象身份，灰色为环境点云](docs/assets/readme/garage_vehicle_objects.png)
 
-**车辆对象地图｜Ours candidate。** 彩色点表示预测车辆对象，灰色点为环境；颜色用于区分对象身份，调色板会循环。此图来自论文中的同一份封存结果，展示车辆在全局地图中的位置与几何分布；真实车库尚无独立对象标注。
+早期车库实验的车辆对象地图。彩色点区分预测对象，灰色点表示环境，调色板循环使用。图中的 `Ours candidate` 为该次实验版本；当前修订方法的四组对照见[论文补充材料](docs/paper/README.md)。
 
-### 室外 · 三维目标框与地面分割
+### 室外目标与地面分割
 
-图像目标检测、地面候选分割、实测深度支持和三维地图联动展示。
+图像中的目标和地面候选投影到实测点云，生成三维观测框与地面图层。
 
 ![室外实验加速回放：目标识别、地面分割、三维观测框和地图累积](docs/assets/readme/outdoor_objects_ground.gif)
 
-*约 21 秒循环；原汇报视频再加速 8×，相对采集时间约 80×。GIF 是实验回放，不代表算法处理帧率。两段视频均来自 2026-11-06 的 LIVO 语义集成实验，当前论文 Ours 的结果单独标注。*
+*约 21 秒，相对采集时间加速约 80×。两段 GIF 来自 2026-11-06 的 LIVO 语义集成实验，播放速度不表示处理帧率。*
 
 <details>
-<summary><strong>展开查看：对象三维框、位置查询与图像证据</strong></summary>
+<summary>对象查询示例</summary>
 
 ![门入口对象的三维观测框、世界坐标、观测次数及对应图像证据](docs/assets/readme/object_query_3d.png)
 
-选择对象后查看三维观测框、位置、观测次数与证据图。框表示已观测表面的范围，不等于完整物体尺寸。
+选择对象可查看位置、观测次数与原始图像。三维框包围已观测表面。
 
 </details>
 
-### 新金桥 · 全局语义地图与地面图层
+### 新金桥全局语义地图
 
-**5,345,591 个地图点 · 120,529 个地面点。** 左图展示完整语义地图，右图展示地面证据与实测雷达点；包含建筑 / 结构、车辆、植被与地面图层。
+地图包含 5,345,591 个点，其中地面点 120,529 个。左侧为全局语义地图，右侧为地面图层；类别包括建筑 / 结构、车辆、植被和地面。
 
 ![新金桥真实 ROSBAG 全局语义地图和地面图层](docs/assets/readme/global_semantic_ground.png)
 
-*离线全局结果；图像与几何共同支持的地面、仅几何支持的地面分别着色。地面图层不等同于已验证的导航可通行区域。点击图片可查看大图。[素材来源与 GIF 生成方式](docs/assets/readme/README.md)。*
+*离线建图结果。地面按图像与几何共同支持、仅几何支持分别着色，尚未用于导航可通行性评测。[图片来源与 GIF 制作参数](docs/assets/readme/README.md)。*
 
-## 当前能力
+## 功能
 
-| 路径 | 已有实现 | 当前边界 |
-| --- | --- | --- |
-| LIO 与重定位 | FAST-LIO、地图保存、先验地图重定位、管理器与 TF 接口 | 现有部署默认后端 |
-| 视觉辅助定位 | FAST-LIVO2 原生 ROS 2 Humble 移植、VBot 输入、关键帧与语义消息 | LIVO 在线回环后端尚未接通，离线修正单列 |
-| 对象语义试跑 | 目标掩码、三维观测框、跨帧记录、位置与证据图查询 | 观测框不是完整物体尺寸，尚无 S100 语义实时性能结论 |
-| 地面图层 | 图像地面候选与局部重力几何核验 | 不是已验证的可通行性 / 导航代价地图 |
-| 论文 Ours | 历史修改授权、局部对象身份与新增实测点写入 | 离线 benchmark 和车库集成，未自动替换在线关联 |
+- **定位与重定位**：FAST-LIO 建图、地图保存与 ICP 重定位；FAST-LIVO2 提供视觉辅助定位。
+- **对象地图**：掩码投影、跨帧关联、三维观测框，以及按类别 / ID 查询位置与图像。
+- **地图修订**：多视角合并判断、历史点标签修改和新增点分配，提供 CPU 核心演示与离线评测。
+- **地面提取**：结合图像分割和局部重力几何生成地面图层。
+
+默认定位后端为 FAST-LIO。LIVO 回环目前仅修正离线地图，论文修订模块也通过离线入口运行。S100 采用板端 LIVO、电脑端语义推理，尚未完成 BPU 部署或语义实时性能评测。
 
 ### 系统结构
 
@@ -62,19 +61,19 @@ flowchart LR
     Sensors[相机 / 雷达 / IMU] --> LIVO["FAST-LIVO2<br/>位姿、图像与实测点"]
     Dataset[公开数据集给定位姿与几何] --> Observations
     LIVO --> Observations["掩码与描述子<br/>关键帧观测"]
-    Observations --> Backbone["对象图强基线<br/>CG + history2"]
-    Backbone --> Revision["Ours<br/>历史授权与局部身份写入"]
+    Observations --> Backbone["对象关联<br/>CG + history2"]
+    Backbone --> Revision["Ours 离线修订<br/>历史合并判断与局部点分配"]
     Revision --> Map[对象 ID、点集、位置与证据]
     LIVO --> Ground["图像分割 + 几何核验<br/>地面图层"]
 ```
 
-室内共享前端实验使用 SAM2.1 / SigLIP，当前室外论文实验使用 SAM3 / SigLIP。DINO、注意力和 VGGT 保留为研究分支，不混入当前主结果。机器人与公开数据集的输入、定位和评价范围分别记录。
+当前 KITTI-360 实验使用 SAM3、SigLIP 和 SegFormer；ROS 语义节点使用 Mask R-CNN，地面分割可选 SegFormer。各入口的输入与依赖见[研究说明](docs/research/README.md)。
 
 ## 快速开始
 
-### 1. 只运行对象修订核心（无需 ROS、GPU、模型或数据集）
+### 1. 对象修订核心
 
-适用 Python 3.10+，需 `g++`：
+依赖 Python 3.10+ 和 `g++`。此演示在 CPU 上运行，无需 ROS、模型权重或数据集。
 
 ```bash
 git clone git@github.com:YanYaoyuan/omni_slam.git
@@ -87,7 +86,7 @@ python examples/revision_core_demo.py --output build/demo/revision_core.json
 bash scripts/test_research_core.sh
 ```
 
-该演示调用论文实际使用的身份授权与图传播内核，展示支持、冲突和不确定时的决策。合成演示验证安装与机制，不代表公开数据集评分。[研究与复现说明](docs/research/README.md)。
+演示使用合成对象图，运行多帧合并判断和局部点分配。数据集评测需要另行准备数据与模型，见[复现说明](docs/research/README.md)。
 
 ### 2. 构建 LIVO 与语义消息（ROS 2 Humble）
 
@@ -111,7 +110,7 @@ ros2 interface show omni_slam_interfaces/msg/LivoSemanticFrame
 
 ### 3. 接入机器人管理器与语义试跑
 
-管理器还依赖相邻项目 `omni_tf_manager` 与 `omni_robot_interfaces`，需先构建并加载其 overlay。S100 当前试跑方案为**板端 LIVO、电脑端语义推理**，不是已经完成 BPU 模型部署。
+管理器依赖相邻项目 `omni_tf_manager` 与 `omni_robot_interfaces`，启动前需构建并加载其 overlay。
 
 - [S100 / 电脑分工、标定检查、启动和录包](docs/deployment/s100_livo_semantic_trial.md)
 - [现有 LIO 管理器、VBot 建图与重定位](docs/deployment/lio_manager_quickstart.md)
@@ -119,9 +118,9 @@ ros2 interface show omni_slam_interfaces/msg/LivoSemanticFrame
 - [对象查询、三维框与证据重投影](omni_semantic_map/README.md)
 - [Orin 部署](DEPLOY_ORIN.md)
 
-生产巡检系统由 Mission 启动唯一 SLAM / TF 控制面。`omni_slam_ctl` 是独立诊断入口，不与既有 Manager 并行启动第二套控制面。
+巡检系统由 Mission 启动 SLAM Manager 与 TF Manager。独立调试可用 `omni_slam_ctl`；已有 Manager 运行时，不要重复启动。
 
-## 仓库结构
+## 文档与目录
 
 | 目录 | 用途 |
 | --- | --- |
@@ -131,7 +130,7 @@ ros2 interface show omni_slam_interfaces/msg/LivoSemanticFrame
 | `omni_slam_manager/` | 后端进程管理、地图资产和状态 |
 | `omni_semantic_map/` | 在线语义消费者、离线对象算法、评测适配与测试 |
 | `examples/` | 无数据集的小型机制演示 |
-| `scripts/benchmarks/` | 有版本与输入封存约束的实验执行记录 |
+| `scripts/benchmarks/` | 数据准备、建图、消融和评分脚本 |
 | `docs/research/` | 当前方法、协议和可复现范围 |
 | `docs/benchmarks/`、`docs/experiments/` | 历史实验文字记录，日期代表当时状态 |
 | `docs/paper/visibility_revision/latex/` | 当前论文、补充材料、固定图表及编译入口 |
@@ -145,31 +144,34 @@ Haoxiang Jie<sup>*,†</sup>, Yaoyuan Yan<sup>*</sup>, Zhiyou Heng, Liang Li, Zh
 
 <sup>*</sup> Haoxiang Jie 与 Yaoyuan Yan 共同贡献、共同第一作者。<sup>†</sup> 通讯作者：Haoxiang Jie（[jiehaoxiang@bgyfw.com](mailto:jiehaoxiang@bgyfw.com)）。
 
-当前为研究稿，尚未指定投稿会议。主稿与补充材料连续分页，包含 **4 幅方法与实验图**、**15 条参考文献**。完整稿共 **10 页**。四窗口扩展与两窗口主评测分别报告，完整 LaTeX 源码可独立编译。
+论文草稿及补充材料提供完整 LaTeX 源码，尚未确定投稿会议。
 
 [论文与编译入口](docs/paper/README.md) · [图表索引](docs/paper/visibility_revision/latex/FIGURES.md) · [文献核对记录](docs/paper/visibility_revision/latex/REFERENCE_AUDIT.md) · [四窗口完整结果](docs/research/results/reviewer_extension_20261117.json)
 
-| 实验 | 对比 | 指标与结果 | 解释 |
-| --- | --- | --- | --- |
-| Replica，8 个已查看开发场景 | 共享前端 CG 核心 vs OVO 核心 | PQ 40.85 vs 33.56 | 三帧控制后 OVO 为 38.59，不是完整原版系统比较 |
-| SceneNN，4 场景，历史 V1 | 基线 / V1 / SOR | PQ 32.376 / 33.218 / 33.268 | V1 是固定身份几何修订，区别于当前 Ours |
-| KITTI-360，0009 / 0010 新窗口 | 强基线 vs 当前 Ours | AP 17.259 vs 18.762，+1.503 | building/car，本地适配 AP50:90，不是官方榜单成绩 |
-| KITTI-360，4 个空间留出窗口 | 强基线 / Ours / 无条件修订 | AP 20.263 / 23.171 / 23.251 | 均值上涨 +2.908，但并非所有窗口、所有控制均胜出 |
-| 真实 ROSBAG | 车库、室外、新金桥 | 图像、对象框、全局语义图与地面图层 | 没有独立对象 GT，不从点数推断语义准确率 |
+KITTI-360 上的建筑 / 车辆实例 AP50:90（百分制）：
 
-PQ / AP 均以百分制显示，不跨协议合并均值。当前 Ours 的类别收益主要来自建筑；额外认证相对最近种子未显示独立 AP 增量。数据来源、算法版本和控制组见[研究索引](docs/research/README.md)。
+| 方法 | 0009 / 0010 两窗口均值 | 0003–0006 四窗口均值 |
+| --- | ---: | ---: |
+| 对象图基线 | 17.259 | 20.263 |
+| 无条件修订 | 17.050 | 23.251 |
+| **Ours** | **18.762** | **23.171** |
+| Ours 相对基线 | +1.503 | +2.908 |
+
+两组窗口独立统计，使用本地评测适配器，未提交官方测试服务器。四窗口来自开发阶段已使用的序列。收益主要来自建筑；四窗口中无条件修订的均值略高，0004 上 Ours 低于基线。消融中，额外种子帧稳定性检查未带来独立 AP 增益。
+
+真实录包用于检查地图与系统接入，尚无独立对象标注。Replica、SceneNN 及早期方法的结果见[研究记录](docs/research/README.md#结果与来源)。
 
 ## 数据、模型与复现范围
 
-Git 保存源码、测试、配置示例、轻量实验说明、当前论文图表，以及 `docs/assets/readme/` 中精选的图片和加速 GIF。原始 ROSBAG、公开数据集、模型权重、点云、预测缓存、生成报告、完整视频、PPT 与本机虚拟环境保留在仓库外或被忽略的本地目录中。
+仓库包含代码、配置、测试、论文源码和展示素材。数据集、ROSBAG、模型权重、完整点云和预测缓存需单独准备。
 
-`build/benchmarks/` 中的实验封存文件记录源码、模型与输入哈希。历史脚本包含当时的绝对路径和依赖缓存，供追溯使用，不承诺全新克隆后直接重放全部跑分。不要修改冻结源码或伪造缺失的 seal 来绕过实验输入检查。[外部输入与复现层级](docs/research/README.md#复现层级)。
+现有评测脚本读取实验协议、缓存与文件哈希，部分路径对应原实验环境。复现实验所需输入和适配步骤见[研究说明](docs/research/README.md#复现层级)。
 
 ## 测试与贡献
 
 - 核心 CPU 回归：`bash scripts/test_research_core.sh`
 - 完整语义研究测试：`PYTHONPATH=omni_semantic_map:scripts/benchmarks python3 -m pytest -q omni_semantic_map/test`，可选依赖与数据集测试见研究说明。
 - ROS / Manager 测试和源码发布检查见 [开发指南](CONTRIBUTING.md)。
-- 本次源码整理的实际检查结果见 [验证记录](docs/research/VALIDATION.md)。
+- 已完成的构建与测试见 [验证记录](docs/research/VALIDATION.md)。
 
-不同模块保留各自上游许可与版权声明，见 [第三方来源](THIRD_PARTY.md)。本仓库没有以单一新许可重新授权全部依赖。
+各模块沿用其许可证与版权声明，见[第三方来源](THIRD_PARTY.md)。

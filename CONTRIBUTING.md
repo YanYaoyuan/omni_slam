@@ -1,11 +1,10 @@
-# 开发与验证
+# 开发指南
 
-## 目录与版本
+## 修改与实验记录
 
-- ROS 包保留原目录名、包名和消息类型，避免破坏部署脚本与消费者。
-- 当前算法与研究边界见 `docs/research/README.md`。不要用历史分支替换 Ours 的名称。
-- 试验输出放在 `build/`，报告交付放在 `output/`，数据与权重单独配置。
-- 修改封存实验算法前，创建新运行根目录并记录新的源码/输入哈希。不要重新计算旧 seal 以掩盖实现变更。
+ROS 包名、消息类型和目录被部署脚本引用，调整时需同步调用方。当前方法及实验入口见[研究说明](docs/research/README.md)。
+
+实验输出放在 `build/`，交付文件放在 `output/`，数据与权重路径通过配置指定。修改算法或输入后，新建运行目录并记录代码、配置和输入哈希；已有实验的 seal 与结果保留原样。
 
 ## Python 与 CPU 内核
 
@@ -18,20 +17,20 @@ bash scripts/test_research_core.sh
 python examples/revision_core_demo.py
 ```
 
-图传播内核从包内 `.cpp` 源码编译到调用方缓存目录。修改打包配置时，需要实际构建 wheel 并在独立目录安装，确认原生内核源码没有遗漏。
+图传播内核从包内 `.cpp` 源码编译到调用方缓存目录。修改打包配置后，构建 wheel 并在独立目录安装，检查原生内核源码是否随包分发。
 
-完整研究回归：
+完整研究测试：
 
 ```bash
 PYTHONPATH=omni_semantic_map:scripts/benchmarks \
   CUDA_VISIBLE_DEVICES='' python3 -m pytest -q omni_semantic_map/test
 ```
 
-历史分支所需模型框架和上游评测器见研究说明。不要把未安装可选依赖导致的跳过记作通过。
+可选依赖见[研究说明](docs/research/README.md#测试)。记录测试结果时，同时注明通过、失败和跳过数量。
 
 ## ROS 构建与测试
 
-先加载 ROS Humble 与所需 Omni 依赖 overlay，构建方式见根 README。构建后：
+加载 ROS Humble 与所需 Omni 依赖 overlay，按[根目录说明](README.md#快速开始)构建后执行：
 
 ```bash
 source install/livo_humble/setup.bash
@@ -42,10 +41,10 @@ colcon --log-base log/livo_humble_test test \
 colcon test-result --test-result-base build/livo_humble --verbose
 ```
 
-现有 `.github/workflows/build-x86.yml`、`build-s100.yml`、`build-orin.yml` 维护原 LIO 部署链路，新 `research-core.yml` 单独验证无 GPU 的论文内核。LIVO 的主机 ROS 构建不等于通过 S100 原生编译、跨机 DDS 或实机验收。
+CI 中的 `build-x86.yml`、`build-s100.yml` 和 `build-orin.yml` 检查 LIO 部署构建；`research-core.yml` 检查 CPU 修订内核。LIVO 的 S100 原生构建、跨机 DDS 和实机运行需要另行验证。
 
-## 提交前
+## 提交
 
-检查 `git diff --check` 和暂存文件清单。提交源码、测试、必要配置、文档及当前论文图表。不要提交原始录包、地图点云、数据集、模型权重、虚拟环境、令牌、私钥或生成报告/视频。配置示例与现场标定分开保存。
+提交前运行 `git diff --check`，检查暂存文件。仓库接收源码、测试、配置、文档和论文图表；原始录包、点云、数据集、权重、虚拟环境和完整视频放在仓库外。现场标定与示例配置分开保存，凭据不写入代码或配置示例。
 
-已有上游版权和许可证不随整理删除。第三方模块来源见 `THIRD_PARTY.md`。
+保留上游版权与许可证，来源见 [THIRD_PARTY.md](THIRD_PARTY.md)。

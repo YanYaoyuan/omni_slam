@@ -1,6 +1,6 @@
 # OmniSLAM 论文
 
-当前唯一正文入口：[visibility_revision/latex/main.tex](visibility_revision/latex/main.tex)。当前论文方法为 `full_authorization`，围绕历史身份修订与新增实测点归属展开。
+论文方法为 `full_authorization`：利用多帧观测判断历史对象合并，并为新增实测点分配对象身份。
 
 **OmniSLAM: Evidence-Authorized Revision of Persistent Object Maps**
 
@@ -16,12 +16,16 @@ bash build.sh
 python3 verify_sources.py
 ```
 
-使用 TeX Live + latexmk 或设置 `TECTONIC_BIN`。生成 `main.pdf`，编译产物被 Git 忽略。模型、GPU、数据集或 ROSBAG 不参与论文编译。`source_manifest.json` 核验随论文交付的源码与图片，不用于宣称重新运行算法实验。
+使用 TeX Live + latexmk，或通过 `TECTONIC_BIN` 指定 Tectonic。输出为 `main.pdf`；`verify_sources.py` 根据 `source_manifest.json` 检查源码与图片的哈希。编译无需模型、GPU 或数据集。
 
 [详细编译说明](visibility_revision/latex/README.md) · [图表索引](visibility_revision/latex/FIGURES.md) · [当前研究与最新扩展](../research/README.md)
 
-历史草稿、重复图表与压缩交付包保存在本地，未复制到 Git 的当前论文入口。历史方法图已移出活动文稿，原资源保留供追溯。
+## 编辑入口
 
-2026-11-19：全文文字与参考文献已复核，增加两篇 ICCAI 2025 论文及缺失出处，并补入已完成四窗口扩展。见 [复核记录](visibility_revision/latex/REFERENCE_AUDIT.md)。
+- [main.tex](visibility_revision/latex/main.tex)：编译入口与署名。
+- [current_main.tex](visibility_revision/latex/sections/merged/current_main.tex)：摘要、正文与结论。
+- [current_supplement.tex](visibility_revision/latex/sections/merged/current_supplement.tex)：协议、补充结果与地图。
+- [causal_review.tex](visibility_revision/latex/sections/merged/causal_review.tex)：机制消融、运行时间及外部方法适配。
+- [references_current.bib](visibility_revision/latex/references_current.bib)：参考文献。
 
-2026-11-24：已按主线重写并精简图表，见 [取舍记录](visibility_revision/latex/FOCUS_REVISION.md)。
+历史草稿和图像不参与当前编译。修改记录见 [FOCUS_REVISION.md](visibility_revision/latex/FOCUS_REVISION.md)，引用核对见 [REFERENCE_AUDIT.md](visibility_revision/latex/REFERENCE_AUDIT.md)。
