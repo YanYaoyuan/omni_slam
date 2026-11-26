@@ -60,3 +60,14 @@
         pcd_save:
             pcd_save_en: false
             interval: -1
+
+        # 定位只把机器人周围的先验地图分块放进 ikd-tree，内存与建树时间与地图
+        # 总大小无关。tile_size/体素/预览点数须与 ICP 节点一致，以共享磁盘索引。
+        map_cache:
+            tile_size: 20.0
+            # 需大于 mapping.det_range，留出预取余量。
+            active_radius: 80.0
+            max_region_points: 2000000
+            max_cached_points: 1000000
+            # 每帧最多插入/删除的分块点数，把区域切换摊到多帧。
+            update_points_per_scan: 30000

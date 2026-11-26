@@ -61,6 +61,8 @@
 #include "fast_lio/reference_odometry.hpp"
 #include "fast_lio/loop_closure_backend.hpp"
 #include "fast_lio/trajectory_exclusion.hpp"
+#include "fast_lio/spatial_map.hpp"
+#include <deque>
 #include <future>
 #include <map>
 #include <set>
@@ -507,6 +509,24 @@ public:
         this->get_parameter_or<string>("prior_map_path", prior_map_path, "");
         if (extrinT.size()!=3 || extrinR.size()!=9)
             throw std::invalid_argument("invalid LiDAR-IMU extrinsic");
+        // Localization keeps only the prior-map tiles around the robot in the
+        // ikd-tree. Same tile/voxel/preview settings as the ICP node share one
+        // disk index (fingerprinted), so the PCD is indexed once per map version.
+        fast_lio::SpatialMap::Config map_cache_config;
+        map_cache_config.voxel_size=filter_size_map_min;
+        map_cache_config.tile_size=this->declare_parameter<double>("map_cache.tile_size",20.0);
+        prior_radius_=this->declare_parameter<double>("map_cache.active_radius",80.0);
+        const int cache_points=this->declare_parameter<int>("map_cache.max_cached_points",1000000);
+        const int region_points=this->declare_parameter<int>("map_cache.max_region_points",2000000);
+        const int update_points=this->declare_parameter<int>("map_cache.update_points_per_scan",30000);
+        if (cache_points<0 || region_points<1 || update_points<1 || !std::isfinite(prior_radius_) || prior_radius_<=0)
+            throw std::invalid_argument("map cache budgets/radius are invalid");
+        map_cache_config.cache_points=cache_points;
+        map_cache_config.region_points=region_points;
+        prior_point_budget_=region_points;
+        prior_update_budget_=update_points;
+        std::string map_cache_directory=this->declare_parameter<string>("map_cache.directory","");
+        if (map_cache_directory.empty()) map_cache_directory=map_parent_directory(prior_map_path)+"/.spatial_cache";
         fast_lio::LoopClosureBackend::Config loop_config;
         const double exclusion_radius=this->declare_parameter<double>("mapping.trajectory_exclusion_radius",0.0);
         loop_config.trajectory_exclusion_radius=locate_in_prior_map?0.0:exclusion_radius;
@@ -536,6 +556,9 @@ public:
         if (candidates<1 || candidates>5 || preview_points<1 || preview_points>300000)
             throw std::invalid_argument("loop candidates must be 1..5; map preview points 1..300000");
         loop_config.candidates=candidates; loop_config.preview_points=preview_points;
+        map_cache_config.preview_points=preview_points;
+        keyframe_export_en_=this->declare_parameter<bool>("pcd_save.keyframes_en",false);
+        loop_config.keyframe_export_voxel=this->declare_parameter<double>("pcd_save.keyframe_voxel_size",0.1);
         const string archive_parent=this->declare_parameter<string>(
             "pcd_save.chunk_directory", map_parent_directory(map_file_path)+"/.dense_chunks");
         if (!locate_in_prior_map && (map_pub_en || pcd_save_en))
@@ -607,21 +630,21 @@ public:
                 RCLCPP_FATAL(this->get_logger(), "prior_map_path must be a non-empty absolute PCD path");
                 throw std::invalid_argument("invalid prior_map_path");
             }
-            RCLCPP_INFO(this->get_logger(), "Loading complete prior map: %s", prior_map_path.c_str());
-            PointCloudXYZI raw;
-            if (pcl::io::loadPCDFile(prior_map_path, raw)<0)
-                throw std::runtime_error("cannot read prior PCD");
-            const auto stats=fast_lio::pointcloud::extentSafeVoxelFilter(raw,filter_size_map_min,&prior_map_);
-            if (prior_map_.size()<NUM_MATCH_POINTS)
+            RCLCPP_INFO(this->get_logger(), "Indexing prior map: %s", prior_map_path.c_str());
+            // Streams the PCD into voxel-filtered disk tiles (memory bounded by
+            // one tile); a cached index of the same map version is reused.
+            spatial_map_=std::make_unique<fast_lio::SpatialMap>(
+                prior_map_path,map_cache_directory,map_cache_config,[] {return !rclcpp::ok();});
+            const auto stats=spatial_map_->stats();
+            if (stats.filtered_points<NUM_MATCH_POINTS)
                 throw std::runtime_error("prior PCD has too few valid points");
-            // raw is released before subscriptions start. The entire filtered
-            // map stays fixed; no disk-region or ikd-tree mutation while moving.
-            PointCloudXYZI preview;
-            const auto stride=std::max<std::size_t>(1,(prior_map_.size()+preview_points-1)/preview_points);
-            for (std::size_t i=0;i<prior_map_.size();i+=stride) preview.push_back(prior_map_[i]);
-            pcl::toROSMsg(preview,prior_preview_);
-            RCLCPP_INFO(this->get_logger(), "Whole prior map loaded: input=%zu filtered=%zu voxel=%.3f m",
-                stats.input_points,prior_map_.size(),filter_size_map_min);
+            prior_tile_size_=stats.tile_size;
+            pcl::toROSMsg(spatial_map_->preview(),prior_preview_);
+            RCLCPP_INFO(this->get_logger(),
+                "Prior map indexed: input=%llu filtered=%llu tiles=%zu reused=%d; active radius=%.1f m budget=%zu points",
+                static_cast<unsigned long long>(stats.input_points),
+                static_cast<unsigned long long>(stats.filtered_points),
+                stats.tiles,stats.reused_index,prior_radius_,prior_point_budget_);
         }
 
         Lidar_T_wrt_IMU << VEC_FROM_ARRAY(extrinT);
@@ -722,8 +745,168 @@ public:
     }
 
 private:
-    PointCloudXYZI prior_map_;
+    // ---- Prior-map tiles (localization only) ----
+    // The ikd-tree holds the tiles within map_cache.active_radius of the robot.
+    // Disk reads and transforms run on a worker; the LIO thread applies at most
+    // update_points_per_scan insertions/deletions per scan, so no single scan
+    // pays for a whole region swap.
+    using PriorTile=fast_lio::SpatialMap::Tile;
+    struct PriorTileState {
+        PointVector points;          // odom-frame copy; deletions match exactly
+        std::size_t inserted{0};     // points[0, inserted) are in the ikd-tree
+        bool removing{false};
+    };
+    struct PriorRegion {
+        Eigen::Vector3d center{Eigen::Vector3d::Zero()};
+        std::set<PriorTile> keep;    // tiles the region retains (budget respected)
+        std::vector<std::pair<PriorTile,PointVector>> added;
+        std::size_t skipped{0};      // nearby tiles dropped by the point budget
+    };
+    std::unique_ptr<fast_lio::SpatialMap> spatial_map_;
+    double prior_radius_{80.0}, prior_tile_size_{20.0};
+    std::size_t prior_point_budget_{2000000}, prior_update_budget_{30000};
+    Eigen::Vector3d prior_center_{Eigen::Vector3d::Zero()}, prior_requested_center_{Eigen::Vector3d::Zero()};
+    std::map<PriorTile,PriorTileState> prior_tiles_;
+    std::deque<PriorTile> prior_add_queue_, prior_remove_queue_;
+    // Declared after spatial_map_: destroyed (and joined) before the index.
+    std::future<PriorRegion> prior_load_;
     Eigen::Isometry3d prior_from_odom_{Eigen::Isometry3d::Identity()};
+    bool keyframe_export_en_{false};
+
+    // Thread-safe: touches only the immutable index and its locked tile cache.
+    PriorRegion plan_prior_region(const Eigen::Vector3d &center, const std::set<PriorTile> &live,
+                                  const Eigen::Matrix<float,4,4,Eigen::DontAlign> &to_odom) const
+    {
+        PriorRegion result; result.center=center;
+        // Tiles inside the radius are loaded; live tiles stay until one tile
+        // beyond it (hysteresis against reloading at a tile boundary).
+        std::vector<std::pair<double,PriorTile>> ordered;
+        for (const auto &key:spatial_map_->tilesFor(center,prior_radius_+prior_tile_size_))
+        {
+            const Eigen::Vector3d low(key[0]*prior_tile_size_,key[1]*prior_tile_size_,key[2]*prior_tile_size_);
+            const Eigen::Vector3d nearest=center.cwiseMax(low).cwiseMin(low+Eigen::Vector3d::Constant(prior_tile_size_));
+            const double distance=(center-nearest).lpNorm<Eigen::Infinity>();
+            if (distance<=prior_radius_ || live.count(key)) ordered.emplace_back(distance,key);
+        }
+        std::sort(ordered.begin(),ordered.end());
+        const Eigen::Matrix4f transform=to_odom;
+        std::size_t points=0;
+        for (const auto &entry:ordered)
+        {
+            const auto count=spatial_map_->pointCount(entry.second);
+            if (points+count>prior_point_budget_) { ++result.skipped; continue; }
+            points+=count;
+            result.keep.insert(entry.second);
+            if (live.count(entry.second)) continue;
+            PointCloudXYZI local;
+            pcl::transformPointCloud(*spatial_map_->tile(entry.second),local,transform);
+            result.added.emplace_back(entry.second,std::move(local.points));
+        }
+        return result;
+    }
+
+    void accept_prior_region(PriorRegion &loaded)
+    {
+        for (auto &entry:loaded.added)
+        {
+            auto found=prior_tiles_.find(entry.first);
+            if (found==prior_tiles_.end())
+            {
+                prior_tiles_[entry.first].points=std::move(entry.second);
+                prior_add_queue_.push_back(entry.first);
+            }
+        }
+        for (auto &entry:prior_tiles_)
+        {
+            const bool wanted=loaded.keep.count(entry.first)>0;
+            if (wanted && entry.second.removing)
+            {
+                entry.second.removing=false; prior_add_queue_.push_back(entry.first);
+            }
+            else if (!wanted && !entry.second.removing)
+            {
+                entry.second.removing=true; prior_remove_queue_.push_back(entry.first);
+            }
+        }
+        if (loaded.skipped)
+            RCLCPP_WARN_THROTTLE(this->get_logger(),*this->get_clock(),10000,
+                "Prior map region exceeds map_cache.max_region_points; %zu farthest tiles not loaded",loaded.skipped);
+        prior_center_=loaded.center;
+    }
+
+    // Insertions first (they are ahead of the robot), then deletions of tiles
+    // that are already beyond the active radius.
+    void apply_prior_updates(std::size_t budget)
+    {
+        while (budget && !prior_add_queue_.empty())
+        {
+            auto found=prior_tiles_.find(prior_add_queue_.front());
+            if (found==prior_tiles_.end() || found->second.removing ||
+                found->second.inserted==found->second.points.size())
+            {
+                prior_add_queue_.pop_front(); continue;
+            }
+            auto &tile=found->second;
+            const auto n=std::min(budget,tile.points.size()-tile.inserted);
+            PointVector slice(tile.points.begin()+tile.inserted,tile.points.begin()+tile.inserted+n);
+            ikdtree.Add_Points(slice,false);
+            tile.inserted+=n; budget-=n;
+        }
+        while (budget && !prior_remove_queue_.empty())
+        {
+            auto found=prior_tiles_.find(prior_remove_queue_.front());
+            if (found==prior_tiles_.end() || !found->second.removing)
+            {
+                prior_remove_queue_.pop_front(); continue;
+            }
+            auto &tile=found->second;
+            const auto n=std::min(budget,tile.inserted);
+            if (n)
+            {
+                PointVector slice(tile.points.begin()+(tile.inserted-n),tile.points.begin()+tile.inserted);
+                ikdtree.Delete_Points(slice);
+                tile.inserted-=n; budget-=n;
+            }
+            if (!tile.inserted)
+            {
+                prior_tiles_.erase(found); prior_remove_queue_.pop_front();
+            }
+        }
+    }
+
+    void update_prior_region()
+    {
+        if (!spatial_map_) return;
+        const Eigen::Vector3d center=prior_from_odom_*state_point.pos;
+        if (prior_load_.valid() && prior_load_.wait_for(std::chrono::seconds(0))==std::future_status::ready)
+        {
+            try
+            {
+                auto loaded=prior_load_.get();
+                accept_prior_region(loaded);
+            }
+            catch (const std::exception &e)
+            {
+                // Keep matching against the current region; retry after the
+                // robot moves another margin instead of stopping localization.
+                prior_center_=prior_requested_center_;
+                RCLCPP_ERROR_THROTTLE(this->get_logger(),*this->get_clock(),5000,
+                    "Prior map region load failed, keeping current region: %s",e.what());
+            }
+        }
+        const double margin=std::max(1.0,std::min(20.0,prior_radius_*.125));
+        if (!prior_load_.valid() && (center-prior_center_).lpNorm<Eigen::Infinity>()>margin)
+        {
+            std::set<PriorTile> live;
+            for (const auto &entry:prior_tiles_) if (!entry.second.removing) live.insert(entry.first);
+            const Eigen::Matrix<float,4,4,Eigen::DontAlign> to_odom=prior_from_odom_.inverse().matrix().cast<float>();
+            prior_requested_center_=center;
+            prior_load_=std::async(std::launch::async,[this,center,live,to_odom] {
+                return plan_prior_region(center,live,to_odom);
+            });
+        }
+        apply_prior_updates(prior_update_budget_);
+    }
     sensor_msgs::msg::PointCloud2 prior_preview_;
     std::unique_ptr<fast_lio::LoopClosureBackend> mapping_backend_;
     fast_lio::TrajectoryExclusion mapping_exclusion_;
@@ -1513,6 +1696,9 @@ private:
                     output.flush(); return static_cast<bool>(output);
                 },&error);
             }
+            // Written after the PCD, so a newer keyframes.txt marks a matching export.
+            if (saved && keyframe_export_en_)
+                saved=mapping_backend_->exportKeyframes(map_file_path+".keyframes",snapshot,&error);
         } catch (const std::exception &e) {error=e.what(); saved=false;}
         if (!saved) RCLCPP_ERROR(this->get_logger(),"Map export failed: %s",error.c_str());
         return saved;
@@ -1782,6 +1968,10 @@ private:
                     }
                 }
             }
+            else
+            {
+                update_prior_region();
+            }
             t5 = omp_get_wtime();
 
             /******* Publish points *******/
@@ -1904,15 +2094,43 @@ private:
         prior_from_odom_.linear()=Eigen::Quaterniond(rotation.w,rotation.x,rotation.y,rotation.z).toRotationMatrix();
         prior_from_odom_.translation()<<initial_pose.pose.pose.position.x,
             initial_pose.pose.pose.position.y,initial_pose.pose.pose.position.z;
-        PointCloudXYZI local;
-        pcl::transformPointCloud(prior_map_,local,prior_from_odom_.inverse().matrix().cast<float>().eval());
+        // Only the region around the seed is built here, so this callback's
+        // cost is bounded by map_cache.max_region_points, not by the map size.
         const auto build_started=std::chrono::steady_clock::now();
+        const Eigen::Vector3d seed=prior_from_odom_.translation();
+        PriorRegion region;
+        try
+        {
+            const Eigen::Matrix<float,4,4,Eigen::DontAlign> to_odom=prior_from_odom_.inverse().matrix().cast<float>();
+            region=plan_prior_region(seed,{},to_odom);
+        }
+        catch (const std::exception &e)
+        {
+            RCLCPP_FATAL(this->get_logger(),"Prior map region load failed: %s",e.what());
+            rclcpp::shutdown(); return;
+        }
+        PointVector initial;
+        for (const auto &entry:region.added) initial.insert(initial.end(),entry.second.begin(),entry.second.end());
+        if (initial.size()<NUM_MATCH_POINTS)
+        {
+            RCLCPP_FATAL(this->get_logger(),"No usable prior map within %.1f m of the ICP seed",prior_radius_);
+            rclcpp::shutdown(); return;
+        }
         ikdtree.set_downsample_param(filter_size_map_min);
-        ikdtree.Build(local.points);
-        RCLCPP_INFO(this->get_logger(), "Whole prior tree ready: points=%zu build_ms=%.1f; moving cache disabled",
-            local.size(),std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-build_started).count());
-        // Preview is already serialized; release the extra map-coordinate copy.
-        PointCloudXYZI().swap(prior_map_);
+        ikdtree.Build(initial);
+        PointVector().swap(initial);
+        for (auto &entry:region.added)
+        {
+            auto &tile=prior_tiles_[entry.first];
+            tile.points=std::move(entry.second); tile.inserted=tile.points.size();
+        }
+        prior_center_=seed;
+        if (region.skipped)
+            RCLCPP_WARN(this->get_logger(),
+                "Prior map region exceeds map_cache.max_region_points; %zu farthest tiles not loaded",region.skipped);
+        RCLCPP_INFO(this->get_logger(), "Prior region tree ready: tiles=%zu points=%zu build_ms=%.1f",
+            prior_tiles_.size(),static_cast<std::size_t>(ikdtree.size()),
+            std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-build_started).count());
         initial_pose_received = true;
         if (reference_odom_enabled_)
         {

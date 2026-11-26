@@ -636,6 +636,7 @@ class SlamManagerNode(Node):
             0.5,
             "importing immutable map asset",
         )
+        keyframes_source = Path(str(self._map_source_path) + ".keyframes")
         try:
             asset = self._store.import_pcd(
                 goal_handle.request.map_id,
@@ -647,6 +648,7 @@ class SlamManagerNode(Node):
                     if Path(str(self._map_source_path) + ".body_path.txt").is_file()
                     else None
                 ),
+                keyframes_source=keyframes_source if keyframes_source.is_dir() else None,
                 publish_current=goal_handle.request.make_current,
                 cancel_requested=lambda: goal_handle.is_cancel_requested,
             )

@@ -23,6 +23,8 @@ public:
     double vertical_sigma{0.10};
     double export_frame_interval{0.0};
     double trajectory_exclusion_radius{0.0};
+    // Leaf size of exported keyframe scans; 0 keeps every archived point.
+    double keyframe_export_voxel{0.1};
     Eigen::Vector3d lidar_in_imu{Eigen::Vector3d::Zero()};
     std::size_t candidates{5}, preview_points{300000}, chunk_bytes{64U << 20};
   };
@@ -42,6 +44,15 @@ public:
   Cloud preview(const Snapshot &snapshot) const;
   bool save(const std::string &path, std::string *error,
             const std::function<bool()> &cancel = {}, Snapshot *saved_snapshot = nullptr);
+  // Writes the keyframes of `snapshot` (normally the one returned by save())
+  // into `directory`, replacing any previous export:
+  //   keyframes.txt     index stamp x y z qx qy qz qw points (optimized IMU poses,
+  //                     same frame as the exported PCD)
+  //   scans/NNNNNN.pcd  every archived frame of that keyframe, in keyframe-local
+  //                     IMU coordinates, trajectory-excluded and voxel filtered
+  //   scan_context.bin  per-keyframe Scan Context descriptors (see .cpp)
+  bool exportKeyframes(const std::string &directory, const Snapshot &snapshot,
+                       std::string *error, const std::function<bool()> &cancel = {}) const;
   // Also used to drain the final pending keyframes when ending a mapping session.
   // Serialized with the worker; never called from the LIO callback.
   void processPending();

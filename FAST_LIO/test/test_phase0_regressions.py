@@ -292,7 +292,9 @@ class Phase0RegressionTests(unittest.TestCase):
         self.assertIn("prior_map_path.empty()", validation_block)
         # Seed reception may precede map I/O, but sensor processing cannot.
         self.assertIn('create_subscription<nav_msgs::msg::Odometry>("/icp_result"', validation_block)
-        self.assertIn("extentSafeVoxelFilter", validation_block)
+        # The prior map is indexed into bounded tiles, never loaded whole.
+        self.assertIn("fast_lio::SpatialMap", validation_block)
+        self.assertNotIn("loadPCDFile", validation_block)
         self.assertIn("throw std::invalid_argument", validation_block)
         self.assertNotIn("catch (", validation_block)
         self.assertNotIn("return;", validation_block)
